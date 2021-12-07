@@ -288,7 +288,8 @@ export default function useSpringCarousel<T>({
   const bindDrag = useDrag(
     props => {
       const isDragging = props.dragging
-      const movement = props.movement[carouselSlideAxis === 'x' ? 0 : 1]
+      const movement = props.offset[carouselSlideAxis === 'x' ? 0 : 1]
+      const currentMovement = props.movement[carouselSlideAxis === 'x' ? 0 : 1]
       function cancelDrag() {
         props.cancel()
       }
@@ -348,12 +349,12 @@ export default function useSpringCarousel<T>({
           }
         } else {
           setCarouselStyles.start({
-            [carouselSlideAxis]: getCurrentSlidedValue() + movement,
+            [carouselSlideAxis]: movement,
           })
         }
 
-        const prevItemTreshold = movement > draggingSlideTreshold
-        const nextItemTreshold = movement < -draggingSlideTreshold
+        const prevItemTreshold = currentMovement > draggingSlideTreshold
+        const nextItemTreshold = currentMovement < -draggingSlideTreshold
 
         if (
           mainCarouselWrapperRef.current!.getBoundingClientRect().width >=
@@ -398,12 +399,12 @@ export default function useSpringCarousel<T>({
       }
 
       if (props.last && !props.pressed && !freeScroll) {
-        resetAnimation()
+        // resetAnimation()
       }
     },
     {
       enabled: !disableGestures,
-      preventScrollAxis: 'x',
+      from: () => [carouselStyles.x.get(), carouselStyles.y.get()],
     },
   )
 
