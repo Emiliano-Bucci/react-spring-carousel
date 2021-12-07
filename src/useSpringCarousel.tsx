@@ -47,6 +47,9 @@ export default function useSpringCarousel<T>({
 } {
   function getItems() {
     if (withLoop) {
+      if (items.length === itemsPerSlide) {
+        return [...items, ...items, ...items, ...items, ...items]
+      }
       return [...items, ...items, ...items]
     }
     return items
