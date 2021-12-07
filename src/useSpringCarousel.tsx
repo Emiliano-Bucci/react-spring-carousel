@@ -399,7 +399,7 @@ export default function useSpringCarousel<T>({
       }
 
       if (props.last && !props.pressed && !freeScroll) {
-        // resetAnimation()
+        resetAnimation()
       }
     },
     {
