@@ -171,6 +171,7 @@ type OnSlideChange = {
 
 type OnDrag = Omit<FullGestureState<'drag'>, 'event'> & {
   eventName: 'onDrag'
+  slideActionType: SlideActionType
 }
 
 type OnFullscreenChange = {

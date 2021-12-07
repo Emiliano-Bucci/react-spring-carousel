@@ -322,6 +322,7 @@ export default function useSpringCarousel<T>({
         setIsDragging(true)
         emitObservable({
           eventName: 'onDrag',
+          slideActionType: getSlideActionType(),
           ...props,
         })
         const direction = props.direction[carouselSlideAxis === 'x' ? 0 : 1]
@@ -402,6 +403,7 @@ export default function useSpringCarousel<T>({
         resetAnimation()
         emitObservable({
           eventName: 'onDrag',
+          slideActionType: getSlideActionType(),
           ...props,
         })
       }
