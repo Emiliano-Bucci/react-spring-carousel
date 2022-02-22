@@ -20,7 +20,7 @@ const UseSpringCarouselContext = createContext<
   (UseSpringFluidTypeReturnProps | UseSpringDafaultTypeReturnProps) | undefined
 >(undefined)
 
-export default function useSpringCarousel<T>({
+export function useSpringCarousel<T>({
   itemsPerSlide = 1,
   items,
   withLoop = false,

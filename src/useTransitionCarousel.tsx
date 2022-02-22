@@ -23,7 +23,7 @@ export function useTransitionCarouselContext() {
   return context
 }
 
-export default function useTransitionCarousel({
+export function useTransitionCarousel({
   items,
   withLoop = false,
   withThumbs = false,
