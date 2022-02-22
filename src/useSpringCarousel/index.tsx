@@ -399,7 +399,7 @@ function useSpringCarousel<T>({
         }
       }
 
-      if (props.last && !props.pressed && !freeScroll) {
+      if (props.last && !freeScroll) {
         resetAnimation()
         emitObservable({
           eventName: 'onDrag',
