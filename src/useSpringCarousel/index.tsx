@@ -238,11 +238,12 @@ function useSpringCarousel<T>({
     } else {
       setCarouselStyles.start({
         immediate: true,
-        x: 0,
-        y: 0,
         [carouselSlideAxis]: -(getSlideValue() * getCurrentActiveItem()),
       })
     }
+
+    fluidTotalWrapperScrollValue.current = getFluidWrapperScrollValue()
+
     adjustCarouselWrapperPosition(carouselTrackWrapperRef.current!)
   }, [
     itemsPerSlide,
