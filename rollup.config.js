@@ -9,12 +9,13 @@ import size from 'rollup-plugin-filesize'
 import excludeDependenciesFromBundle from 'rollup-plugin-exclude-dependencies-from-bundle'
 
 export default {
-  input: 'src/index.tsx',
+  input: ['src/useSpringCarousel.tsx', 'src/useTransitionCarousel.tsx'],
   output: [
     {
       dir: 'dist',
       format: 'cjs',
       sourcemap: true,
+      exports: 'named',
     },
   ],
   preserveModules: true,
