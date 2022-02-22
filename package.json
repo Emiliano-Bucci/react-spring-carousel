@@ -31,9 +31,8 @@
     "release:lib": "npm run lint && npm run release:test && npm run check:tag:branch && npm run build:lib && npm run push:tags && npm publish",
     "storybook": "start-storybook -p 6006"
   },
-  "main": "dist/index.umd.js",
-  "module": "dist/index.es.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/types",
   "files": [
     "dist"
   ],

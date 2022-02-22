@@ -18,46 +18,81 @@ const globals = {
   screenfull: 'screenfull',
 }
 
-export default {
-  input: 'src/index.tsx',
-  output: [
-    {
-      file: pkg.main,
-      format: 'umd',
-      exports: 'named',
-      sourcemap: true,
-      name: 'ReactSpringCarousel',
-      globals,
-    },
-    {
-      file: pkg.module,
-      format: 'es',
-      sourcemap: true,
-      name: 'ReactSpringCarousel',
-      globals,
-    },
-  ],
-  external: [
-    ...Object.keys(pkg.dependencies || {}),
-    ...Object.keys(pkg.peerDependencies || {}),
-  ],
-  plugins: [
-    excludeDependenciesFromBundle({
-      peerDependencies: true,
-    }),
-    rollupTS({
-      tsconfigOverride: {
-        exclude: ['Examples', 'node_modules'],
+const files = ['useSpringCarousel', 'useTransitionCarousel']
+
+export default files.map(file => {
+  return {
+    input: 'src/' + file + '.tsx',
+    output: [
+      {
+        file: 'dist/' + file + '/index.umd.js',
+        format: 'umd',
+        exports: 'named',
+        sourcemap: true,
+        name: 'ReactSpringCarousel',
+        globals,
       },
-    }),
-    babel({
-      exclude: 'node_modules/**',
-      presets: ['@babel/preset-react'],
-    }),
-    external(),
-    resolve(),
-    commonjs(),
-    terser(),
-    size(),
-  ],
-}
+    ],
+    external: [
+      ...Object.keys(pkg.dependencies || {}),
+      ...Object.keys(pkg.peerDependencies || {}),
+    ],
+    plugins: [
+      excludeDependenciesFromBundle({
+        peerDependencies: true,
+      }),
+      rollupTS({
+        useTsconfigDeclarationDir: true,
+        tsconfigOverride: {
+          exclude: ['Examples', 'node_modules'],
+        },
+      }),
+      babel({
+        exclude: 'node_modules/**',
+        presets: ['@babel/preset-react'],
+      }),
+      external(),
+      resolve(),
+      commonjs(),
+      terser(),
+      size(),
+    ],
+  }
+})
+
+// export default {
+//   input: 'src/index.tsx',
+//   output: [
+//     {
+//       file: 'dist/index.umd.js',
+//       format: 'umd',
+//       exports: 'named',
+//       sourcemap: true,
+//       name: 'ReactSpringCarousel',
+//       globals,
+//     },
+//   ],
+//   external: [
+//     ...Object.keys(pkg.dependencies || {}),
+//     ...Object.keys(pkg.peerDependencies || {}),
+//   ],
+//   plugins: [
+//     excludeDependenciesFromBundle({
+//       peerDependencies: true,
+//     }),
+//     rollupTS({
+//       tsconfigOverride: {
+//         exclude: ['Examples', 'node_modules'],
+//       },
+//     }),
+//     babel({
+//       exclude: 'node_modules/**',
+//       presets: ['@babel/preset-react'],
+//     }),
+//     external(),
+//     resolve(),
+//     commonjs(),
+//     terser(),
+//     size(),
+//   ],
+// }
