@@ -23,7 +23,7 @@
     "jsxImportSource": "react",
     "outDir": "./dist/types",
     "baseUrl": "./",
-    "rootDir": "./src"
+    "rootDir": "./"
   },
   "include": ["src/**/*", "Examples"],
   "exclude": ["node_modules"]

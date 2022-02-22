@@ -240,9 +240,6 @@ function useSpringCarousel<T>({
         immediate: true,
         x: 0,
         y: 0,
-      })
-      setCarouselStyles.start({
-        immediate: true,
         [carouselSlideAxis]: -(getSlideValue() * getCurrentActiveItem()),
       })
     }
@@ -480,13 +477,10 @@ function useSpringCarousel<T>({
     }
   })
   useEffect(() => {
-    function resize() {
-      setTimeout(handleResize)
-    }
     if (shouldResizeOnWindowResize) {
-      window.addEventListener('resize', resize)
+      window.addEventListener('resize', handleResize)
       return () => {
-        window.removeEventListener('resize', resize)
+        window.removeEventListener('resize', handleResize)
       }
     }
   }, [handleResize, shouldResizeOnWindowResize])
