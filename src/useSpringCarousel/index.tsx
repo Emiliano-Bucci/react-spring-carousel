@@ -66,6 +66,7 @@ function useSpringCarousel<T>({
   const fluidTotalWrapperScrollValue = useRef(0)
   const slideFluidEndReached = useRef(false)
   const initialWindowWidth = useRef(0)
+  const nonFluidNextItemWillExceed = useRef(false)
 
   const [carouselStyles, setCarouselStyles] = useSpring(() => ({
     y: 0,
@@ -349,6 +350,17 @@ function useSpringCarousel<T>({
             })
           }
         } else {
+          const nextItemWillExceed =
+            Math.abs(getCurrentSlidedValue()) + 100 >=
+            fluidTotalWrapperScrollValue.current
+
+          if (nextItemWillExceed && direction < 0) {
+            nonFluidNextItemWillExceed.current = true
+          }
+          if (direction > 0) {
+            nonFluidNextItemWillExceed.current = false
+          }
+
           setCarouselStyles.start({
             [carouselSlideAxis]: movement,
           })
@@ -621,6 +633,7 @@ function useSpringCarousel<T>({
   }
   function slideToPrevItem() {
     setSlideActionType('prev')
+    nonFluidNextItemWillExceed.current = false
 
     if (itemsPerSlide === 'fluid') {
       if (getIfItemsNotFillTheCarousel()) {
@@ -680,7 +693,8 @@ function useSpringCarousel<T>({
       if (getIfItemsNotFillTheCarousel()) {
         return
       }
-      const willGoAfterLastFluidItem =
+
+      const nextItemWillExceed =
         Math.abs(getCurrentSlidedValue() - getSlideValue()) + 100 >=
         fluidTotalWrapperScrollValue.current
 
@@ -701,7 +715,7 @@ function useSpringCarousel<T>({
         })
       } else if (slideFluidEndReached.current) {
         return
-      } else if (willGoAfterLastFluidItem) {
+      } else if (nextItemWillExceed) {
         slideFluidEndReached.current = true
         slideToItem({
           customTo: -fluidTotalWrapperScrollValue.current,
@@ -719,7 +733,17 @@ function useSpringCarousel<T>({
         return
       }
 
-      if (getIsLastItem()) {
+      const nextItemWillExceed =
+        Math.abs(getCurrentSlidedValue() - getSlideValue()) + 100 >=
+        fluidTotalWrapperScrollValue.current
+
+      if (nextItemWillExceed && !getIsDragging()) {
+        nonFluidNextItemWillExceed.current = true
+      } else if (nonFluidNextItemWillExceed.current) {
+        slideToItem({
+          to: items.length - itemsPerSlide,
+        })
+      } else if (getIsLastItem()) {
         slideToItem({
           from: getCurrentSlidedValue() + getSlideValue() * items.length,
           to: 0,
