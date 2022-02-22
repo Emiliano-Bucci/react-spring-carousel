@@ -8,16 +8,7 @@ import pkg from './package.json'
 import size from 'rollup-plugin-filesize'
 import excludeDependenciesFromBundle from 'rollup-plugin-exclude-dependencies-from-bundle'
 
-export default {
-  input: 'src/index.tsx',
-  output: [
-    {
-      dir: 'dist',
-      format: 'cjs',
-      sourcemap: true,
-    },
-  ],
-  preserveModules: true,
+const props = {
   external: [
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.peerDependencies || {}),
@@ -42,4 +33,21 @@ export default {
     terser(),
     size(),
   ],
+}
+
+export default {
+  input: 'src/index.tsx',
+  output: [
+    {
+      file: pkg.module,
+      format: 'esm',
+      sourcemap: true,
+    },
+    {
+      format: 'cjs',
+      file: pkg.main,
+      sourcemap: true,
+    },
+  ],
+  ...props,
 }

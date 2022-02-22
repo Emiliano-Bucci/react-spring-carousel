@@ -1,16 +1,16 @@
 import { useRef, createContext, useCallback, useContext, useEffect } from 'react'
 import { useSpring, config, animated } from 'react-spring'
 import { useDrag } from '@use-gesture/react'
-import { useCustomEventsModule, useFullscreenModule, useThumbsModule } from './modules'
+import { useCustomEventsModule, useFullscreenModule, useThumbsModule } from '../modules'
 import {
   UseSpringCarouselProps,
   SlideToItemFnProps,
   SlideActionType,
   UseSpringDafaultTypeReturnProps,
   UseSpringFluidTypeReturnProps,
-} from './types'
-import { useMount } from './utils'
-import { getIsBrowser } from './utils'
+} from '../types'
+import { useMount } from '../utils'
+import { getIsBrowser } from '../utils'
 
 type ReturnHook<T> = T extends 'fluid'
   ? UseSpringFluidTypeReturnProps
@@ -20,7 +20,7 @@ const UseSpringCarouselContext = createContext<
   (UseSpringFluidTypeReturnProps | UseSpringDafaultTypeReturnProps) | undefined
 >(undefined)
 
-export function useSpringCarousel<T>({
+function useSpringCarousel<T>({
   itemsPerSlide = 1,
   items,
   withLoop = false,
@@ -913,7 +913,7 @@ export function useSpringCarousel<T>({
   }
 }
 
-export function useSpringCarouselContext<T>() {
+function useSpringCarouselContext<T>() {
   const context = useContext(UseSpringCarouselContext)
   if (!context) {
     throw new Error(
@@ -922,3 +922,5 @@ export function useSpringCarouselContext<T>() {
   }
   return context as ReturnHook<T>
 }
+
+export { useSpringCarousel, useSpringCarouselContext }

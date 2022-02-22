@@ -1,4 +1,2 @@
-import * as useSpringCarousel from './useSpringCarousel'
-import * as useTransitionCarousel from './useSpringCarousel'
-
-export { useSpringCarousel, useTransitionCarousel }
+export * from './useSpringCarousel'
+export * from './useTransitionCarousel'
