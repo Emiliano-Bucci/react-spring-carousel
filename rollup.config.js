@@ -21,6 +21,9 @@ const props = {
       useTsconfigDeclarationDir: true,
       tsconfigOverride: {
         exclude: ['Examples', 'node_modules'],
+        compilerOptions: {
+          rootDir: './src',
+        },
       },
     }),
     babel({

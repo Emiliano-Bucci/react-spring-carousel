@@ -15,13 +15,13 @@
     "jsx": "react-jsx", // Support JSX in .tsx files
     "sourceMap": true, // Generate corrresponding .map file
     "declaration": true, // Generate corresponding .d.ts file
-    "declarationDir": "./dist/types",
+    "declarationDir": "dist/types",
     "noUnusedLocals": true, // Report errors on unused locals
     "noUnusedParameters": true, // Report errors on unused parameters
     "incremental": true, // Enable incremental compilation by reading/writing information from prior compilations to a file on disk
     "noFallthroughCasesInSwitch": true, // Report errors for fallthrough cases in switch statement
     "jsxImportSource": "react",
-    "outDir": "./dist/types",
+    "outDir": "dist/types",
     "baseUrl": "./",
     "rootDir": "./"
   },
