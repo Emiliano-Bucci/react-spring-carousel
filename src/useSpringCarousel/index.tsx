@@ -694,8 +694,12 @@ function useSpringCarousel<T>({
         fluidTotalWrapperScrollValue.current
 
       if (freeScroll) {
+        const nextValue = mainCarouselWrapperRef.current!.scrollLeft + getSlideValue()
+        const willExceed = nextValue > fluidTotalWrapperScrollValue.current
+        const val = mainCarouselWrapperRef.current!.scrollLeft + getSlideValue()
+
         slideToItem({
-          customTo: mainCarouselWrapperRef.current!.scrollLeft + getSlideValue(),
+          customTo: willExceed ? fluidTotalWrapperScrollValue.current : val,
           from: mainCarouselWrapperRef.current!.scrollLeft,
         })
       } else if (

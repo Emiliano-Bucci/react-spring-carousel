@@ -12,6 +12,7 @@ export const SliderItem: React.FC = ({ children, ...rest }) => {
         font-size: 24px;
         color: #fff;
         height: 100%;
+        width: 400px;
       `}
       {...rest}
     >
