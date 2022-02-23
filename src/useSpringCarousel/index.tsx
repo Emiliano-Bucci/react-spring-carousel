@@ -340,13 +340,11 @@ function useSpringCarousel<T>({
                 [carouselSlideAxis]: getWrapperScrollDirection(),
               },
               to: {
-                [carouselSlideAxis]:
-                  direction > 0
-                    ? getWrapperScrollDirection() - Math.abs(movement)
-                    : getWrapperScrollDirection() + Math.abs(movement),
+                [carouselSlideAxis]: -movement,
               },
             })
           }
+          return
         } else {
           const nextItemWillExceed =
             Math.abs(getCurrentSlidedValue()) + 100 >=
@@ -420,7 +418,15 @@ function useSpringCarousel<T>({
     },
     {
       enabled: !disableGestures,
-      from: () => [carouselStyles.x.get(), carouselStyles.y.get()],
+      from: () => {
+        if (freeScroll) {
+          if (carouselSlideAxis === 'x') {
+            return [-getWrapperScrollDirection(), 0]
+          }
+          return [0, -getWrapperScrollDirection()]
+        }
+        return [carouselStyles.x.get(), carouselStyles.y.get()]
+      },
     },
   )
 
