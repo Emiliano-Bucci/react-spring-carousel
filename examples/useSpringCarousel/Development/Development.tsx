@@ -8,6 +8,7 @@ export function Development() {
   const { carouselFragment, slideToNextItem, slideToPrevItem } = useSpringCarousel({
     itemsPerSlide: 'fluid',
     freeScroll: true,
+    enableFreeScrollDrag: true,
     items: mockedItems.map(({ id, label, ...rest }) => ({
       id,
       renderItem: <SliderItem {...rest}>{label}</SliderItem>,

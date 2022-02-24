@@ -45,11 +45,13 @@ type UseSpringCarouselLoopProps = {
   withLoop: true
   startEndGutter?: number
   freeScroll?: never
+  enableFreeScrollDrag?: never
 }
 type UseSpringCarouselNoLoopProps = {
   withLoop?: false
   startEndGutter?: never
   freeScroll?: boolean
+  enableFreeScrollDrag?: boolean | (() => boolean)
 }
 export type UseSpringCarouselFluidType = {
   itemsPerSlide: 'fluid'
@@ -57,6 +59,7 @@ export type UseSpringCarouselFluidType = {
   initialStartingPosition?: never
   initialActiveItem?: never
   freeScroll?: boolean
+  enableFreeScrollDrag?: boolean | (() => boolean)
 }
 type UseSpringCarouselNumericSlideType = {
   itemsPerSlide?: number
@@ -64,6 +67,7 @@ type UseSpringCarouselNumericSlideType = {
   initialStartingPosition?: 'start' | 'center' | 'end'
   initialActiveItem?: number
   freeScroll?: never
+  enableFreeScrollDrag?: never
 }
 
 export type UseSpringCarouselProps = Omit<BaseCarouselSharedProps, 'withLoop'> & {
