@@ -42,7 +42,8 @@
     "release:test": "jest",
     "push:tags": "git push --follow-tags",
     "release:lib": "npm run lint && npm run release:test && npm run check:tag:branch && npm run build:lib && npm run push:tags && npm publish",
-    "storybook": "start-storybook -p 6006"
+    "storybook": "start-storybook -p 6006",
+    "release:beta": "npm run build:lib && npm publish --tag beta"
   },
   "dependencies": {
     "@use-gesture/react": "^10.2.1",
