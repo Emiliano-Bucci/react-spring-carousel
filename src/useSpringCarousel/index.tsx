@@ -778,7 +778,9 @@ function useSpringCarousel<T>({
     return {}
   }
   function getTouchAction() {
-    if (!touchAction) {
+    if (disableGestures) {
+      return 'none'
+    } else if (!touchAction) {
       if (carouselSlideAxis === 'x') {
         return 'pan-y'
       }
