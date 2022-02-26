@@ -55,13 +55,13 @@ export function useThumbsModule({
     x: 0,
     y: 0,
     config: springConfig,
-    onChange: ({ value }) => {
-      if (internalThumbsWrapperRef.current) {
-        internalThumbsWrapperRef.current[
-          thumbsSlideAxis === 'x' ? 'scrollLeft' : 'scrollTop'
-        ] = Math.abs(value[thumbsSlideAxis])
-      }
-    },
+    // onChange: ({ value }) => {
+    //   if (internalThumbsWrapperRef.current) {
+    //     internalThumbsWrapperRef.current[
+    //       thumbsSlideAxis === 'x' ? 'scrollLeft' : 'scrollTop'
+    //     ] = Math.abs(value[thumbsSlideAxis])
+    //   }
+    // },
   }))
 
   useMount(() => {
@@ -212,35 +212,36 @@ export function useThumbsModule({
           offsetDimension,
         })
 
+        const fromValue = getScrollFromValue({
+          thumbWrapper,
+          scrollDirection,
+        })
+        const toValue = getScrollToValue({
+          thumbWrapper,
+          thumbOffsetPosition,
+          thumbScrollDimension,
+          offsetDimension,
+        })
+
         setThumbListStyles.start({
           from: {
-            [thumbsSlideAxis]: getScrollFromValue({
-              thumbWrapper,
-              scrollDirection,
-            }),
+            [thumbsSlideAxis]: fromValue,
           },
           to: {
-            [thumbsSlideAxis]: getScrollToValue({
-              thumbWrapper,
-              thumbOffsetPosition,
-              thumbScrollDimension,
-              offsetDimension,
-            }),
+            [thumbsSlideAxis]: actionType === 'prev' && toValue < 0 ? 0 : toValue,
           },
-          onChange: val => {
+          onChange: ({ value }) => {
             if (thumbsSlideAxis === 'x') {
-              // @ts-ignore
-              internalThumbsWrapperRef!.current!.scrollLeft = val.x
+              internalThumbsWrapperRef!.current!.scrollLeft = value.x
             } else {
-              // @ts-ignore
-              internalThumbsWrapperRef!.current!.scrollTop = val.y
+              internalThumbsWrapperRef!.current!.scrollTop = value.y
             }
           },
         })
       }
     }
   }
-  function handlePrepareThumbsDate() {
+  function handlePrepareThumbsData() {
     function getPreparedItems(
       _items: UseSpringCarouselItems['items'],
     ): ReactSpringThumbItem[] {
@@ -271,6 +272,8 @@ export function useThumbsModule({
         display: 'flex',
         flex: 1,
         position: 'relative',
+        width: '100%',
+        height: '100%',
         flexDirection: thumbsSlideAxis === 'x' ? 'row' : 'column',
         ...(thumbsSlideAxis === 'x'
           ? { overflowX: 'auto' }
@@ -280,7 +283,7 @@ export function useThumbsModule({
             }),
       }}
     >
-      {handlePrepareThumbsDate().map(({ id, renderThumb }) => {
+      {handlePrepareThumbsData().map(({ id, renderThumb }) => {
         const thumbId = `thumb-${id}`
         return (
           <div key={thumbId} id={thumbId}>
