@@ -286,7 +286,7 @@ export function useThumbsModule({
       {handlePrepareThumbsData().map(({ id, renderThumb }) => {
         const thumbId = `thumb-${id}`
         return (
-          <div key={thumbId} id={thumbId}>
+          <div key={thumbId} id={thumbId} className="thumb-item">
             {renderThumb}
           </div>
         )

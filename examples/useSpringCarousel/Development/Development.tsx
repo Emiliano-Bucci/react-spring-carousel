@@ -8,7 +8,6 @@ export function Development() {
   const { carouselFragment, thumbsFragment, slideToNextItem, slideToPrevItem } =
     useSpringCarousel({
       withThumbs: true,
-      itemsPerSlide: 'fluid',
       items: mockedItems.map(({ id, label, ...rest }) => ({
         id,
         renderItem: <SliderItem {...rest}>{label}</SliderItem>,
