@@ -32,41 +32,47 @@ export function Development() {
     items = items.filter(i => !i.id.includes('extra-item'))
   }
 
-  const { carouselFragment, thumbsFragment, slideToNextItem, slideToPrevItem } =
-    useSpringCarousel({
-      withThumbs: true,
-      prepareThumbsData(items) {
-        return [
-          ...items,
-          {
-            id: 'btn',
-            renderThumb: (
-              <button onClick={() => setShowMoreItems(p => !p)}>Toggle items</button>
-            ),
-          },
-        ]
-      },
-      items: items.map(({ id, label, ...rest }) => ({
-        id,
-        renderItem: <SliderItem {...rest}>{label}</SliderItem>,
-        renderThumb: (
-          <div
-            css={css`
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              width: 240px;
-              height: 100%;
-            `}
-          >
-            {label}
-          </div>
-        ),
-      })),
-    })
+  const {
+    carouselFragment,
+    thumbsFragment,
+    slideToNextItem,
+    slideToPrevItem,
+    slideToItem,
+  } = useSpringCarousel({
+    withThumbs: true,
+    prepareThumbsData(items) {
+      return [
+        ...items,
+        {
+          id: 'btn',
+          renderThumb: (
+            <button onClick={() => setShowMoreItems(p => !p)}>Toggle items</button>
+          ),
+        },
+      ]
+    },
+    items: items.map(({ id, label, ...rest }) => ({
+      id,
+      renderItem: <SliderItem {...rest}>{label}</SliderItem>,
+      renderThumb: (
+        <div
+          css={css`
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 240px;
+            height: 100%;
+          `}
+        >
+          {label}
+        </div>
+      ),
+    })),
+  })
 
   return (
     <div
+      onClick={() => slideToItem(0)}
       css={css`
         display: grid;
         width: 100%;

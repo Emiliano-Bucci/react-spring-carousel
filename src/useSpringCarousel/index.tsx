@@ -712,7 +712,10 @@ function useSpringCarousel<T>({
       )
     }
 
-    if (itemIndex === getCurrentActiveItem() || getCurrentActiveItem() < items.length) {
+    if (
+      itemIndex === getCurrentActiveItem() ||
+      (items.length !== prevItems.current.length && getCurrentActiveItem() < items.length)
+    ) {
       return
     }
 
