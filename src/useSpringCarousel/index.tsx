@@ -55,6 +55,7 @@ function useSpringCarousel<T>({
     }
     return items
   }
+
   const slideActionType = useRef<SlideActionType>('initial')
   const internalItems = getItems()
   const activeItem = useRef(initialActiveItem)
@@ -67,6 +68,8 @@ function useSpringCarousel<T>({
   const fluidTotalWrapperScrollValue = useRef(0)
   const slideEndReached = useRef(false)
   const initialWindowWidth = useRef(0)
+
+  const prevItems = useRef(items)
 
   const [carouselStyles, setCarouselStyles] = useSpring(() => ({
     y: 0,
@@ -671,7 +674,7 @@ function useSpringCarousel<T>({
       }
 
       const nextItemWillExceed =
-        Math.abs(getCurrentSlidedValue() - getSlideValue()) + 100 >=
+        Math.abs(getCurrentSlidedValue() - getSlideValue() + 25) >
         fluidTotalWrapperScrollValue.current
 
       if (nextItemWillExceed && !getIsDragging()) {
@@ -692,6 +695,7 @@ function useSpringCarousel<T>({
       }
     }
   }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   function _slideToItem(item: string | number) {
     let itemIndex = 0
 
@@ -711,7 +715,7 @@ function useSpringCarousel<T>({
       return
     }
 
-    const currentItem = findItemIndex(items[getCurrentActiveItem()].id)
+    const currentItem = findItemIndex(prevItems.current[getCurrentActiveItem()].id)
     const newActiveItem = findItemIndex(items[itemIndex].id)
 
     if (newActiveItem > currentItem) {
@@ -863,6 +867,16 @@ function useSpringCarousel<T>({
   useEffect(() => {
     setTimeout(() => adjustCarouselWrapperPosition(carouselTrackWrapperRef.current!), 150)
   }, [adjustCarouselWrapperPosition, carouselSlideAxis, itemsPerSlide])
+  useEffect(() => {
+    fluidTotalWrapperScrollValue.current = getFluidWrapperScrollValue()
+    const itemsAreEqual = items.length === prevItems.current.length
+
+    if (!itemsAreEqual && items.length < prevItems.current.length) {
+      _slideToItem(items.length - 1)
+    }
+
+    prevItems.current = items
+  }, [_slideToItem, getFluidWrapperScrollValue, items])
 
   const contextProps = {
     useListenToCustomEvent,
