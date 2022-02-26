@@ -55,13 +55,13 @@ export function useThumbsModule({
     x: 0,
     y: 0,
     config: springConfig,
-    // onChange: ({ value }) => {
-    //   if (internalThumbsWrapperRef.current) {
-    //     internalThumbsWrapperRef.current[
-    //       thumbsSlideAxis === 'x' ? 'scrollLeft' : 'scrollTop'
-    //     ] = Math.abs(value[thumbsSlideAxis])
-    //   }
-    // },
+    onChange: ({ value }) => {
+      if (internalThumbsWrapperRef.current && itemsPerSlide === 'fluid') {
+        internalThumbsWrapperRef.current[
+          thumbsSlideAxis === 'x' ? 'scrollLeft' : 'scrollTop'
+        ] = Math.abs(value[thumbsSlideAxis])
+      }
+    },
   }))
 
   useMount(() => {
