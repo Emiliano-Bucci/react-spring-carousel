@@ -852,15 +852,15 @@ function useSpringCarousel<T>({
     }
   })
   useEffect(() => {
-    resize()
-
     if (shouldResizeOnWindowResize) {
       window.addEventListener('resize', handleResize)
       return () => {
         window.removeEventListener('resize', handleResize)
       }
     }
-  }, [handleResize, shouldResizeOnWindowResize, gutter, startEndGutter, resize])
+    resize()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldResizeOnWindowResize, gutter, startEndGutter])
   useEffect(() => {
     if (carouselTrackWrapperRef.current) {
       if (carouselSlideAxis === 'x') {
