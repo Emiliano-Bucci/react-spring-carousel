@@ -13,13 +13,13 @@ const newItems = [
       background-color: red;
     `,
   },
-  {
-    id: 'extra-item-2',
-    label: 'Extra item 2',
-    css: css`
-      background-color: brown;
-    `,
-  },
+  // {
+  //   id: 'extra-item-2',
+  //   label: 'Extra item 2',
+  //   css: css`
+  //     background-color: brown;
+  //   `,
+  // },
 ]
 
 export function Development() {

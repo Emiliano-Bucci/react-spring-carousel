@@ -711,7 +711,8 @@ function useSpringCarousel<T>({
         you provide a wrong id or a higher numeric index.`,
       )
     }
-    if (itemIndex === getCurrentActiveItem()) {
+
+    if (itemIndex === getCurrentActiveItem() || getCurrentActiveItem() < items.length) {
       return
     }
 
