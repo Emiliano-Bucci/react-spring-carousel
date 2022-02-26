@@ -860,7 +860,7 @@ function useSpringCarousel<T>({
         window.removeEventListener('resize', handleResize)
       }
     }
-  }, [handleResize, shouldResizeOnWindowResize, gutter, resize])
+  }, [handleResize, shouldResizeOnWindowResize, gutter, startEndGutter, resize])
   useEffect(() => {
     if (carouselTrackWrapperRef.current) {
       if (carouselSlideAxis === 'x') {
