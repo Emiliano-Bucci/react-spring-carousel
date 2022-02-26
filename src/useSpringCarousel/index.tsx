@@ -205,10 +205,7 @@ function useSpringCarousel<T>({
       withLoop,
     ],
   )
-  const handleResize = useCallback(() => {
-    if (window.innerWidth === currentWindowWidth.current || freeScroll) {
-      return
-    }
+  const resize = useCallback(() => {
     currentWindowWidth.current = window.innerWidth
 
     if (itemsPerSlide === 'fluid') {
@@ -245,19 +242,23 @@ function useSpringCarousel<T>({
     }
 
     fluidTotalWrapperScrollValue.current = getFluidWrapperScrollValue()
-
     adjustCarouselWrapperPosition(carouselTrackWrapperRef.current!)
   }, [
-    itemsPerSlide,
-    getIfItemsNotFillTheCarousel,
-    getFluidWrapperScrollValue,
-    freeScroll,
-    setCarouselStyles,
+    adjustCarouselWrapperPosition,
     carouselSlideAxis,
     getCurrentSlidedValue,
+    getFluidWrapperScrollValue,
+    getIfItemsNotFillTheCarousel,
     getSlideValue,
-    adjustCarouselWrapperPosition,
+    itemsPerSlide,
+    setCarouselStyles,
   ])
+  const handleResize = useCallback(() => {
+    if (window.innerWidth === currentWindowWidth.current || freeScroll) {
+      return
+    }
+    resize()
+  }, [freeScroll, resize])
   // Custom modules
   const { useListenToCustomEvent, emitObservable } = useCustomEventsModule()
   const { enterFullscreen, exitFullscreen, getIsFullscreen } = useFullscreenModule({
@@ -851,13 +852,15 @@ function useSpringCarousel<T>({
     }
   })
   useEffect(() => {
+    resize()
+
     if (shouldResizeOnWindowResize) {
       window.addEventListener('resize', handleResize)
       return () => {
         window.removeEventListener('resize', handleResize)
       }
     }
-  }, [handleResize, shouldResizeOnWindowResize])
+  }, [handleResize, shouldResizeOnWindowResize, gutter, resize])
   useEffect(() => {
     if (carouselTrackWrapperRef.current) {
       if (carouselSlideAxis === 'x') {
