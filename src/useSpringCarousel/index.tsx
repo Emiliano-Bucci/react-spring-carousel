@@ -69,6 +69,7 @@ function useSpringCarousel<T>({
   const slideEndReached = useRef(false)
   const initialWindowWidth = useRef(0)
 
+  const prevSlidedValue = useRef(0)
   const prevItems = useRef(items)
 
   const [carouselStyles, setCarouselStyles] = useSpring(() => ({
@@ -217,16 +218,9 @@ function useSpringCarousel<T>({
         return
       }
       fluidTotalWrapperScrollValue.current = getFluidWrapperScrollValue()
-      const diff = currentWindowWidth.current - initialWindowWidth.current
 
       if (slideEndReached.current) {
         const nextValue = -fluidTotalWrapperScrollValue.current
-        setCarouselStyles.start({
-          immediate: true,
-          [carouselSlideAxis]: nextValue,
-        })
-      } else {
-        const nextValue = getCurrentSlidedValue() + diff
         setCarouselStyles.start({
           immediate: true,
           [carouselSlideAxis]: nextValue,
@@ -246,7 +240,6 @@ function useSpringCarousel<T>({
   }, [
     adjustCarouselWrapperPosition,
     carouselSlideAxis,
-    getCurrentSlidedValue,
     getFluidWrapperScrollValue,
     getIfItemsNotFillTheCarousel,
     getSlideValue,
@@ -320,13 +313,9 @@ function useSpringCarousel<T>({
               [carouselSlideAxis]: -fluidTotalWrapperScrollValue.current,
             })
           } else {
-            // if (!prevItemTreshold && !nextItemTreshold) {
-            //   setCarouselStyles.start({
-            //     [carouselSlideAxis]: prevFluidSlidedValue.current,
-            //   })
-            // } else {
-            //   prevFluidSlidedValue.current = getCurrentSlidedValue()
-            // }
+            setCarouselStyles.start({
+              [carouselSlideAxis]: prevSlidedValue.current,
+            })
           }
         } else {
           setCarouselStyles.start({
@@ -409,6 +398,7 @@ function useSpringCarousel<T>({
           } else {
             slideToNextItem()
           }
+          return
         } else if (prevItemTreshold) {
           cancelDrag()
           if (!withLoop && getIsFirstItem()) {
@@ -416,16 +406,19 @@ function useSpringCarousel<T>({
           } else {
             slideToPrevItem()
           }
+          return
         }
       }
 
-      if (props.last && !freeScroll) {
-        resetAnimation()
-        emitObservable({
-          eventName: 'onDrag',
-          slideActionType: getSlideActionType(),
-          ...props,
-        })
+      if (props.last && !nextItemTreshold && !prevItemTreshold) {
+        if (!freeScroll) {
+          resetAnimation()
+          emitObservable({
+            eventName: 'onDrag',
+            slideActionType: getSlideActionType(),
+            ...props,
+          })
+        }
       }
     },
     {
@@ -539,7 +532,7 @@ function useSpringCarousel<T>({
         [carouselSlideAxis]: -(getSlideValue() * to),
       }
     }
-
+    prevSlidedValue.current = getToValue()[carouselSlideAxis]
     setCarouselStyles.start({
       ...getFromValue(),
       to: getToValue(),
