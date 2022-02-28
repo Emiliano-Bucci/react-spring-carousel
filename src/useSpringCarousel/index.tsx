@@ -1,4 +1,11 @@
-import { useRef, createContext, useCallback, useContext, useEffect } from 'react'
+import {
+  useRef,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+} from 'react'
 import { useSpring, config, animated } from 'react-spring'
 import { useDrag } from '@use-gesture/react'
 import { useCustomEventsModule, useFullscreenModule, useThumbsModule } from '../modules'
@@ -490,6 +497,7 @@ function useSpringCarousel({
   function findItemIndex(id: string) {
     return items.findIndex(item => item.id === id)
   }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   function slideToItem({
     from,
     to = -1,
@@ -791,33 +799,31 @@ function useSpringCarousel({
 
   // Perform some check on first mount
   useMount(() => {
-    if (slideType !== 'fluid' && !Number.isInteger(itemsPerSlide)) {
-      throw new Error(`itemsPerSlide should be an integer.`)
+    if (itemsPerSlide < 1) {
+      throw new Error(`The itemsPerSlide prop can't be less than 1.`)
     }
     if (itemsPerSlide > items.length) {
       throw new Error(
         `The itemsPerSlide prop can't be greater than the total length of the items you provide.`,
       )
     }
-    if (itemsPerSlide < 1) {
-      throw new Error(`The itemsPerSlide prop can't be less than 1.`)
+    if (initialActiveItem < 0) {
+      throw new Error('The initialActiveItem cannot be less than 0.')
+    }
+    if (initialActiveItem > items.length) {
+      throw new Error(
+        'The initialActiveItem cannot be greater than the total length of the items you provide.',
+      )
     }
     if (!shouldResizeOnWindowResize) {
       console.warn(
         'You set shouldResizeOnWindowResize={false}; be aware that the carousel could behave in a strange way if you also use the fullscreen functionality or if you change the mobile orientation.',
       )
     }
-    if (initialActiveItem < 0) {
-      console.warn('The initialActiveItem cannot be less than 0.')
-    }
-    if (initialActiveItem > items.length) {
-      console.warn(
-        'The initialActiveItem cannot be greater than the total length of the items you provide.',
-      )
-    }
   })
   useMount(() => {
     fluidTotalWrapperScrollValue.current = getFluidWrapperScrollValue()
+    initialWindowWidth.current = window.innerWidth
     function handleVisibilityChange() {
       if (document.hidden) {
         windowIsHidden.current = true
@@ -832,16 +838,27 @@ function useSpringCarousel({
       }
     }
   })
-  useMount(() => {
-    initialWindowWidth.current = window.innerWidth
-    if (initialActiveItem > 0 && initialActiveItem <= items.length) {
+  useLayoutEffect(() => {
+    slideToItem({
+      to: initialActiveItem,
+      immediate: true,
+    })
+    setActiveItem(initialActiveItem)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  useEffect(() => {
+    if (
+      initialActiveItem > 0 &&
+      initialActiveItem < items.length &&
+      initialActiveItem !== activeItem.current
+    ) {
       slideToItem({
         to: initialActiveItem,
         immediate: true,
       })
       setActiveItem(initialActiveItem)
     }
-  })
+  }, [initialActiveItem, items.length, slideToItem])
   useEffect(() => {
     if (shouldResizeOnWindowResize) {
       window.addEventListener('resize', handleResize)
