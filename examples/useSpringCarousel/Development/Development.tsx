@@ -4,13 +4,16 @@ import { SliderItem } from 'examples/components/SliderItem/SliderItem'
 import { SliderWrapper } from 'examples/components/SliderWrapper/SliderWrapper'
 import { css } from '@emotion/react'
 
+const items = mockedItems.map(({ id, label, ...rest }) => ({
+  id,
+  renderItem: <SliderItem {...rest}>{label}</SliderItem>,
+}))
+
 export function Development() {
   const { carouselFragment, slideToNextItem, slideToPrevItem } = useSpringCarousel({
-    itemsPerSlide: 'fluid',
-    items: mockedItems.map(({ id, label, ...rest }) => ({
-      id,
-      renderItem: <SliderItem {...rest}>{label}</SliderItem>,
-    })),
+    items,
+    withThumbs: false,
+    slideType: 'fluid',
   })
 
   return (

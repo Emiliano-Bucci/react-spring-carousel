@@ -2,11 +2,12 @@ import { createContext, useRef, useState, useContext } from 'react'
 import { useTransition, animated, config } from 'react-spring'
 import { useDrag } from '@use-gesture/react'
 import { useCustomEventsModule, useThumbsModule, useFullscreenModule } from '../modules'
+import { SlideActionType } from '../types'
 import {
   UseTransitionCarouselContextProps,
   UseTransitionCarouselProps,
-  SlideActionType,
-} from '../types'
+} from '../types/useTransitionCarousel'
+import { ReactSpringCarouselItemWithThumbs } from '../types/useSpringCarousel'
 
 const UseTransitionCarouselContext = createContext<
   UseTransitionCarouselContextProps | undefined
@@ -66,12 +67,13 @@ function useTransitionCarousel({
     mainCarouselWrapperRef,
   })
   const { thumbsFragment: _thumbsFragment, handleThumbsScroll } = useThumbsModule({
-    items,
+    items: items as ReactSpringCarouselItemWithThumbs[],
     withThumbs,
     thumbsSlideAxis,
     springConfig,
     prepareThumbsData,
     CustomThumbsWrapperComponent,
+    slideType: 'fixed',
   })
 
   const bindSwipe = useDrag(

@@ -3,25 +3,23 @@ import { useSpring, config, animated } from 'react-spring'
 import { useDrag } from '@use-gesture/react'
 import { useCustomEventsModule, useFullscreenModule, useThumbsModule } from '../modules'
 import {
-  UseSpringCarouselProps,
   SlideToItemFnProps,
   SlideActionType,
   UseSpringDafaultTypeReturnProps,
-  UseSpringFluidTypeReturnProps,
 } from '../types'
 import { useMount } from '../utils'
 import { getIsBrowser } from '../utils'
-
-type ReturnHook<T> = T extends 'fluid'
-  ? UseSpringFluidTypeReturnProps
-  : UseSpringDafaultTypeReturnProps
+import {
+  UseSpringCarouselProps,
+  ReactSpringCarouselItemWithThumbs,
+} from '../types/useSpringCarousel'
+import { UseSpringFluidTypeReturnProps } from 'react-spring-carousel'
 
 const UseSpringCarouselContext = createContext<
   (UseSpringFluidTypeReturnProps | UseSpringDafaultTypeReturnProps) | undefined
 >(undefined)
 
-function useSpringCarousel<T>({
-  itemsPerSlide = 1,
+function useSpringCarousel({
   items,
   withLoop = false,
   draggingSlideTreshold = 140,
@@ -42,10 +40,9 @@ function useSpringCarousel<T>({
   freeScroll = false,
   CustomThumbsWrapperComponent,
   enableFreeScrollDrag,
-}: UseSpringCarouselProps): ReturnHook<T> & {
-  carouselFragment: JSX.Element
-  thumbsFragment: JSX.Element
-} {
+  itemsPerSlide = 1,
+  slideType,
+}: UseSpringCarouselProps) {
   function getItems() {
     if (withLoop) {
       if (items.length === itemsPerSlide) {
@@ -133,14 +130,14 @@ function useSpringCarousel<T>({
     }
     const itemVal = getCarouselItemWidth()
 
-    if (itemsPerSlide === 'fluid' && typeof slideAmount === 'number') {
+    if (slideType === 'fluid' && typeof slideAmount === 'number') {
       if (slideAmount < itemVal) {
         throw new Error('slideAmount must be greater than the width of a single item.')
       }
       return slideAmount
     }
     return itemVal
-  }, [getCarouselItemWidth, itemsPerSlide, slideAmount])
+  }, [getCarouselItemWidth, slideType, slideAmount])
   const adjustCarouselWrapperPosition = useCallback(
     (ref: HTMLDivElement) => {
       const positionProperty = carouselSlideAxis === 'x' ? 'left' : 'top'
@@ -158,7 +155,7 @@ function useSpringCarousel<T>({
         setPosition(getDefaultPositionValue())
       }
 
-      if (itemsPerSlide !== 'fluid' && typeof itemsPerSlide === 'number') {
+      if (slideType !== 'fluid' && typeof itemsPerSlide === 'number') {
         function setCenterPosition() {
           setPosition(
             getDefaultPositionValue() -
@@ -197,19 +194,20 @@ function useSpringCarousel<T>({
     },
     [
       carouselSlideAxis,
+      slideType,
       itemsPerSlide,
       getCarouselItemWidth,
       items.length,
+      withLoop,
       startEndGutter,
       getSlideValue,
       initialStartingPosition,
-      withLoop,
     ],
   )
   const resize = useCallback(() => {
     currentWindowWidth.current = window.innerWidth
 
-    if (itemsPerSlide === 'fluid') {
+    if (slideType === 'fluid') {
       if (getIfItemsNotFillTheCarousel()) {
         setCarouselStyles.start({
           immediate: true,
@@ -243,8 +241,8 @@ function useSpringCarousel<T>({
     getFluidWrapperScrollValue,
     getIfItemsNotFillTheCarousel,
     getSlideValue,
-    itemsPerSlide,
     setCarouselStyles,
+    slideType,
   ])
   const handleResize = useCallback(() => {
     if (window.innerWidth === currentWindowWidth.current || freeScroll) {
@@ -261,11 +259,11 @@ function useSpringCarousel<T>({
   })
   const { thumbsFragment: _thumbsFragment, handleThumbsScroll } = useThumbsModule({
     withThumbs,
-    items,
+    items: items as ReactSpringCarouselItemWithThumbs[],
     thumbsSlideAxis,
     springConfig,
     prepareThumbsData,
-    itemsPerSlide,
+    slideType,
     getFluidWrapperScrollValue,
     getSlideValue,
     CustomThumbsWrapperComponent,
@@ -300,7 +298,7 @@ function useSpringCarousel<T>({
         props.cancel()
       }
       function resetAnimation() {
-        if (itemsPerSlide === 'fluid') {
+        if (slideType === 'fluid') {
           if (
             getIfItemsNotFillTheCarousel() ||
             (getIsFirstItem() && getSlideActionType() === 'prev')
@@ -377,7 +375,7 @@ function useSpringCarousel<T>({
         if (
           (prevItemTreshold || nextItemTreshold) &&
           getIfItemsNotFillTheCarousel() &&
-          itemsPerSlide === 'fluid'
+          slideType === 'fluid'
         ) {
           cancelDrag()
           resetAnimation()
@@ -506,8 +504,8 @@ function useSpringCarousel<T>({
         eventName: 'onSlideStartChange',
         slideActionType: getSlideActionType(),
         nextItem: {
-          index: itemsPerSlide === 'fluid' ? -1 : to,
-          id: itemsPerSlide === 'fluid' ? '' : items[to].id,
+          index: slideType === 'fluid' ? -1 : to,
+          id: slideType === 'fluid' ? '' : items[to].id,
         },
       })
     }
@@ -547,8 +545,8 @@ function useSpringCarousel<T>({
               eventName: 'onSlideChange',
               slideActionType: getSlideActionType(),
               currentItem: {
-                index: itemsPerSlide === 'fluid' ? -1 : getCurrentActiveItem(),
-                id: itemsPerSlide === 'fluid' ? '' : items[getCurrentActiveItem()].id,
+                index: slideType === 'fluid' ? -1 : getCurrentActiveItem(),
+                id: slideType === 'fluid' ? '' : items[getCurrentActiveItem()].id,
               },
             })
           }
@@ -566,7 +564,7 @@ function useSpringCarousel<T>({
     setSlideActionType('prev')
     slideEndReached.current = false
 
-    if (itemsPerSlide === 'fluid') {
+    if (slideType === 'fluid') {
       slideEndReached.current = false
 
       if (getIfItemsNotFillTheCarousel()) {
@@ -619,7 +617,7 @@ function useSpringCarousel<T>({
   function slideToNextItem() {
     setSlideActionType('next')
 
-    if (itemsPerSlide === 'fluid') {
+    if (slideType === 'fluid') {
       if (getIfItemsNotFillTheCarousel()) {
         return
       }
@@ -793,7 +791,7 @@ function useSpringCarousel<T>({
 
   // Perform some check on first mount
   useMount(() => {
-    if (itemsPerSlide !== 'fluid' && !Number.isInteger(itemsPerSlide)) {
+    if (slideType !== 'fluid' && !Number.isInteger(itemsPerSlide)) {
       throw new Error(`itemsPerSlide should be an integer.`)
     }
     if (itemsPerSlide > items.length) {
@@ -960,20 +958,20 @@ function useSpringCarousel<T>({
   )
 
   return {
-    ...(contextProps as ReturnHook<T>),
+    ...contextProps,
     carouselFragment,
     thumbsFragment,
   }
 }
 
-function useSpringCarouselContext<T>() {
+function useSpringCarouselContext() {
   const context = useContext(UseSpringCarouselContext)
   if (!context) {
     throw new Error(
       'useSpringCarouselContext must be used only inside a component that is rendered inside the Carousel.',
     )
   }
-  return context as ReturnHook<T>
+  return context
 }
 
 export { useSpringCarousel, useSpringCarouselContext }

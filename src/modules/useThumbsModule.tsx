@@ -1,25 +1,21 @@
 import { forwardRef, HTMLAttributes, useRef } from 'react'
 import { useSpring, SpringConfig, animated } from 'react-spring'
 import { useMount } from 'src/utils'
-import {
-  UseSpringCarouselProps,
-  ReactSpringThumbItem,
-  PrepareThumbsData,
-  UseSpringCarouselItems,
-  SlideActionType,
-} from '../types'
+import { UseSpringCarouselProps, SlideActionType } from '../types'
+import { ReactSpringCarouselItemWithThumbs } from '../types/useSpringCarousel'
+import { PrepareThumbsData } from '../types/index'
 
 type OffsetDimension = 'offsetWidth' | 'offsetHeight'
 type OffsetDirection = 'offsetLeft' | 'offsetTop'
 type ScrollDirection = 'scrollLeft' | 'scrollTop'
 
 type Props = {
-  items: UseSpringCarouselItems['items']
+  items: ReactSpringCarouselItemWithThumbs[]
   withThumbs: boolean
+  slideType: UseSpringCarouselProps['slideType']
   thumbsSlideAxis: UseSpringCarouselProps['thumbsSlideAxis']
   springConfig: SpringConfig
-  prepareThumbsData?: PrepareThumbsData
-  itemsPerSlide?: UseSpringCarouselProps['itemsPerSlide']
+  prepareThumbsData?: UseSpringCarouselProps['prepareThumbsData']
   CustomThumbsWrapperComponent?: UseSpringCarouselProps['CustomThumbsWrapperComponent']
   getFluidWrapperScrollValue?(): number
   getSlideValue?(): number
@@ -45,10 +41,10 @@ export function useThumbsModule({
   thumbsSlideAxis = 'x',
   springConfig,
   prepareThumbsData,
-  itemsPerSlide,
   getFluidWrapperScrollValue = () => 0,
   getSlideValue = () => 0,
   CustomThumbsWrapperComponent,
+  slideType,
 }: Props) {
   const internalThumbsWrapperRef = useRef<HTMLDivElement | null>(null)
   const [thumbListStyles, setThumbListStyles] = useSpring(() => ({
@@ -56,7 +52,7 @@ export function useThumbsModule({
     y: 0,
     config: springConfig,
     onChange: ({ value }) => {
-      if (internalThumbsWrapperRef.current && itemsPerSlide === 'fluid') {
+      if (internalThumbsWrapperRef.current && slideType === 'fluid') {
         internalThumbsWrapperRef.current[
           thumbsSlideAxis === 'x' ? 'scrollLeft' : 'scrollTop'
         ] = Math.abs(value[thumbsSlideAxis])
@@ -97,7 +93,7 @@ export function useThumbsModule({
   }
 
   function handleThumbsScroll(activeItem: number, actionType?: SlideActionType) {
-    if (itemsPerSlide === 'fluid') {
+    if (slideType === 'fluid') {
       const totalScrollableValue = getThumbsTotalScrollableValue()
 
       if (actionType === 'next') {
@@ -243,8 +239,8 @@ export function useThumbsModule({
   }
   function handlePrepareThumbsData() {
     function getPreparedItems(
-      _items: UseSpringCarouselItems['items'],
-    ): ReactSpringThumbItem[] {
+      _items: ReturnType<PrepareThumbsData>,
+    ): ReturnType<PrepareThumbsData> {
       return _items.map(i => ({
         id: i.id,
         renderThumb: i.renderThumb,
