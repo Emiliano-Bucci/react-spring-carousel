@@ -17,7 +17,3 @@ export function useMount(callback: Callback) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 }
-
-export function getIsBrowser() {
-  return typeof window !== 'undefined'
-}

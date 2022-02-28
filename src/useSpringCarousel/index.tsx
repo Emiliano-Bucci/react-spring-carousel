@@ -1,11 +1,4 @@
-import {
-  useRef,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-} from 'react'
+import { useRef, createContext, useCallback, useContext, useEffect } from 'react'
 import { useSpring, config, animated } from 'react-spring'
 import { useDrag } from '@use-gesture/react'
 import { useCustomEventsModule, useFullscreenModule, useThumbsModule } from '../modules'
@@ -15,7 +8,6 @@ import {
   UseSpringDafaultTypeReturnProps,
 } from '../types'
 import { useMount } from '../utils'
-import { getIsBrowser } from '../utils'
 import {
   UseSpringCarouselProps,
   ReactSpringCarouselItemWithThumbs,
@@ -68,11 +60,10 @@ function useSpringCarousel({
   const isDragging = useRef(false)
   const isAnimating = useRef(false)
   const windowIsHidden = useRef(false)
-  const currentWindowWidth = useRef(0)
   const fluidTotalWrapperScrollValue = useRef(0)
   const slideEndReached = useRef(false)
+  const currentWindowWidth = useRef(0)
   const initialWindowWidth = useRef(0)
-
   const prevSlidedValue = useRef(0)
   const prevItems = useRef(items)
 
@@ -152,8 +143,6 @@ function useSpringCarousel({
         return getCarouselItemWidth() * items.length
       }
       function setPosition(v: number) {
-        ref.style.top = '0px'
-        ref.style.left = '0px'
         if (withLoop) {
           ref.style[positionProperty] = `-${v - startEndGutter}px`
         }
@@ -756,12 +745,6 @@ function useSpringCarousel({
       height: carouselSlideAxis === 'y' ? percentValue : '100%',
     }
   }
-  function handleCarouselFragmentRef(ref: HTMLDivElement | null) {
-    if (ref) {
-      carouselTrackWrapperRef.current = ref
-      adjustCarouselWrapperPosition(ref)
-    }
-  }
   function getOverflowStyles() {
     if (freeScroll) {
       if (carouselSlideAxis === 'x') {
@@ -822,8 +805,6 @@ function useSpringCarousel({
     }
   })
   useMount(() => {
-    fluidTotalWrapperScrollValue.current = getFluidWrapperScrollValue()
-    initialWindowWidth.current = window.innerWidth
     function handleVisibilityChange() {
       if (document.hidden) {
         windowIsHidden.current = true
@@ -831,21 +812,23 @@ function useSpringCarousel({
         windowIsHidden.current = false
       }
     }
-    if (getIsBrowser()) {
-      document.addEventListener('visibilitychange', handleVisibilityChange)
-      return () => {
-        document.removeEventListener('visibilitychange', handleVisibilityChange)
-      }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   })
-  useLayoutEffect(() => {
+  useMount(() => {
+    if (carouselTrackWrapperRef.current) {
+      carouselTrackWrapperRef.current.style.left = '0px'
+      carouselTrackWrapperRef.current.style.top = '0px'
+    }
+
     slideToItem({
       to: initialActiveItem,
       immediate: true,
     })
     setActiveItem(initialActiveItem)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  })
   useEffect(() => {
     if (
       initialActiveItem > 0 &&
@@ -860,6 +843,10 @@ function useSpringCarousel({
     }
   }, [initialActiveItem, items.length, slideToItem])
   useEffect(() => {
+    fluidTotalWrapperScrollValue.current = getFluidWrapperScrollValue()
+    initialWindowWidth.current = window.innerWidth
+    currentWindowWidth.current = window.innerWidth
+
     if (shouldResizeOnWindowResize) {
       window.addEventListener('resize', handleResize)
       return () => {
@@ -879,9 +866,6 @@ function useSpringCarousel({
       }
     }
   }, [carouselSlideAxis])
-  useEffect(() => {
-    setTimeout(() => adjustCarouselWrapperPosition(carouselTrackWrapperRef.current!), 150)
-  }, [adjustCarouselWrapperPosition, carouselSlideAxis, itemsPerSlide])
   useEffect(() => {
     fluidTotalWrapperScrollValue.current = getFluidWrapperScrollValue()
     const itemsAreEqual = items.length === prevItems.current.length
@@ -918,6 +902,17 @@ function useSpringCarousel({
       : {}),
   }
 
+  function getInitialValues() {
+    if (carouselSlideAxis === 'x') {
+      return {
+        left: `calc(-${initialActiveItem} * 100%)`,
+      }
+    }
+    return {
+      top: `calc(-${initialActiveItem} * 100%)`,
+    }
+  }
+
   const carouselFragment = (
     <UseSpringCarouselContext.Provider value={contextProps}>
       <div
@@ -938,7 +933,7 @@ function useSpringCarousel({
           {...bindDrag()}
           className="use-spring-carousel-track-wrapper"
           data-testid="use-spring-carousel-animated-wrapper"
-          ref={handleCarouselFragmentRef}
+          ref={carouselTrackWrapperRef}
           style={{
             display: 'flex',
             position: 'relative',
@@ -946,6 +941,7 @@ function useSpringCarousel({
             flexDirection: carouselSlideAxis === 'x' ? 'row' : 'column',
             ...getAnimatedWrapperStyles(),
             ...(freeScroll ? {} : carouselStyles),
+            ...getInitialValues(),
           }}
         >
           {internalItems.map(({ id, renderItem }, index) => {
