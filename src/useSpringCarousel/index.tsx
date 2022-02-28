@@ -41,7 +41,7 @@ function useSpringCarousel({
   CustomThumbsWrapperComponent,
   enableFreeScrollDrag,
   itemsPerSlide = 1,
-  slideType,
+  slideType = 'fixed',
 }: UseSpringCarouselProps) {
   function getItems() {
     if (withLoop) {
