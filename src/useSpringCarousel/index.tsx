@@ -137,16 +137,21 @@ function useSpringCarousel({
     return itemVal
   }, [getCarouselItemWidth, slideType, slideAmount])
   const adjustCarouselWrapperPosition = useCallback(
-    (ref: HTMLDivElement) => {
+    (ref: HTMLDivElement, _initialActiveItem?: number) => {
       const positionProperty = carouselSlideAxis === 'x' ? 'left' : 'top'
       function getDefaultPositionValue() {
         return getCarouselItemWidth() * items.length
       }
       function setPosition(v: number) {
         if (withLoop) {
-          ref.style.left = '0px'
           ref.style.top = '0px'
           ref.style[positionProperty] = `-${v - startEndGutter}px`
+        } else {
+          ref.style.left = '0px'
+          ref.style.top = '0px'
+          if (_initialActiveItem) {
+            ref.style[positionProperty] = `calc(-${_initialActiveItem} * 100%)`
+          }
         }
       }
       function setStartPosition() {
@@ -193,11 +198,11 @@ function useSpringCarousel({
     [
       carouselSlideAxis,
       slideType,
-      itemsPerSlide,
       getCarouselItemWidth,
       items.length,
       withLoop,
       startEndGutter,
+      itemsPerSlide,
       getSlideValue,
       initialStartingPosition,
     ],
@@ -488,6 +493,32 @@ function useSpringCarousel({
   function findItemIndex(id: string) {
     return items.findIndex(item => item.id === id)
   }
+  function getFromValue(from: SlideToItemFnProps['from']) {
+    if (typeof from === 'number') {
+      return {
+        from: {
+          [carouselSlideAxis]: from,
+        },
+      }
+    }
+    return {}
+  }
+  function getToValue(
+    customTo: SlideToItemFnProps['customTo'],
+    to: SlideToItemFnProps['to'],
+  ) {
+    if (typeof customTo === 'number') {
+      return {
+        [carouselSlideAxis]: customTo,
+      }
+    }
+    if (typeof to !== 'number') {
+      throw new Error(`to values is not a number!`)
+    }
+    return {
+      [carouselSlideAxis]: -(getSlideValue() * to!),
+    }
+  }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   function slideToItem({
     from,
@@ -509,30 +540,10 @@ function useSpringCarousel({
       })
     }
 
-    function getFromValue() {
-      if (typeof from === 'number') {
-        return {
-          from: {
-            [carouselSlideAxis]: from,
-          },
-        }
-      }
-      return {}
-    }
-    function getToValue() {
-      if (typeof customTo === 'number') {
-        return {
-          [carouselSlideAxis]: customTo,
-        }
-      }
-      return {
-        [carouselSlideAxis]: -(getSlideValue() * to),
-      }
-    }
-    prevSlidedValue.current = getToValue()[carouselSlideAxis]
+    prevSlidedValue.current = getToValue(customTo, to)[carouselSlideAxis]
     setCarouselStyles.start({
-      ...getFromValue(),
-      to: getToValue(),
+      ...getFromValue(from),
+      to: getToValue(customTo, to),
       immediate,
       onRest: val => {
         if (val.finished) {
@@ -821,15 +832,15 @@ function useSpringCarousel({
   })
   useMount(() => {
     if (initialActiveItem > 0) {
-      if (carouselTrackWrapperRef.current) {
-        adjustCarouselWrapperPosition(carouselTrackWrapperRef.current)
-      }
-
       slideToItem({
         to: initialActiveItem,
         immediate: true,
       })
       setActiveItem(initialActiveItem)
+      if (!withLoop && carouselTrackWrapperRef.current) {
+        carouselTrackWrapperRef.current.style.top = '0px'
+        carouselTrackWrapperRef.current.style.left = '0px'
+      }
     }
   })
   useEffect(() => {
@@ -907,17 +918,7 @@ function useSpringCarousel({
   function handleCarouselFragmentRef(ref: HTMLDivElement | null) {
     if (ref) {
       carouselTrackWrapperRef.current = ref
-      adjustCarouselWrapperPosition(ref)
-    }
-  }
-  function getInitialValues() {
-    if (carouselSlideAxis === 'x') {
-      return {
-        left: `calc(-${initialActiveItem} * 100%)`,
-      }
-    }
-    return {
-      top: `calc(-${initialActiveItem} * 100%)`,
+      adjustCarouselWrapperPosition(ref, initialActiveItem)
     }
   }
 
@@ -949,7 +950,6 @@ function useSpringCarousel({
             flexDirection: carouselSlideAxis === 'x' ? 'row' : 'column',
             ...getAnimatedWrapperStyles(),
             ...(freeScroll ? {} : carouselStyles),
-            ...getInitialValues(),
           }}
         >
           {internalItems.map(({ id, renderItem }, index) => {
