@@ -844,11 +844,7 @@ function useSpringCarousel({
     }
   })
   useEffect(() => {
-    if (
-      initialActiveItem > 0 &&
-      initialActiveItem < items.length &&
-      initialActiveItem !== activeItem.current
-    ) {
+    if (initialActiveItem < items.length && initialActiveItem !== activeItem.current) {
       slideToItem({
         to: initialActiveItem,
         immediate: true,
