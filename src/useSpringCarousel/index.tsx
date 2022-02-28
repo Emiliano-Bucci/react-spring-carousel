@@ -155,7 +155,7 @@ function useSpringCarousel({
         setPosition(getDefaultPositionValue())
       }
 
-      if (slideType !== 'fluid' && typeof itemsPerSlide === 'number') {
+      if (slideType === 'fixed') {
         function setCenterPosition() {
           setPosition(
             getDefaultPositionValue() -
@@ -725,7 +725,7 @@ function useSpringCarousel({
     })
   }
   function getItemStyles() {
-    if (typeof itemsPerSlide === 'number') {
+    if (slideType === 'fixed') {
       return {
         ...(carouselSlideAxis === 'x'
           ? { marginRight: `${gutter}px` }
@@ -887,7 +887,7 @@ function useSpringCarousel({
     getIsPrevItem,
     slideToPrevItem,
     slideToNextItem,
-    ...(typeof itemsPerSlide === 'number'
+    ...(slideType === 'fixed'
       ? {
           slideToItem: _slideToItem,
           getIsActiveItem: (id: string) => {
