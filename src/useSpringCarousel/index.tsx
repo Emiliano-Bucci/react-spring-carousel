@@ -144,6 +144,8 @@ function useSpringCarousel({
       }
       function setPosition(v: number) {
         if (withLoop) {
+          ref.style.left = '0px'
+          ref.style.top = '0px'
           ref.style[positionProperty] = `-${v - startEndGutter}px`
         }
       }
@@ -818,16 +820,17 @@ function useSpringCarousel({
     }
   })
   useMount(() => {
-    if (carouselTrackWrapperRef.current) {
-      carouselTrackWrapperRef.current.style.left = '0px'
-      carouselTrackWrapperRef.current.style.top = '0px'
-    }
+    if (initialActiveItem > 0) {
+      if (carouselTrackWrapperRef.current) {
+        adjustCarouselWrapperPosition(carouselTrackWrapperRef.current)
+      }
 
-    slideToItem({
-      to: initialActiveItem,
-      immediate: true,
-    })
-    setActiveItem(initialActiveItem)
+      slideToItem({
+        to: initialActiveItem,
+        immediate: true,
+      })
+      setActiveItem(initialActiveItem)
+    }
   })
   useEffect(() => {
     if (
@@ -901,7 +904,12 @@ function useSpringCarousel({
         }
       : {}),
   }
-
+  function handleCarouselFragmentRef(ref: HTMLDivElement | null) {
+    if (ref) {
+      carouselTrackWrapperRef.current = ref
+      adjustCarouselWrapperPosition(ref)
+    }
+  }
   function getInitialValues() {
     if (carouselSlideAxis === 'x') {
       return {
@@ -933,7 +941,7 @@ function useSpringCarousel({
           {...bindDrag()}
           className="use-spring-carousel-track-wrapper"
           data-testid="use-spring-carousel-animated-wrapper"
-          ref={carouselTrackWrapperRef}
+          ref={handleCarouselFragmentRef}
           style={{
             display: 'flex',
             position: 'relative',

@@ -3,7 +3,6 @@ import { SpringConfig } from 'react-spring'
 import { PrepareThumbsData, UseListenToCustomEvent } from './index'
 
 export type UseSpringCarouselBaseProps = {
-  withLoop?: boolean
   disableGestures?: boolean
   draggingSlideTreshold?: number
   springConfig?: SpringConfig
@@ -71,6 +70,10 @@ type UseSpringCarouselNumericSlideType = {
 
 type SlideTypes = UseSpringCarouselFluidType | UseSpringCarouselNumericSlideType
 
+/**
+ * Types based on gestures activation
+ */
+
 type DisableGesturesProps = {
   disableGestures?: true
   touchAction?: never
@@ -82,10 +85,25 @@ type EnableGesturesProps = {
 
 type Gestures = DisableGesturesProps | EnableGesturesProps
 
+/**
+ * Types based on loop functionality
+ */
+
+type WithLoopProps = {
+  withLoop?: true
+  initialStartingPosition?: 'start' | 'center' | 'end'
+}
+type WithNoLoop = {
+  withLoop?: false
+  initialStartingPosition?: never
+}
+
+type LoopProps = WithLoopProps | WithNoLoop
 export type UseSpringCarouselProps = UseSpringCarouselBaseProps &
   ThumbsProps &
   SlideTypes &
-  Gestures
+  Gestures &
+  LoopProps
 
 export type UseSpringCarouselWithThumbsReturnProps = {
   carouselFragment: ReactNode
