@@ -52,6 +52,7 @@ function useSpringCarousel({
     return items
   }
 
+  const isFirstMount = useRef(true)
   const slideActionType = useRef<SlideActionType>('initial')
   const internalItems = getItems()
   const activeItem = useRef(initialActiveItem)
@@ -149,7 +150,7 @@ function useSpringCarousel({
         } else {
           ref.style.left = '0px'
           ref.style.top = '0px'
-          if (_initialActiveItem) {
+          if (_initialActiveItem && isFirstMount.current) {
             ref.style[positionProperty] = `calc(-${_initialActiveItem} * 100%)`
           }
         }
@@ -831,6 +832,11 @@ function useSpringCarousel({
     }
   })
   useMount(() => {
+    isFirstMount.current = false
+    fluidTotalWrapperScrollValue.current = getFluidWrapperScrollValue()
+    initialWindowWidth.current = window.innerWidth
+    currentWindowWidth.current = window.innerWidth
+
     if (initialActiveItem > 0) {
       slideToItem({
         to: initialActiveItem,
@@ -853,10 +859,6 @@ function useSpringCarousel({
     }
   }, [initialActiveItem, items.length, slideToItem])
   useEffect(() => {
-    fluidTotalWrapperScrollValue.current = getFluidWrapperScrollValue()
-    initialWindowWidth.current = window.innerWidth
-    currentWindowWidth.current = window.innerWidth
-
     if (shouldResizeOnWindowResize) {
       window.addEventListener('resize', handleResize)
       return () => {
@@ -912,13 +914,15 @@ function useSpringCarousel({
       : {}),
   }
 
-  const handleCarouselFragmentRef = useCallback((ref: HTMLDivElement | null) => {
-    if (ref) {
-      carouselTrackWrapperRef.current = ref
-      adjustCarouselWrapperPosition(ref, initialActiveItem)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  const handleCarouselFragmentRef = useCallback(
+    (ref: HTMLDivElement | null) => {
+      if (ref) {
+        carouselTrackWrapperRef.current = ref
+        adjustCarouselWrapperPosition(ref, initialActiveItem)
+      }
+    },
+    [adjustCarouselWrapperPosition, initialActiveItem],
+  )
 
   const carouselFragment = (
     <UseSpringCarouselContext.Provider value={contextProps}>
