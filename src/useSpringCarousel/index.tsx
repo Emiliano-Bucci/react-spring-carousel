@@ -915,12 +915,14 @@ function useSpringCarousel({
         }
       : {}),
   }
-  function handleCarouselFragmentRef(ref: HTMLDivElement | null) {
+
+  const handleCarouselFragmentRef = useCallback((ref: HTMLDivElement | null) => {
     if (ref) {
       carouselTrackWrapperRef.current = ref
       adjustCarouselWrapperPosition(ref, initialActiveItem)
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const carouselFragment = (
     <UseSpringCarouselContext.Provider value={contextProps}>
