@@ -30,7 +30,14 @@ export function Development() {
       >
         <button onClick={slideToPrevItem}>prev</button>
         <SliderWrapper>{carouselFragment}</SliderWrapper>
-        <button onClick={slideToNextItem}>next</button>
+        <button
+          onClick={() => {
+            slideToNextItem()
+            setCount(p => p + 1)
+          }}
+        >
+          next
+        </button>
       </div>
     </div>
   )

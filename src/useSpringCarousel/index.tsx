@@ -857,7 +857,8 @@ function useSpringCarousel({
       })
       setActiveItem(initialActiveItem)
     }
-  }, [initialActiveItem, items.length, slideToItem])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialActiveItem, items.length])
   useEffect(() => {
     if (shouldResizeOnWindowResize) {
       window.addEventListener('resize', handleResize)
@@ -887,7 +888,8 @@ function useSpringCarousel({
     }
 
     prevItems.current = items
-  }, [_slideToItem, getFluidWrapperScrollValue, items])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getFluidWrapperScrollValue, items])
 
   const contextProps = {
     useListenToCustomEvent,
