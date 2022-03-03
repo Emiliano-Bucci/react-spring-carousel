@@ -868,7 +868,11 @@ function useSpringCarousel({
     }
     resize()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldResizeOnWindowResize, gutter, startEndGutter])
+  }, [shouldResizeOnWindowResize])
+  useEffect(() => {
+    resize()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gutter, startEndGutter])
   useEffect(() => {
     if (carouselTrackWrapperRef.current) {
       if (carouselSlideAxis === 'x') {

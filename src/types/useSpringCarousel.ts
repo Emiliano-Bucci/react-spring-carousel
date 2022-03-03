@@ -8,7 +8,6 @@ export type UseSpringCarouselBaseProps = {
   springConfig?: SpringConfig
   carouselSlideAxis?: 'x' | 'y'
   gutter?: number
-  startEndGutter?: number
   shouldResizeOnWindowResize?: boolean
 }
 
@@ -90,12 +89,14 @@ type Gestures = DisableGesturesProps | EnableGesturesProps
  */
 
 type WithLoopProps = {
-  withLoop?: true
+  withLoop: true
   initialStartingPosition?: 'start' | 'center' | 'end'
+  startEndGutter?: number
 }
 type WithNoLoop = {
   withLoop?: false
   initialStartingPosition?: never
+  startEndGutter?: never
 }
 
 type LoopProps = WithLoopProps | WithNoLoop
