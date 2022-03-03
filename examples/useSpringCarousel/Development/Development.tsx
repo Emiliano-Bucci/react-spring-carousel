@@ -3,6 +3,7 @@ import { mockedItems } from '../mocked-data'
 import { SliderItem } from 'examples/components/SliderItem/SliderItem'
 import { SliderWrapper } from 'examples/components/SliderWrapper/SliderWrapper'
 import { css } from '@emotion/react'
+import { useState } from 'react'
 
 const items = mockedItems.map(({ id, label, ...rest }) => ({
   id,
@@ -10,9 +11,9 @@ const items = mockedItems.map(({ id, label, ...rest }) => ({
 }))
 
 export function Development() {
+  const [s, ss] = useState(false)
   const { carouselFragment, slideToNextItem, slideToPrevItem } = useSpringCarousel({
-    items,
-    initialActiveItem: 3,
+    items: s ? items.filter((i, indx) => indx > 2) : items,
   })
 
   return (
@@ -33,7 +34,7 @@ export function Development() {
         <button
           onClick={() => {
             slideToNextItem()
-            setCount(p => p + 1)
+            ss(p => !p)
           }}
         >
           next

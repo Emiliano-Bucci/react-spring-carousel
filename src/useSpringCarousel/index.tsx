@@ -858,7 +858,7 @@ function useSpringCarousel({
       setActiveItem(initialActiveItem)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialActiveItem, items.length])
+  }, [initialActiveItem])
   useEffect(() => {
     if (shouldResizeOnWindowResize) {
       window.addEventListener('resize', handleResize)
