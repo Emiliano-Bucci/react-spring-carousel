@@ -37,7 +37,7 @@ export function Development() {
         <button
           onClick={() => {
             // slideToNextItem()
-            ss(p => p + 16)
+            ss(Math.random() * 100)
           }}
         >
           next

@@ -927,7 +927,8 @@ function useSpringCarousel({
         adjustCarouselWrapperPosition(ref, initialActiveItem)
       }
     },
-    [adjustCarouselWrapperPosition, initialActiveItem],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [initialActiveItem],
   )
 
   const carouselFragment = (
