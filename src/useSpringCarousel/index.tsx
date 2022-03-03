@@ -866,13 +866,12 @@ function useSpringCarousel({
         window.removeEventListener('resize', handleResize)
       }
     }
-    resize()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldResizeOnWindowResize])
   useEffect(() => {
     resize()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gutter, startEndGutter])
+  }, [gutter, startEndGutter, initialActiveItem, initialStartingPosition])
   useEffect(() => {
     if (carouselTrackWrapperRef.current) {
       if (carouselSlideAxis === 'x') {
@@ -928,7 +927,7 @@ function useSpringCarousel({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [initialActiveItem],
+    [],
   )
 
   const carouselFragment = (
