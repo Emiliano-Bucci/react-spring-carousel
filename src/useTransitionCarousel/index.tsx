@@ -310,10 +310,11 @@ function useTransitionCarousel({
           eventName: 'onSlideStartChange',
           slideActionType: getSlideActionType(),
           nextItem: {
-            index: activeItem - 1,
-            id: items[activeItem - 1].id,
+            index: items.length - 1,
+            id: items[items.length - 1].id,
           },
         })
+
         setActiveItem(items.length - 1)
       } else {
         emitObservable({
