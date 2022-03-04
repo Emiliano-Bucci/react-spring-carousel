@@ -37,26 +37,24 @@ function useTransitionCarousel({
   toNextItemSpringProps,
   disableGestures = false,
   CustomThumbsWrapperComponent,
+  trail,
+  exitBeforeEnter = false,
   springAnimationProps = {
     initial: {
       opacity: 1,
-      position: 'relative',
-      zIndex: 0,
+      position: 'absolute',
     },
     from: {
       opacity: 0,
       position: 'absolute',
-      zIndex: 0,
     },
     enter: {
       opacity: 1,
-      position: 'relative',
-      zIndex: 1000,
+      position: 'absolute',
     },
     leave: {
-      position: 'absolute',
       opacity: 0,
-      zIndex: 0,
+      position: 'absolute',
     },
   },
 }: UseTransitionCarouselProps) {
@@ -175,7 +173,9 @@ function useTransitionCarousel({
     config: springConfig,
     ...getTransitionConfig(),
     onStart: () => setIsAnimating(true),
-    keys: null,
+    trail,
+    exitBeforeEnter,
+    key: items[activeItem].id,
     onRest: val => {
       if (val.finished) {
         setIsAnimating(false)

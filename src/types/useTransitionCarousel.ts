@@ -19,10 +19,13 @@ export type UseTransitionCarouselProps = UseSpringCarouselBaseProps &
     toNextItemSpringProps?: SpringAnimationProps
     springAnimationProps?: SpringAnimationProps
     withLoop?: boolean
+    exitBeforeEnter?: boolean
+    trail?: number
   }
 
 export type UseTransitionCarouselContextProps = {
   useListenToCustomEvent: UseListenToCustomEvent
+  activeItem: number
   getIsFullscreen(): boolean
   getIsPrevItem(id: string): boolean
   getIsNextItem(id: string): boolean
@@ -37,5 +40,4 @@ export type UseTransitionCarouselContextProps = {
     id: string
     index: number
   }
-  activeItem: number
 }
