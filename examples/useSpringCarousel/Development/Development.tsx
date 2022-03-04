@@ -10,10 +10,9 @@ const items = mockedItems.map(({ id, label, ...rest }) => ({
 }))
 
 export function Development() {
-  const { carouselFragment, slideToPrevItem, slideToNextItem, enterFullscreen } =
-    useSpringCarousel({
-      items,
-    })
+  const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
+    items,
+  })
 
   return (
     <div
@@ -30,13 +29,7 @@ export function Development() {
       >
         <button onClick={slideToPrevItem}>prev</button>
         <SliderWrapper>{carouselFragment}</SliderWrapper>
-        <button
-          onClick={() => {
-            enterFullscreen()
-          }}
-        >
-          next
-        </button>
+        <button onClick={slideToNextItem}>next</button>
       </div>
     </div>
   )

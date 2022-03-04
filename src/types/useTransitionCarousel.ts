@@ -18,6 +18,7 @@ export type UseTransitionCarouselProps = UseSpringCarouselBaseProps &
     toPrevItemSpringProps?: SpringAnimationProps
     toNextItemSpringProps?: SpringAnimationProps
     springAnimationProps?: SpringAnimationProps
+    withLoop?: boolean
   }
 
 export type UseTransitionCarouselContextProps = {

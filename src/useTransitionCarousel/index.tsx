@@ -41,18 +41,22 @@ function useTransitionCarousel({
     initial: {
       opacity: 1,
       position: 'relative',
+      zIndex: 0,
     },
     from: {
       opacity: 0,
       position: 'absolute',
+      zIndex: 0,
     },
     enter: {
       opacity: 1,
       position: 'relative',
+      zIndex: 1000,
     },
     leave: {
-      opacity: 0,
       position: 'absolute',
+      opacity: 0,
+      zIndex: 0,
     },
   },
 }: UseTransitionCarouselProps) {
