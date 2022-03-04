@@ -21,7 +21,7 @@ const UseSpringCarouselContext = createContext<
 function useSpringCarousel({
   items,
   withLoop = false,
-  draggingSlideTreshold = 140,
+  draggingSlideTreshold,
   springConfig = config.default,
   shouldResizeOnWindowResize = true,
   withThumbs = false,
@@ -289,14 +289,20 @@ function useSpringCarousel({
     }
     return false
   }
+  function getDraggingSlideTreshold() {
+    if (draggingSlideTreshold) {
+      return draggingSlideTreshold
+    }
+    return Math.floor(getSlideValue() / 2)
+  }
 
   const bindDrag = useDrag(
     props => {
       const isDragging = props.dragging
       const movement = props.offset[carouselSlideAxis === 'x' ? 0 : 1]
       const currentMovement = props.movement[carouselSlideAxis === 'x' ? 0 : 1]
-      const prevItemTreshold = currentMovement > draggingSlideTreshold
-      const nextItemTreshold = currentMovement < -draggingSlideTreshold
+      const prevItemTreshold = currentMovement > getDraggingSlideTreshold()
+      const nextItemTreshold = currentMovement < -getDraggingSlideTreshold()
       const direction = props.direction[carouselSlideAxis === 'x' ? 0 : 1]
       function cancelDrag() {
         props.cancel()
@@ -795,10 +801,10 @@ function useSpringCarousel({
   }
   // Perform some check on first mount
   useIsomorphicMount(() => {
-    if (draggingSlideTreshold < 0) {
+    if (getDraggingSlideTreshold() < 0) {
       throw new Error('draggingSlideTreshold must be greater than 0')
     }
-    if (draggingSlideTreshold > getSlideValue() / 2) {
+    if (getDraggingSlideTreshold() > getSlideValue() / 2) {
       throw new Error(
         `draggingSlideTreshold must be equal or less than the half of the width of an item, which is ${Math.floor(
           getSlideValue() / 2,
