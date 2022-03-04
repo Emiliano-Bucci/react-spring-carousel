@@ -5,7 +5,7 @@ type Callback = () => void | (() => void)
 const useIsomorphicLayoutEffect =
   typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
-export function useIsomorphicMount(callback: Callback) {
+function useIsomorphicMount(callback: Callback) {
   const isMounted = useRef(false)
 
   useIsomorphicLayoutEffect(() => {
@@ -20,3 +20,5 @@ export function useIsomorphicMount(callback: Callback) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 }
+
+export { useIsomorphicLayoutEffect, useIsomorphicMount }
