@@ -283,7 +283,7 @@ function useSpringCarousel({
   const { enterFullscreen, exitFullscreen, getIsFullscreen } = useFullscreenModule({
     mainCarouselWrapperRef,
     emitObservable,
-    handleResize,
+    handleResize: resize,
   })
   const { thumbsFragment: _thumbsFragment, handleThumbsScroll } = useThumbsModule({
     withThumbs,
