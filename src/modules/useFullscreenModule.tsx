@@ -1,6 +1,7 @@
-import { useRef, MutableRefObject, useEffect } from 'react'
+import { useRef, MutableRefObject } from 'react'
 import screenfull from 'screenfull'
 import { EmitObservableFn } from '../types'
+import { useIsomorphicMount } from '../utils'
 
 type FullscreenModule = {
   mainCarouselWrapperRef: MutableRefObject<HTMLDivElement | null>
@@ -15,7 +16,7 @@ export function useFullscreenModule({
 }: FullscreenModule) {
   const isFullscreen = useRef(false)
 
-  useEffect(() => {
+  useIsomorphicMount(() => {
     function handleFullscreenChange() {
       if (document.fullscreenElement) {
         setIsFullscreen(true)

@@ -7,7 +7,7 @@ import {
   SlideActionType,
   UseSpringDafaultTypeReturnProps,
 } from '../types'
-import { useMount } from '../utils'
+import { useIsomorphicMount } from '../utils'
 import {
   UseSpringCarouselProps,
   ReactSpringCarouselItemWithThumbs,
@@ -793,9 +793,18 @@ function useSpringCarousel({
     }
     return touchAction
   }
-
   // Perform some check on first mount
-  useMount(() => {
+  useIsomorphicMount(() => {
+    if (draggingSlideTreshold < 0) {
+      throw new Error('draggingSlideTreshold must be greater than 0')
+    }
+    if (draggingSlideTreshold > getSlideValue() / 2) {
+      throw new Error(
+        `draggingSlideTreshold must be equal or less than the half of the width of an item, which is ${Math.floor(
+          getSlideValue() / 2,
+        )}`,
+      )
+    }
     if (itemsPerSlide < 1) {
       throw new Error(`The itemsPerSlide prop can't be less than 1.`)
     }
@@ -818,7 +827,7 @@ function useSpringCarousel({
       )
     }
   })
-  useMount(() => {
+  useIsomorphicMount(() => {
     function handleVisibilityChange() {
       if (document.hidden) {
         windowIsHidden.current = true
@@ -831,7 +840,7 @@ function useSpringCarousel({
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   })
-  useMount(() => {
+  useIsomorphicMount(() => {
     isFirstMount.current = false
     fluidTotalWrapperScrollValue.current = getFluidWrapperScrollValue()
     initialWindowWidth.current = window.innerWidth
@@ -849,6 +858,7 @@ function useSpringCarousel({
       }
     }
   })
+
   useEffect(() => {
     if (initialActiveItem < items.length && initialActiveItem !== activeItem.current) {
       slideToItem({
@@ -871,7 +881,7 @@ function useSpringCarousel({
   useEffect(() => {
     resize()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gutter, startEndGutter, initialActiveItem, initialStartingPosition])
+  }, [gutter, startEndGutter, initialActiveItem, initialStartingPosition, itemsPerSlide])
   useEffect(() => {
     if (carouselTrackWrapperRef.current) {
       if (carouselSlideAxis === 'x') {

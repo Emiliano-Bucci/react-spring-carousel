@@ -1,11 +1,14 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useLayoutEffect, useEffect } from 'react'
 
 type Callback = () => void | (() => void)
 
-export function useMount(callback: Callback) {
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
+export function useIsomorphicMount(callback: Callback) {
   const isMounted = useRef(false)
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!isMounted.current) {
       const clean = callback()
       isMounted.current = true

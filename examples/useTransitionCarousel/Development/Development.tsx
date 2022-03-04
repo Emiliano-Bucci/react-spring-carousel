@@ -1,4 +1,4 @@
-import { useSpringCarousel } from 'src'
+import { useTransitionCarousel } from 'src'
 import { mockedItems } from '../mocked-data'
 import { SliderItem } from 'examples/components/SliderItem/SliderItem'
 import { SliderWrapper } from 'examples/components/SliderWrapper/SliderWrapper'
@@ -10,9 +10,8 @@ const items = mockedItems.map(({ id, label, ...rest }) => ({
 }))
 
 export function Development() {
-  const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
+  const { carouselFragment, slideToPrevItem, slideToNextItem } = useTransitionCarousel({
     items,
-    draggingSlideTreshold: 0,
   })
 
   return (

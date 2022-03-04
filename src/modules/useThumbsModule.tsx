@@ -1,6 +1,6 @@
 import { forwardRef, HTMLAttributes, useRef } from 'react'
 import { useSpring, SpringConfig, animated } from 'react-spring'
-import { useMount } from 'src/utils'
+import { useIsomorphicMount } from 'src/utils'
 import { UseSpringCarouselProps, SlideActionType } from '../types'
 import { ReactSpringCarouselItemWithThumbs } from '../types/useSpringCarousel'
 import { PrepareThumbsData } from '../types/index'
@@ -60,7 +60,7 @@ export function useThumbsModule({
     },
   }))
 
-  useMount(() => {
+  useIsomorphicMount(() => {
     if (withThumbs && !internalThumbsWrapperRef.current) {
       throw new Error(
         "The thumbs wrapper is not defined. If you've passed a Functional component, be sure to wrap your component in forwardRef.",
