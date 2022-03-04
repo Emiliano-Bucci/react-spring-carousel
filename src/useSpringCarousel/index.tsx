@@ -1,4 +1,4 @@
-import { useRef, createContext, useCallback, useContext } from 'react'
+import { useRef, createContext, useContext } from 'react'
 import { useSpring, config, animated } from 'react-spring'
 import { useDrag } from '@use-gesture/react'
 import { useCustomEventsModule, useFullscreenModule, useThumbsModule } from '../modules'
@@ -78,6 +78,7 @@ function useSpringCarousel({
   const startEndGutterRef = useRef(startEndGutter)
   const initialActiveItemRef = useRef(initialActiveItem)
   const initialStartingPositionRef = useRef(initialStartingPosition)
+  const carouselSlideAxisRef = useRef(carouselSlideAxis)
 
   /**
    * Update inner values during external rerenders!
@@ -87,6 +88,20 @@ function useSpringCarousel({
   startEndGutterRef.current = startEndGutter
   initialActiveItemRef.current = initialActiveItem
   initialStartingPositionRef.current = initialStartingPosition
+  carouselSlideAxisRef.current = carouselSlideAxis
+
+  const [carouselStyles, setCarouselStyles] = useSpring(() => ({
+    y: 0,
+    x: 0,
+    config: springConfig,
+    onChange: ({ value }) => {
+      if (mainCarouselWrapperRef.current && freeScroll) {
+        mainCarouselWrapperRef.current[
+          carouselSlideAxisRef.current === 'x' ? 'scrollLeft' : 'scrollTop'
+        ] = Math.abs(value[carouselSlideAxisRef.current])
+      }
+    },
+  }))
 
   useIsomorphicLayoutEffect(() => {
     if (draggingSlideTreshold) {
@@ -103,64 +118,54 @@ function useSpringCarousel({
     startEndGutter,
     initialActiveItem,
     initialStartingPosition,
+    carouselSlideAxis,
+    thumbsSlideAxis,
   ])
 
-  const [carouselStyles, setCarouselStyles] = useSpring(() => ({
-    y: 0,
-    x: 0,
-    config: springConfig,
-    onChange: ({ value }) => {
-      if (mainCarouselWrapperRef.current && freeScroll) {
-        mainCarouselWrapperRef.current[
-          carouselSlideAxis === 'x' ? 'scrollLeft' : 'scrollTop'
-        ] = Math.abs(value[carouselSlideAxis])
-      }
-    },
-  }))
   function getCarouselItem() {
     return carouselTrackWrapperRef.current?.querySelector('.use-spring-carousel-item')
   }
-  const getMainCarouselWrapperWidth = useCallback(() => {
+  function getMainCarouselWrapperWidth() {
     if (!mainCarouselWrapperRef.current) {
       throw new Error('mainCarouselWrapperRef is not available')
     }
     return mainCarouselWrapperRef.current.getBoundingClientRect()[
-      carouselSlideAxis === 'x' ? 'width' : 'height'
+      carouselSlideAxisRef.current === 'x' ? 'width' : 'height'
     ]
-  }, [carouselSlideAxis])
-  const getCarouselItemWidth = useCallback(() => {
+  }
+  function getCarouselItemWidth() {
     const carouselItem = getCarouselItem()
     if (!carouselItem) {
       throw Error('No carousel items available!')
     }
     return (
       carouselItem.getBoundingClientRect()[
-        carouselSlideAxis === 'x' ? 'width' : 'height'
+        carouselSlideAxisRef.current === 'x' ? 'width' : 'height'
       ] + gutterRef.current
     )
-  }, [carouselSlideAxis])
-  const getCurrentSlidedValue = useCallback(() => {
-    return carouselStyles[carouselSlideAxis].get()
-  }, [carouselSlideAxis, carouselStyles])
-  const getIfItemsNotFillTheCarousel = useCallback(() => {
+  }
+  function getCurrentSlidedValue() {
+    return carouselStyles[carouselSlideAxisRef.current].get()
+  }
+  function getIfItemsNotFillTheCarousel() {
     return getCarouselItemWidth() * items.length < getMainCarouselWrapperWidth()
-  }, [getCarouselItemWidth, getMainCarouselWrapperWidth, items.length])
-  const getFluidWrapperScrollValue = useCallback(() => {
+  }
+  function getFluidWrapperScrollValue() {
     return Math.round(
       Number(
         carouselTrackWrapperRef.current?.[
-          carouselSlideAxis === 'x' ? 'scrollWidth' : 'scrollHeight'
+          carouselSlideAxisRef.current === 'x' ? 'scrollWidth' : 'scrollHeight'
         ],
       ) -
         carouselTrackWrapperRef.current!.getBoundingClientRect()[
-          carouselSlideAxis === 'x' ? 'width' : 'height'
+          carouselSlideAxisRef.current === 'x' ? 'width' : 'height'
         ],
     )
-  }, [carouselSlideAxis])
-  const getIsFirstItem = useCallback(() => {
+  }
+  function getIsFirstItem() {
     return getCurrentActiveItem() === 0
-  }, [])
-  const getSlideValue = useCallback(() => {
+  }
+  function getSlideValue() {
     if (!carouselTrackWrapperRef.current) {
       return 0
     }
@@ -173,12 +178,12 @@ function useSpringCarousel({
       return slideAmount
     }
     return itemVal
-  }, [getCarouselItemWidth, slideType, slideAmount])
-  const adjustCarouselWrapperPosition = (
+  }
+  function adjustCarouselWrapperPosition(
     ref: HTMLDivElement,
     _initialActiveItem?: number,
-  ) => {
-    const positionProperty = carouselSlideAxis === 'x' ? 'left' : 'top'
+  ) {
+    const positionProperty = carouselSlideAxisRef.current === 'x' ? 'left' : 'top'
     function getDefaultPositionValue() {
       return getCarouselItemWidth() * items.length
     }
@@ -235,14 +240,14 @@ function useSpringCarousel({
     }
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const resize = () => {
+  function resize() {
     currentWindowWidth.current = window.innerWidth
 
     if (slideType === 'fluid') {
       if (getIfItemsNotFillTheCarousel()) {
         setCarouselStyles.start({
           immediate: true,
-          [carouselSlideAxis]: 0,
+          [carouselSlideAxisRef.current]: 0,
         })
         return
       }
@@ -252,7 +257,7 @@ function useSpringCarousel({
         const nextValue = -fluidTotalWrapperScrollValue.current
         setCarouselStyles.start({
           immediate: true,
-          [carouselSlideAxis]: nextValue,
+          [carouselSlideAxisRef.current]: nextValue,
         })
       }
 
@@ -260,14 +265,14 @@ function useSpringCarousel({
     } else {
       setCarouselStyles.start({
         immediate: true,
-        [carouselSlideAxis]: -(getSlideValue() * getCurrentActiveItem()),
+        [carouselSlideAxisRef.current]: -(getSlideValue() * getCurrentActiveItem()),
       })
     }
 
     fluidTotalWrapperScrollValue.current = getFluidWrapperScrollValue()
     adjustCarouselWrapperPosition(carouselTrackWrapperRef.current!)
   }
-  const handleResize = () => {
+  function handleResize() {
     if (window.innerWidth === currentWindowWidth.current || freeScroll) {
       return
     }
@@ -297,7 +302,7 @@ function useSpringCarousel({
       throw new Error('Missing mainCarouselWrapperRef.current')
     }
     return mainCarouselWrapperRef.current[
-      carouselSlideAxis === 'x' ? 'scrollLeft' : 'scrollTop'
+      carouselSlideAxisRef.current === 'x' ? 'scrollLeft' : 'scrollTop'
     ]
   }
   function getIfShouldEnableFluidDrag() {
@@ -312,11 +317,11 @@ function useSpringCarousel({
   const bindDrag = useDrag(
     props => {
       const isDragging = props.dragging
-      const movement = props.offset[carouselSlideAxis === 'x' ? 0 : 1]
-      const currentMovement = props.movement[carouselSlideAxis === 'x' ? 0 : 1]
+      const movement = props.offset[carouselSlideAxisRef.current === 'x' ? 0 : 1]
+      const currentMovement = props.movement[carouselSlideAxisRef.current === 'x' ? 0 : 1]
       const prevItemTreshold = currentMovement > draggingSlideTresholdRef.current
       const nextItemTreshold = currentMovement < -draggingSlideTresholdRef.current
-      const direction = props.direction[carouselSlideAxis === 'x' ? 0 : 1]
+      const direction = props.direction[carouselSlideAxisRef.current === 'x' ? 0 : 1]
       function cancelDrag() {
         props.cancel()
       }
@@ -327,20 +332,20 @@ function useSpringCarousel({
             (getIsFirstItem() && getSlideActionType() === 'prev')
           ) {
             setCarouselStyles.start({
-              [carouselSlideAxis]: 0,
+              [carouselSlideAxisRef.current]: 0,
             })
           } else if (slideEndReached.current && getSlideActionType() === 'next') {
             setCarouselStyles.start({
-              [carouselSlideAxis]: -fluidTotalWrapperScrollValue.current,
+              [carouselSlideAxisRef.current]: -fluidTotalWrapperScrollValue.current,
             })
           } else {
             setCarouselStyles.start({
-              [carouselSlideAxis]: prevSlidedValue.current,
+              [carouselSlideAxisRef.current]: prevSlidedValue.current,
             })
           }
         } else {
           setCarouselStyles.start({
-            [carouselSlideAxis]: -(getCurrentActiveItem() * getSlideValue()),
+            [carouselSlideAxisRef.current]: -(getCurrentActiveItem() * getSlideValue()),
           })
         }
       }
@@ -380,10 +385,10 @@ function useSpringCarousel({
             } else {
               setCarouselStyles.start({
                 from: {
-                  [carouselSlideAxis]: getWrapperScrollDirection(),
+                  [carouselSlideAxisRef.current]: getWrapperScrollDirection(),
                 },
                 to: {
-                  [carouselSlideAxis]: -movement,
+                  [carouselSlideAxisRef.current]: -movement,
                 },
               })
             }
@@ -391,7 +396,7 @@ function useSpringCarousel({
           return
         } else {
           setCarouselStyles.start({
-            [carouselSlideAxis]: movement,
+            [carouselSlideAxisRef.current]: movement,
           })
         }
 
@@ -410,7 +415,7 @@ function useSpringCarousel({
           slideEndReached.current = false
           cancelDrag()
           setCarouselStyles.start({
-            [carouselSlideAxis]: -fluidTotalWrapperScrollValue.current,
+            [carouselSlideAxisRef.current]: -fluidTotalWrapperScrollValue.current,
           })
         } else if (nextItemTreshold) {
           cancelDrag()
@@ -446,7 +451,7 @@ function useSpringCarousel({
       enabled: !disableGestures,
       from: () => {
         if (freeScroll) {
-          if (carouselSlideAxis === 'x') {
+          if (carouselSlideAxisRef.current === 'x') {
             return [-getWrapperScrollDirection(), 0]
           }
           return [0, -getWrapperScrollDirection()]
@@ -517,7 +522,7 @@ function useSpringCarousel({
     if (typeof from === 'number') {
       return {
         from: {
-          [carouselSlideAxis]: from,
+          [carouselSlideAxisRef.current]: from,
         },
       }
     }
@@ -529,14 +534,14 @@ function useSpringCarousel({
   ) {
     if (typeof customTo === 'number') {
       return {
-        [carouselSlideAxis]: customTo,
+        [carouselSlideAxisRef.current]: customTo,
       }
     }
     if (typeof to !== 'number') {
       throw new Error(`to values is not a number!`)
     }
     return {
-      [carouselSlideAxis]: -(getSlideValue() * to!),
+      [carouselSlideAxisRef.current]: -(getSlideValue() * to!),
     }
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -757,7 +762,7 @@ function useSpringCarousel({
   function getItemStyles(_itemsPerSlide: number) {
     if (slideType === 'fixed') {
       return {
-        ...(carouselSlideAxis === 'x'
+        ...(carouselSlideAxisRef.current === 'x'
           ? { marginRight: `${gutterRef.current}px` }
           : { marginBottom: `${gutterRef.current}px` }),
         flex: `1 0 calc(100% / ${_itemsPerSlide} - ${
@@ -766,7 +771,7 @@ function useSpringCarousel({
       }
     }
     return {
-      ...(carouselSlideAxis === 'x'
+      ...(carouselSlideAxisRef.current === 'x'
         ? { marginRight: `${gutterRef.current}px` }
         : { marginBottom: `${gutterRef.current}px` }),
     }
@@ -774,13 +779,13 @@ function useSpringCarousel({
   function getAnimatedWrapperStyles() {
     const percentValue = `calc(100% - ${startEndGutterRef.current * 2}px)`
     return {
-      width: carouselSlideAxis === 'x' ? percentValue : '100%',
-      height: carouselSlideAxis === 'y' ? percentValue : '100%',
+      width: carouselSlideAxisRef.current === 'x' ? percentValue : '100%',
+      height: carouselSlideAxisRef.current === 'y' ? percentValue : '100%',
     }
   }
   function getOverflowStyles() {
     if (freeScroll) {
-      if (carouselSlideAxis === 'x') {
+      if (carouselSlideAxisRef.current === 'x') {
         return {
           overflowX: 'auto',
         }
@@ -795,7 +800,7 @@ function useSpringCarousel({
     if (freeScroll) {
       return {
         onWheel() {
-          carouselStyles[carouselSlideAxis].stop()
+          carouselStyles[carouselSlideAxisRef.current].stop()
         },
       }
     }
@@ -805,7 +810,7 @@ function useSpringCarousel({
     if (disableGestures) {
       return 'unset'
     } else if (!touchAction) {
-      if (carouselSlideAxis === 'x') {
+      if (carouselSlideAxisRef.current === 'x') {
         return 'pan-y'
       }
       return 'pan-x'
@@ -901,10 +906,10 @@ function useSpringCarousel({
   }, [shouldResizeOnWindowResize])
   useIsomorphicLayoutEffect(() => {
     if (carouselTrackWrapperRef.current) {
-      if (carouselSlideAxis === 'x') {
+      if (carouselSlideAxisRef.current === 'x') {
         carouselTrackWrapperRef.current.style.top = '0px'
       }
-      if (carouselSlideAxis === 'y') {
+      if (carouselSlideAxisRef.current === 'y') {
         carouselTrackWrapperRef.current.style.left = '0px'
       }
     }
@@ -979,7 +984,7 @@ function useSpringCarousel({
             display: 'flex',
             position: 'relative',
             touchAction: getTouchAction(),
-            flexDirection: carouselSlideAxis === 'x' ? 'row' : 'column',
+            flexDirection: carouselSlideAxisRef.current === 'x' ? 'row' : 'column',
             ...getAnimatedWrapperStyles(),
             ...(freeScroll ? {} : carouselStyles),
           }}
