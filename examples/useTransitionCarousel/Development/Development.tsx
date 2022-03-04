@@ -12,7 +12,6 @@ const items = mockedItems.map(({ id, label, ...rest }) => ({
 export function Development() {
   const { carouselFragment, slideToPrevItem, slideToNextItem } = useTransitionCarousel({
     items,
-    withLoop: true,
   })
 
   return (

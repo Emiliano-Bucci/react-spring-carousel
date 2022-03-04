@@ -24,7 +24,7 @@ export type UseTransitionCarouselProps = UseSpringCarouselBaseProps &
   }
 
 export type UseTransitionCarouselContextProps = {
-  useListenToCustomEvent: UseListenToCustomEvent
+  useListenToCustomEvent: UseListenToCustomEvent<'use-transition'>
   activeItem: number
   getIsFullscreen(): boolean
   getIsPrevItem(id: string): boolean

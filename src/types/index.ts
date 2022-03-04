@@ -51,27 +51,25 @@ type OnRightSwipe = {
   eventName: 'onRightSwipe'
 }
 
-export type EmitObservableFn = (
-  data:
-    | OnSlideStartChange
-    | OnSlideChange
-    | OnDrag
-    | OnFullscreenChange
-    | OnLeftSwipe
-    | OnRightSwipe,
-) => void
-
-export type EventsObservableProps =
+export type UseSpringCarouselEventsObservableProps =
   | OnSlideStartChange
   | OnSlideChange
   | OnDrag
   | OnFullscreenChange
+export type UseTransitionCarouselEventsObservableProps =
+  | OnSlideStartChange
+  | OnSlideChange
+  | OnFullscreenChange
   | OnLeftSwipe
   | OnRightSwipe
 
-export type ObservableCallbackFn = (data: EventsObservableProps) => void
+type CombinedProps<T> = T extends 'use-spring'
+  ? UseSpringCarouselEventsObservableProps
+  : UseTransitionCarouselEventsObservableProps
+export type EmitObservableFn<T> = (data: CombinedProps<T>) => void
+export type ObservableCallbackFn<T> = (data: CombinedProps<T>) => void
 
-export type UseListenToCustomEvent = (fn: ObservableCallbackFn) => void
+export type UseListenToCustomEvent<T> = (fn: ObservableCallbackFn<T>) => void
 
 export * from './useSpringCarousel'
 export * from './useTransitionCarousel'

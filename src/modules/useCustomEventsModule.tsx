@@ -1,18 +1,29 @@
 import { useEffect, useRef } from 'react'
 import { Subject } from 'rxjs'
-import { EventsObservableProps, ObservableCallbackFn, EmitObservableFn } from '../types'
+import {
+  UseSpringCarouselEventsObservableProps,
+  UseTransitionCarouselEventsObservableProps,
+  ObservableCallbackFn,
+  EmitObservableFn,
+} from '../types'
 
-export function useCustomEventsModule() {
-  const eventsObserverRef = useRef(new Subject<EventsObservableProps>())
+export function useCustomEventsModule<T>() {
+  const eventsObserverRef = useRef(
+    new Subject<
+      T extends 'use-spring'
+        ? UseSpringCarouselEventsObservableProps
+        : UseTransitionCarouselEventsObservableProps
+    >(),
+  )
 
-  function useListenToCustomEvent(fn: ObservableCallbackFn) {
+  function useListenToCustomEvent(fn: ObservableCallbackFn<T>) {
     useEffect(() => {
       const subscribe = eventsObserverRef.current.subscribe(fn)
       return () => subscribe.unsubscribe()
     }, [fn])
   }
 
-  const emitObservable: EmitObservableFn = data => {
+  const emitObservable: EmitObservableFn<T> = data => {
     eventsObserverRef.current.next(data)
   }
 

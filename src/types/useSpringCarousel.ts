@@ -109,7 +109,7 @@ export type UseSpringCarouselProps = UseSpringCarouselBaseProps &
 export type UseSpringCarouselWithThumbsReturnProps = {
   carouselFragment: ReactNode
   thumbsFragment: ReactNode
-  useListenToCustomEvent: UseListenToCustomEvent
+  useListenToCustomEvent: UseListenToCustomEvent<'use-spring'>
   getIsFullscreen(): boolean
   getIsPrevItem(id: string): boolean
   getIsNextItem(id: string): boolean
@@ -123,7 +123,7 @@ export type UseSpringCarouselWithThumbsReturnProps = {
 
 export type UseSpringDafaultTypeReturnProps = {
   carouselFragment: ReactNode
-  useListenToCustomEvent: UseListenToCustomEvent
+  useListenToCustomEvent: UseListenToCustomEvent<'use-spring'>
   getIsFullscreen(): boolean
   getIsPrevItem(id: string): boolean
   getIsNextItem(id: string): boolean

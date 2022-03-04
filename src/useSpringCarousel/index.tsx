@@ -279,11 +279,11 @@ function useSpringCarousel({
     resize()
   }
   // Custom modules
-  const { useListenToCustomEvent, emitObservable } = useCustomEventsModule()
+  const { useListenToCustomEvent, emitObservable } = useCustomEventsModule<'use-spring'>()
   const { enterFullscreen, exitFullscreen, getIsFullscreen } = useFullscreenModule({
     mainCarouselWrapperRef,
     emitObservable,
-    handleResize: resize,
+    handleResize,
   })
   const { thumbsFragment: _thumbsFragment, handleThumbsScroll } = useThumbsModule({
     withThumbs,

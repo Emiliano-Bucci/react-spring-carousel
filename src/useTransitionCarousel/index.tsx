@@ -63,7 +63,8 @@ function useTransitionCarousel({
   const isAnimating = useRef(false)
   const [activeItem, setActiveItem] = useState(0)
 
-  const { emitObservable, useListenToCustomEvent } = useCustomEventsModule()
+  const { emitObservable, useListenToCustomEvent } =
+    useCustomEventsModule<'use-transition'>()
   const { enterFullscreen, exitFullscreen, getIsFullscreen } = useFullscreenModule({
     emitObservable,
     mainCarouselWrapperRef,
