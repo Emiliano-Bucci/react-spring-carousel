@@ -53,7 +53,7 @@ function useSpringCarousel({
   }
 
   const isFirstMount = useRef(true)
-  const slideActionType = useRef<SlideActionType>('initial')
+  const slideActionType = useRef<SlideActionType>('initial' as SlideActionType)
   const internalItems = getItems()
   const activeItem = useRef(initialActiveItem)
   const mainCarouselWrapperRef = useRef<HTMLDivElement | null>(null)

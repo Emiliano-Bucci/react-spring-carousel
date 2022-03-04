@@ -14,7 +14,7 @@ export type SlideToItemFnProps = {
   onRest?(): void
 }
 
-export type SlideActionType = 'initial' | 'prev' | 'next'
+export type SlideActionType = 'prev' | 'next'
 
 type OnSlideStartChange = {
   eventName: 'onSlideStartChange'
