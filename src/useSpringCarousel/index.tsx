@@ -160,16 +160,15 @@ function useSpringCarousel({
       }
 
       if (slideType === 'fixed') {
-        function setCenterPosition() {
+        function setCenterPosition(i: number) {
           setPosition(
             getDefaultPositionValue() -
-              getSlideValue() * Math.round(((itemsPerSlide as number) - 1) / 2),
+              getSlideValue() * Math.round(((i as number) - 1) / 2),
           )
         }
-        function setEndPosition() {
+        function setEndPosition(i: number) {
           setPosition(
-            getDefaultPositionValue() -
-              getSlideValue() * Math.round((itemsPerSlide as number) - 1),
+            getDefaultPositionValue() - getSlideValue() * Math.round((i as number) - 1),
           )
         }
 
@@ -181,11 +180,11 @@ function useSpringCarousel({
               break
             }
             case 'center': {
-              setCenterPosition()
+              setCenterPosition(itemsPerSlide)
               break
             }
             case 'end': {
-              setEndPosition()
+              setEndPosition(itemsPerSlide)
               break
             }
           }
@@ -293,7 +292,7 @@ function useSpringCarousel({
     if (draggingSlideTreshold) {
       return draggingSlideTreshold
     }
-    return Math.floor(getSlideValue() / 2)
+    return Math.floor(getSlideValue() / 2 / 2)
   }
 
   const bindDrag = useDrag(
@@ -882,12 +881,17 @@ function useSpringCarousel({
         window.removeEventListener('resize', handleResize)
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldResizeOnWindowResize])
+  }, [handleResize, shouldResizeOnWindowResize])
   useEffect(() => {
     resize()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gutter, startEndGutter, initialActiveItem, initialStartingPosition, itemsPerSlide])
+  }, [
+    gutter,
+    startEndGutter,
+    initialActiveItem,
+    initialStartingPosition,
+    itemsPerSlide,
+    resize,
+  ])
   useEffect(() => {
     if (carouselTrackWrapperRef.current) {
       if (carouselSlideAxis === 'x') {
