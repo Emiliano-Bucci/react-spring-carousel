@@ -952,10 +952,32 @@ function useSpringCarousel({
   }
 
   const handleCarouselFragmentRef = (ref: HTMLDivElement | null) => {
-    itemsPerSlideRef.current = itemsPerSlide
     if (ref) {
       carouselTrackWrapperRef.current = ref
       adjustCarouselWrapperPosition(ref, initialActiveItemRef.current)
+    }
+  }
+
+  function getInitialStyles() {
+    const totalValue = (items.length / itemsPerSlide) * 100
+    const singleItemValue = 100 / itemsPerSlide
+    const cssProp = carouselSlideAxisRef.current === 'x' ? 'left' : 'y'
+    const quantityToMove = Math.floor(50 / singleItemValue)
+
+    if (slideType === 'fixed') {
+      if (initialStartingPositionRef.current === 'center') {
+        return {
+          [cssProp]: `calc(-${totalValue}% + ${singleItemValue * quantityToMove}%)`,
+        }
+      }
+      if (initialStartingPositionRef.current === 'end') {
+        return {
+          [cssProp]: `calc(-${totalValue}% + ${singleItemValue * (quantityToMove * 2)}%)`,
+        }
+      }
+    }
+    return {
+      [cssProp]: `0px`,
     }
   }
 
@@ -986,6 +1008,7 @@ function useSpringCarousel({
             touchAction: getTouchAction(),
             flexDirection: carouselSlideAxisRef.current === 'x' ? 'row' : 'column',
             ...getAnimatedWrapperStyles(),
+            ...getInitialStyles(),
             ...(freeScroll ? {} : carouselStyles),
           }}
         >
