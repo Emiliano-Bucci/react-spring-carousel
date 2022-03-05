@@ -37,7 +37,6 @@ function useSpringCarousel({
   touchAction,
   slideAmount,
   freeScroll = false,
-  CustomThumbsWrapperComponent,
   enableFreeScrollDrag,
   itemsPerSlide = 1,
   slideType = 'fixed',
@@ -294,7 +293,6 @@ function useSpringCarousel({
     slideType,
     getFluidWrapperScrollValue,
     getSlideValue,
-    CustomThumbsWrapperComponent,
   })
 
   function getWrapperScrollDirection() {

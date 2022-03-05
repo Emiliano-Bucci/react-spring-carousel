@@ -1,4 +1,4 @@
-import { forwardRef, HTMLAttributes, useRef } from 'react'
+import { useRef } from 'react'
 import { useSpring, SpringConfig, animated } from 'react-spring'
 import { useIsomorphicMount } from 'src/utils'
 import { UseSpringCarouselProps, SlideActionType } from '../types'
@@ -16,24 +16,9 @@ type Props = {
   thumbsSlideAxis: UseSpringCarouselProps['thumbsSlideAxis']
   springConfig: SpringConfig
   prepareThumbsData?: UseSpringCarouselProps['prepareThumbsData']
-  CustomThumbsWrapperComponent?: UseSpringCarouselProps['CustomThumbsWrapperComponent']
   getFluidWrapperScrollValue?(): number
   getSlideValue?(): number
 }
-
-type WrapperProps = {
-  children: React.ReactNode
-} & HTMLAttributes<HTMLDivElement>
-
-const InternalWrapper = forwardRef<HTMLDivElement, WrapperProps>(
-  ({ children, ...rest }, ref) => {
-    return (
-      <animated.div {...rest} ref={ref}>
-        {children}
-      </animated.div>
-    )
-  },
-)
 
 export function useThumbsModule({
   items,
@@ -43,7 +28,6 @@ export function useThumbsModule({
   prepareThumbsData,
   getFluidWrapperScrollValue = () => 0,
   getSlideValue = () => 0,
-  CustomThumbsWrapperComponent,
   slideType,
 }: Props) {
   const internalThumbsWrapperRef = useRef<HTMLDivElement | null>(null)
@@ -253,12 +237,8 @@ export function useThumbsModule({
     return getPreparedItems(items)
   }
 
-  const Wrapper = CustomThumbsWrapperComponent
-    ? animated(CustomThumbsWrapperComponent)
-    : InternalWrapper
-
   const thumbsFragment = withThumbs ? (
-    <Wrapper
+    <animated.div
       ref={internalThumbsWrapperRef}
       className="use-spring-carousel-thumbs-wrapper"
       onWheel={() => {
@@ -287,7 +267,7 @@ export function useThumbsModule({
           </div>
         )
       })}
-    </Wrapper>
+    </animated.div>
   ) : null
 
   return {

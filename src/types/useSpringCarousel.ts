@@ -1,4 +1,4 @@
-import { ReactNode, HTMLAttributes } from 'react'
+import { ReactNode } from 'react'
 import { SpringConfig } from 'react-spring'
 import { PrepareThumbsData, UseListenToCustomEvent } from './index'
 
@@ -30,7 +30,6 @@ type UseSpringCarouselWithThumbs = {
   thumbsSlideAxis?: 'x' | 'y'
   items: ReactSpringCarouselItemWithThumbs[]
   enableThumbsWrapperScroll?: boolean
-  CustomThumbsWrapperComponent?: React.FC<HTMLAttributes<HTMLElement>>
   prepareThumbsData?: PrepareThumbsData
 }
 type UseSpringCarouselWithNoThumbs = {
@@ -38,7 +37,6 @@ type UseSpringCarouselWithNoThumbs = {
   thumbsSlideAxis?: never
   items: ReactSpringCarouselItem[]
   enableThumbsWrapperScroll?: never
-  CustomThumbsWrapperComponent?: never
   prepareThumbsData?: never
 }
 

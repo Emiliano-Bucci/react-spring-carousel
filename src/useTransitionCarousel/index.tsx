@@ -36,7 +36,6 @@ function useTransitionCarousel({
   toPrevItemSpringProps,
   toNextItemSpringProps,
   disableGestures = false,
-  CustomThumbsWrapperComponent,
   trail,
   exitBeforeEnter = false,
   springAnimationProps = {
@@ -75,7 +74,6 @@ function useTransitionCarousel({
     thumbsSlideAxis,
     springConfig,
     prepareThumbsData,
-    CustomThumbsWrapperComponent,
     slideType: 'fixed',
   })
 
