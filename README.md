@@ -1,4 +1,4 @@
-# react-spring-carousel-js
+# react-spring-carousel
 
 > A performant React carousel component powered by `react-spring` and `@use-gesture`.
 
