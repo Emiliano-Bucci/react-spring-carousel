@@ -17,7 +17,7 @@ npm install --save react-spring react-spring-carousel
 ```
 
 ```bash
-yarn add react-spring-carousel
+yarn add react-spring react-spring-carousel
 ```
 
 ## Usage
