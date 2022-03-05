@@ -30,7 +30,7 @@ function useSpringCarousel({
   thumbsSlideAxis = 'x',
   prepareThumbsData,
   initialActiveItem = 0,
-  initialStartingPosition = 'start',
+  initialStartingPosition,
   disableGestures = false,
   gutter = 0,
   startEndGutter = 0,
@@ -819,6 +819,11 @@ function useSpringCarousel({
   }
   // Perform some check on first mount
   useIsomorphicMount(() => {
+    if (itemsPerSlide % 2 === 0 && initialStartingPositionRef.current) {
+      throw new Error(
+        `initialStartingPosition can be only used if itemsPerSlide is an even value.`,
+      )
+    }
     if (draggingSlideTresholdRef.current < 0) {
       throw new Error('draggingSlideTreshold must be greater than 0')
     }
