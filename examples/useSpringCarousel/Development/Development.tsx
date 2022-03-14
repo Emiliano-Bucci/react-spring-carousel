@@ -2,17 +2,22 @@ import { mockedItems } from '../mocked-data'
 import { SliderItem } from 'examples/components/SliderItem/SliderItem'
 import { SliderWrapper } from 'examples/components/SliderWrapper/SliderWrapper'
 import { css } from '@emotion/react'
-import { useSpringCarousel } from 'react-spring-carousel'
+import { useSpringCarousel } from 'src'
 
 const items = mockedItems.map(({ id, label, ...rest }) => ({
   id,
   renderItem: <SliderItem {...rest}>{label}</SliderItem>,
 }))
 
+const slideType = 'fixed'
 export function Development() {
-  const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
-    items,
-  })
+  const { carouselFragment, slideToPrevItem, slideToNextItem, getCurrentActiveItem } =
+    useSpringCarousel<typeof slideType>({
+      items,
+      slideType,
+    })
+
+  getCurrentActiveItem()
 
   return (
     <div

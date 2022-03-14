@@ -11,14 +11,19 @@ import { useIsomorphicLayoutEffect, useIsomorphicMount } from '../utils'
 import {
   UseSpringCarouselProps,
   ReactSpringCarouselItemWithThumbs,
+  UseSpringCarouselWithThumbsReturnProps,
 } from '../types/useSpringCarousel'
-import { UseSpringFluidTypeReturnProps } from 'react-spring-carousel'
 
-const UseSpringCarouselContext = createContext<
-  (UseSpringFluidTypeReturnProps | UseSpringDafaultTypeReturnProps) | undefined
->(undefined)
+type ReturnType<T> = T extends 'fixed'
+  ? UseSpringDafaultTypeReturnProps
+  : UseSpringCarouselWithThumbsReturnProps
+type ContextTypes<T> = Omit<ReturnType<T>, 'carouselFragment' | 'thumbsFragment'>
 
-function useSpringCarousel({
+function getContext<T>() {
+  return createContext<ContextTypes<T> | undefined>(undefined)
+}
+
+function useSpringCarousel<U = 'fixed'>({
   items,
   withLoop = false,
   draggingSlideTreshold,
@@ -40,7 +45,7 @@ function useSpringCarousel({
   enableFreeScrollDrag,
   itemsPerSlide = 1,
   slideType = 'fixed',
-}: UseSpringCarouselProps) {
+}: UseSpringCarouselProps): ReturnType<U> {
   function getItems() {
     if (withLoop) {
       if (items.length === itemsPerSlide) {
@@ -953,7 +958,7 @@ function useSpringCarousel({
           }),
         }
       : {}),
-  }
+  } as ContextTypes<U>
 
   const handleCarouselFragmentRef = (ref: HTMLDivElement | null) => {
     if (ref) {
@@ -985,8 +990,10 @@ function useSpringCarousel({
     }
   }
 
+  const context = getContext<U>()
+
   const carouselFragment = (
-    <UseSpringCarouselContext.Provider value={contextProps}>
+    <context.Provider value={contextProps}>
       <div
         ref={mainCarouselWrapperRef}
         className="use-spring-carousel-main-wrapper"
@@ -1034,23 +1041,21 @@ function useSpringCarousel({
           })}
         </animated.div>
       </div>
-    </UseSpringCarouselContext.Provider>
+    </context.Provider>
   )
   const thumbsFragment = (
-    <UseSpringCarouselContext.Provider value={contextProps}>
-      {_thumbsFragment}
-    </UseSpringCarouselContext.Provider>
+    <context.Provider value={contextProps}>{_thumbsFragment}</context.Provider>
   )
 
   return {
     ...contextProps,
     carouselFragment,
     thumbsFragment,
-  }
+  } as ReturnType<U>
 }
 
-function useSpringCarouselContext() {
-  const context = useContext(UseSpringCarouselContext)
+function useSpringCarouselContext<T = 'fixed'>() {
+  const context = useContext(getContext<T>())
   if (!context) {
     throw new Error(
       'useSpringCarouselContext must be used only inside a component that is rendered inside the Carousel.',
