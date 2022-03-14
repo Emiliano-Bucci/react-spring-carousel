@@ -3,17 +3,17 @@ import screenfull from 'screenfull'
 import { EmitObservableFn } from '../types'
 import { useIsomorphicMount } from '../utils'
 
-type FullscreenModule = {
+type FullscreenModule<T> = {
   mainCarouselWrapperRef: MutableRefObject<HTMLDivElement | null>
-  emitObservable: EmitObservableFn
+  emitObservable: EmitObservableFn<T>
   handleResize?(): void
 }
 
-export function useFullscreenModule({
+export function useFullscreenModule<T>({
   mainCarouselWrapperRef,
   emitObservable,
   handleResize,
-}: FullscreenModule) {
+}: FullscreenModule<T>) {
   const isFullscreen = useRef(false)
 
   useIsomorphicMount(() => {

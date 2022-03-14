@@ -21,6 +21,7 @@ const props = {
       useTsconfigDeclarationDir: true,
       tsconfigOverride: {
         exclude: ['Examples', 'node_modules'],
+        target: 'ES2015',
         compilerOptions: {
           rootDir: './src',
         },
@@ -38,19 +39,45 @@ const props = {
   ],
 }
 
-export default {
-  input: 'src/index.tsx',
-  output: [
-    {
-      file: pkg.module,
+export default [
+  {
+    input: [
+      'src/index.tsx',
+      'src/modules/index.tsx',
+      'src/useSpringCarousel/index.tsx',
+      'src/useTransitionCarousel/index.tsx',
+    ],
+    output: {
+      dir: pkg.module,
       format: 'esm',
       sourcemap: true,
     },
-    {
-      format: 'cjs',
-      file: pkg.main,
-      sourcemap: true,
-    },
-  ],
-  ...props,
-}
+    ...props,
+  },
+  {
+    input: 'src/index.tsx',
+    output: [
+      {
+        format: 'cjs',
+        file: pkg.main,
+        sourcemap: true,
+      },
+      {
+        format: 'umd',
+        file: './dist/umd/index.js',
+        sourcemap: true,
+        name: 'ReactSpringCarousel',
+        globals: {
+          react: 'React',
+          'react-dom': 'ReactDOM',
+          screenfull: 'Screenfull',
+          'react/jsx-runtime': 'ReactJSXRuntime',
+          'react-spring': 'ReactSpring',
+          rxjs: 'rxjs',
+          '@use-gesture/react': 'UseGestureReact',
+        },
+      },
+    ],
+    ...props,
+  },
+]
