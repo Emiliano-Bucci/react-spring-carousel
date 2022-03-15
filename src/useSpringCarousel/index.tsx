@@ -19,9 +19,7 @@ type ReturnType<T> = T extends 'fixed'
   : UseSpringCarouselWithThumbsReturnProps
 type ContextTypes<T> = Omit<ReturnType<T>, 'carouselFragment' | 'thumbsFragment'>
 
-function getContext<T>() {
-  return createContext<ContextTypes<T> | undefined>(undefined)
-}
+const Context = createContext<ContextTypes<'fixed' | 'fluid'> | undefined>(undefined)
 
 function useSpringCarousel<U = 'fixed'>({
   items,
@@ -990,10 +988,8 @@ function useSpringCarousel<U = 'fixed'>({
     }
   }
 
-  const context = getContext<U>()
-
   const carouselFragment = (
-    <context.Provider value={contextProps}>
+    <Context.Provider value={contextProps}>
       <div
         ref={mainCarouselWrapperRef}
         className="use-spring-carousel-main-wrapper"
@@ -1041,10 +1037,10 @@ function useSpringCarousel<U = 'fixed'>({
           })}
         </animated.div>
       </div>
-    </context.Provider>
+    </Context.Provider>
   )
   const thumbsFragment = (
-    <context.Provider value={contextProps}>{_thumbsFragment}</context.Provider>
+    <Context.Provider value={contextProps}>{_thumbsFragment}</Context.Provider>
   )
 
   return {
@@ -1055,13 +1051,13 @@ function useSpringCarousel<U = 'fixed'>({
 }
 
 function useSpringCarouselContext<T = 'fixed'>() {
-  const context = useContext(getContext<T>())
+  const context = useContext(Context)
   if (!context) {
     throw new Error(
       'useSpringCarouselContext must be used only inside a component that is rendered inside the Carousel.',
     )
   }
-  return context
+  return context as unknown as ContextTypes<T>
 }
 
 export { useSpringCarousel, useSpringCarouselContext }
