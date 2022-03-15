@@ -1050,14 +1050,14 @@ function useSpringCarousel<U = 'fixed'>({
   } as ReturnType<U>
 }
 
-function useSpringCarouselContext<T = 'fixed'>() {
+function useSpringCarouselContext<T = 'fixed' | 'fluid'>() {
   const context = useContext(Context)
   if (!context) {
     throw new Error(
       'useSpringCarouselContext must be used only inside a component that is rendered inside the Carousel.',
     )
   }
-  return context as unknown as ContextTypes<T>
+  return context as ContextTypes<T>
 }
 
 export { useSpringCarousel, useSpringCarouselContext }
