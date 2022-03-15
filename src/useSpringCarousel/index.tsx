@@ -12,6 +12,15 @@ import {
   UseSpringCarouselProps,
   ReactSpringCarouselItemWithThumbs,
   UseSpringCarouselWithThumbsReturnProps,
+  UseSpringCarouselBaseProps,
+  UseSpringCarouselWithThumbs,
+  UseSpringCarouselFluidType,
+  DisableGesturesProps,
+  WithLoopProps,
+  UseSpringCarouselWithNoThumbs,
+  EnableGesturesProps,
+  WithNoLoop,
+  UseSpringCarouselFixedSlideType,
 } from '../types/useSpringCarousel'
 
 type ReturnType<T> = T extends 'fixed'
@@ -21,7 +30,22 @@ type ContextTypes<T> = Omit<ReturnType<T>, 'carouselFragment' | 'thumbsFragment'
 
 const Context = createContext<ContextTypes<'fixed' | 'fluid'> | undefined>(undefined)
 
-function useSpringCarousel<U = 'fixed'>({
+function useSpringCarousel(
+  props: UseSpringCarouselBaseProps &
+    UseSpringCarouselFluidType &
+    (UseSpringCarouselWithThumbs | UseSpringCarouselWithNoThumbs) &
+    (DisableGesturesProps | EnableGesturesProps) &
+    (WithLoopProps | WithNoLoop),
+): ReturnType<'fluid'>
+function useSpringCarousel(
+  props: UseSpringCarouselBaseProps &
+    UseSpringCarouselFixedSlideType &
+    (UseSpringCarouselWithThumbs | UseSpringCarouselWithNoThumbs) &
+    (DisableGesturesProps | EnableGesturesProps) &
+    (WithLoopProps | WithNoLoop),
+): ReturnType<'fixed'>
+
+function useSpringCarousel({
   items,
   withLoop = false,
   draggingSlideTreshold,
@@ -43,7 +67,7 @@ function useSpringCarousel<U = 'fixed'>({
   enableFreeScrollDrag,
   itemsPerSlide = 1,
   slideType = 'fixed',
-}: UseSpringCarouselProps): ReturnType<U> {
+}: UseSpringCarouselProps): ReturnType<'fixed' | 'fluid'> {
   function getItems() {
     if (withLoop) {
       if (items.length === itemsPerSlide) {
@@ -956,7 +980,7 @@ function useSpringCarousel<U = 'fixed'>({
           }),
         }
       : {}),
-  } as ContextTypes<U>
+  }
 
   const handleCarouselFragmentRef = (ref: HTMLDivElement | null) => {
     if (ref) {
@@ -1047,7 +1071,7 @@ function useSpringCarousel<U = 'fixed'>({
     ...contextProps,
     carouselFragment,
     thumbsFragment,
-  } as ReturnType<U>
+  }
 }
 
 function useSpringCarouselContext<T = 'fixed' | 'fluid'>() {

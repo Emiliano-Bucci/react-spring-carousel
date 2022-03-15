@@ -25,17 +25,17 @@ export type ReactSpringCarouselItemWithThumbs = {
   renderThumb: ReactNode
 }
 
-type UseSpringCarouselWithThumbs = {
-  withThumbs: true
+export type UseSpringCarouselWithThumbs = {
+  withThumbs?: true
   thumbsSlideAxis?: 'x' | 'y'
   items: ReactSpringCarouselItemWithThumbs[]
   enableThumbsWrapperScroll?: boolean
   prepareThumbsData?: PrepareThumbsData
 }
-type UseSpringCarouselWithNoThumbs = {
+export type UseSpringCarouselWithNoThumbs = {
   withThumbs?: false
-  thumbsSlideAxis?: never
   items: ReactSpringCarouselItem[]
+  thumbsSlideAxis?: never
   enableThumbsWrapperScroll?: never
   prepareThumbsData?: never
 }
@@ -45,17 +45,17 @@ export type ThumbsProps = UseSpringCarouselWithThumbs | UseSpringCarouselWithNoT
 /**
  * Types based on slideType
  */
-type UseSpringCarouselFluidType = {
+export type UseSpringCarouselFluidType = {
   slideType: 'fluid'
   slideAmount?: number
+  freeScroll?: boolean
+  enableFreeScrollDrag?: boolean | (() => boolean)
   itemsPerSlide?: never
   initialActiveItem?: never
   initialStartingPosition?: never
-  freeScroll?: boolean
-  enableFreeScrollDrag?: boolean | (() => boolean)
 }
 
-type UseSpringCarouselNumericSlideType = {
+export type UseSpringCarouselFixedSlideType = {
   slideType?: 'fixed'
   itemsPerSlide?: number
   initialActiveItem?: number
@@ -65,33 +65,33 @@ type UseSpringCarouselNumericSlideType = {
   enableFreeScrollDrag?: never
 }
 
-type SlideTypes = UseSpringCarouselFluidType | UseSpringCarouselNumericSlideType
+type SlideTypes = UseSpringCarouselFluidType | UseSpringCarouselFixedSlideType
 
 /**
  * Types based on gestures activation
  */
 
-type DisableGesturesProps = {
+export type DisableGesturesProps = {
   disableGestures?: true
   touchAction?: never
 }
-type EnableGesturesProps = {
+export type EnableGesturesProps = {
   disableGestures?: false
   touchAction?: string
 }
 
-type Gestures = DisableGesturesProps | EnableGesturesProps
+export type Gestures = DisableGesturesProps | EnableGesturesProps
 
 /**
  * Types based on loop functionality
  */
 
-type WithLoopProps = {
-  withLoop: true
+export type WithLoopProps = {
+  withLoop?: true
   initialStartingPosition?: 'start' | 'center' | 'end'
   startEndGutter?: number
 }
-type WithNoLoop = {
+export type WithNoLoop = {
   withLoop?: false
   initialStartingPosition?: never
   startEndGutter?: never

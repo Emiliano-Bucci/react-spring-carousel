@@ -52,7 +52,7 @@ export declare type UseSpringCarouselFluidType = {
   initialActiveItem?: never
   freeScroll?: boolean
 }
-declare type UseSpringCarouselNumericSlideType = {
+declare type UseSpringCarouselFixedSlideType = {
   itemsPerSlide?: number
   slideAmount?: never
   initialStartingPosition?: 'start' | 'center' | 'end'
@@ -65,7 +65,7 @@ export declare type UseSpringCarouselProps = Omit<BaseCarouselSharedProps, 'with
   gutter?: number
   touchAction?: 'none' | 'pan-x' | 'pan-y'
 } & (UseSpringCarouselLoopProps | UseSpringCarouselNoLoopProps) &
-  (UseSpringCarouselFluidType | UseSpringCarouselNumericSlideType) &
+  (UseSpringCarouselFluidType | UseSpringCarouselFixedSlideType) &
   UseSpringCarouselItems
 export declare type PrepareThumbsData = (
   items: ReactSpringThumbItem[],
