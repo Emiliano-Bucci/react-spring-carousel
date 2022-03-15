@@ -102,7 +102,7 @@ export declare type UseSpringFluidTypeReturnProps = {
   getIsAnimating(): boolean
   getIsDragging(): boolean
 }
-export declare type UseSpringDafaultTypeReturnProps = {
+export declare type UseSpringFixedSlideTypeReturnProps = {
   useListenToCustomEvent: UseListenToCustomEvent
   getIsFullscreen(): boolean
   getIsPrevItem(id: string): boolean

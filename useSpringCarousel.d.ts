@@ -1,12 +1,12 @@
 /// <reference types="react" />
 import {
   UseSpringCarouselProps,
-  UseSpringDafaultTypeReturnProps,
+  UseSpringFixedSlideTypeReturnProps,
   UseSpringFluidTypeReturnProps,
 } from './types'
 declare type ReturnHook<T> = T extends 'fluid'
   ? UseSpringFluidTypeReturnProps
-  : UseSpringDafaultTypeReturnProps
+  : UseSpringFixedSlideTypeReturnProps
 export default function useSpringCarousel<T>({
   itemsPerSlide,
   items,

@@ -104,7 +104,7 @@ export type UseSpringCarouselProps = UseSpringCarouselBaseProps &
   Gestures &
   LoopProps
 
-export type UseSpringCarouselWithThumbsReturnProps = {
+export type UseSpringFluidSlideTypeReturnProps = {
   carouselFragment: ReactNode
   thumbsFragment: ReactNode
   useListenToCustomEvent: UseListenToCustomEvent<'use-spring'>
@@ -119,8 +119,9 @@ export type UseSpringCarouselWithThumbsReturnProps = {
   getIsDragging(): boolean
 }
 
-export type UseSpringDafaultTypeReturnProps = {
+export type UseSpringFixedSlideTypeReturnProps = {
   carouselFragment: ReactNode
+  thumbsFragment: ReactNode
   useListenToCustomEvent: UseListenToCustomEvent<'use-spring'>
   getIsFullscreen(): boolean
   getIsPrevItem(id: string): boolean

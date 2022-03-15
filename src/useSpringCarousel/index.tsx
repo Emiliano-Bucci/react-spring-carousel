@@ -5,13 +5,13 @@ import { useCustomEventsModule, useFullscreenModule, useThumbsModule } from '../
 import {
   SlideToItemFnProps,
   SlideActionType,
-  UseSpringDafaultTypeReturnProps,
+  UseSpringFixedSlideTypeReturnProps,
 } from '../types'
 import { useIsomorphicLayoutEffect, useIsomorphicMount } from '../utils'
 import {
   UseSpringCarouselProps,
   ReactSpringCarouselItemWithThumbs,
-  UseSpringCarouselWithThumbsReturnProps,
+  UseSpringFluidSlideTypeReturnProps,
   UseSpringCarouselBaseProps,
   UseSpringCarouselWithThumbs,
   UseSpringCarouselFluidType,
@@ -24,8 +24,8 @@ import {
 } from '../types/useSpringCarousel'
 
 type ReturnType<T> = T extends 'fixed'
-  ? UseSpringDafaultTypeReturnProps
-  : UseSpringCarouselWithThumbsReturnProps
+  ? UseSpringFixedSlideTypeReturnProps
+  : UseSpringFluidSlideTypeReturnProps
 type ContextTypes<T> = Omit<ReturnType<T>, 'carouselFragment' | 'thumbsFragment'>
 
 const Context = createContext<ContextTypes<'fixed' | 'fluid'> | undefined>(undefined)
