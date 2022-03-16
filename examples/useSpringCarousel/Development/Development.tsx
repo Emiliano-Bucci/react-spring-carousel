@@ -2,7 +2,7 @@ import { mockedItems } from '../mocked-data'
 import { SliderItem } from 'examples/components/SliderItem/SliderItem'
 import { SliderWrapper } from 'examples/components/SliderWrapper/SliderWrapper'
 import { css } from '@emotion/react'
-import { useSpringCarousel } from 'src'
+import { useSpringCarousel } from 'react-spring-carousel'
 
 const items = mockedItems.map(({ id, label, ...rest }) => ({
   id,
