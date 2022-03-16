@@ -23,7 +23,6 @@ const props = {
         exclude: ['Examples', 'node_modules'],
         compilerOptions: {
           target: 'ES2015',
-          module: 'ES2015',
           rootDir: './src',
         },
       },
