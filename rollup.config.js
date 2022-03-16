@@ -21,8 +21,9 @@ const props = {
       useTsconfigDeclarationDir: true,
       tsconfigOverride: {
         exclude: ['Examples', 'node_modules'],
-        target: 'ES2015',
         compilerOptions: {
+          target: 'ES2015',
+          module: 'ES2015',
           rootDir: './src',
         },
       },
