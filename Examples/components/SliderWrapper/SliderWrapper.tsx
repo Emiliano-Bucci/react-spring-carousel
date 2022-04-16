@@ -1,6 +1,7 @@
 import { css, Global } from '@emotion/react'
+import { ReactNode } from 'react'
 
-export const SliderWrapper: React.FC = ({ children }) => {
+export const SliderWrapper = ({ children }: { children: ReactNode }) => {
   return (
     <div
       css={css`
