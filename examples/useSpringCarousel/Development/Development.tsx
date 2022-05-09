@@ -10,14 +10,19 @@ const items = mockedItems.map(({ id, label, ...rest }) => ({
   renderThumb: <div>asd</div>,
 }))
 
-const slideType = 'fixed'
 export function Development() {
-  const { carouselFragment, slideToPrevItem, slideToNextItem, getCurrentActiveItem } =
-    useSpringCarousel({
-      items,
-      slideType,
-      withLoop: true,
-    })
+  const {
+    carouselFragment,
+    slideToPrevItem,
+    slideToNextItem,
+    getCurrentActiveItem,
+    thumbsFragment,
+  } = useSpringCarousel({
+    items,
+    // slideType,
+    withLoop: false,
+    withThumbs: true,
+  })
 
   getCurrentActiveItem()
 
@@ -30,13 +35,20 @@ export function Development() {
     >
       <div
         css={css`
-          display: flex;
-          overflow: hidden;
+          display: grid;
         `}
       >
-        <button onClick={slideToPrevItem}>prev</button>
-        <SliderWrapper>{carouselFragment}</SliderWrapper>
-        <button onClick={slideToNextItem}>next</button>
+        <div
+          css={css`
+            display: flex;
+            overflow: hidden;
+          `}
+        >
+          <button onClick={slideToPrevItem}>prev</button>
+          <SliderWrapper>{carouselFragment}</SliderWrapper>
+          <button onClick={slideToNextItem}>next</button>
+        </div>
+        {thumbsFragment}
       </div>
     </div>
   )

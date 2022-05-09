@@ -914,18 +914,14 @@ function useSpringCarousel({
     }
   })
   useIsomorphicLayoutEffect(() => {
-    if (
-      initialActiveItemRef.current < items.length &&
-      initialActiveItemRef.current !== activeItem.current
-    ) {
+    if (initialActiveItem < items.length && initialActiveItem !== activeItem.current) {
       slideToItem({
-        to: initialActiveItemRef.current,
+        to: initialActiveItem,
         immediate: true,
       })
-      setActiveItem(initialActiveItemRef.current)
+      setActiveItem(initialActiveItem)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [initialActiveItem])
   useIsomorphicLayoutEffect(() => {
     if (shouldResizeOnWindowResize) {
       window.addEventListener('resize', handleResize)
