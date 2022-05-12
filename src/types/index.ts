@@ -11,6 +11,7 @@ export type SlideToItemFnProps = {
   newIndex?: number
   immediate?: boolean
   customTo?: number
+  velocity?: number[]
   onRest?(): void
 }
 

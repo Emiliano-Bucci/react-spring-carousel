@@ -23,6 +23,7 @@ export function Development() {
     withLoop: false,
     withThumbs: true,
     slideWhenThresholdIsReached: false,
+    draggingSlideTreshold: 24,
   })
 
   getCurrentActiveItem()

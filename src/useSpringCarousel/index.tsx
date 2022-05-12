@@ -360,19 +360,31 @@ function useSpringCarousel({
           ) {
             setCarouselStyles.start({
               [carouselSlideAxisRef.current]: 0,
+              config: {
+                velocity: props.velocity,
+              },
             })
           } else if (slideEndReached.current && getSlideActionType() === 'next') {
             setCarouselStyles.start({
               [carouselSlideAxisRef.current]: -fluidTotalWrapperScrollValue.current,
+              config: {
+                velocity: props.velocity,
+              },
             })
           } else {
             setCarouselStyles.start({
               [carouselSlideAxisRef.current]: prevSlidedValue.current,
+              config: {
+                velocity: props.velocity,
+              },
             })
           }
         } else {
           setCarouselStyles.start({
             [carouselSlideAxisRef.current]: -(getCurrentActiveItem() * getSlideValue()),
+            config: {
+              velocity: props.velocity,
+            },
           })
         }
       }
@@ -424,8 +436,12 @@ function useSpringCarousel({
           return
         } else {
           setCarouselStyles.start({
-            immediate: props.down,
             [carouselSlideAxisRef.current]: movement,
+            config: {
+              velocity: props.velocity,
+              friction: 50,
+              tension: 1000,
+            },
           })
         }
 
@@ -452,7 +468,7 @@ function useSpringCarousel({
             if (!withLoop && getIsLastItem()) {
               resetAnimation()
             } else {
-              slideToNextItem()
+              slideToNextItem(props.velocity)
             }
             return
           } else if (prevItemTreshold) {
@@ -460,7 +476,7 @@ function useSpringCarousel({
             if (!withLoop && getIsFirstItem()) {
               resetAnimation()
             } else {
-              slideToPrevItem()
+              slideToPrevItem(props.velocity)
             }
             return
           }
@@ -476,13 +492,13 @@ function useSpringCarousel({
           if (!withLoop && getIsLastItem()) {
             resetAnimation()
           } else {
-            slideToNextItem()
+            slideToNextItem(props.velocity)
           }
         } else if (prevItemTreshold) {
           if (!withLoop && getIsFirstItem()) {
             resetAnimation()
           } else {
-            slideToPrevItem()
+            slideToPrevItem(props.velocity)
           }
         }
         return
@@ -603,6 +619,7 @@ function useSpringCarousel({
     customTo,
     immediate = false,
     onRest = () => {},
+    velocity,
   }: SlideToItemFnProps) {
     if (!immediate) {
       setActiveItem(to)
@@ -621,6 +638,14 @@ function useSpringCarousel({
     setCarouselStyles.start({
       ...getFromValue(from),
       to: getToValue(customTo, to),
+      ...(velocity
+        ? { config: { velocity, friction: undefined, tension: undefined } }
+        : {
+            config: {
+              velocity: undefined,
+              ...springConfig,
+            },
+          }),
       immediate,
       onRest: val => {
         if (val.finished) {
@@ -647,7 +672,7 @@ function useSpringCarousel({
   function getIsLastItem() {
     return getCurrentActiveItem() === items.length - 1
   }
-  function slideToPrevItem() {
+  function slideToPrevItem(velocity?: number[]) {
     setSlideActionType('prev')
     slideEndReached.current = false
 
@@ -664,11 +689,13 @@ function useSpringCarousel({
         slideToItem({
           customTo: nextValue < 0 ? 0 : nextValue,
           from: mainCarouselWrapperRef.current!.scrollLeft,
+          velocity,
         })
       } else if (nextPrevValue >= 0) {
         if (withLoop) {
           slideToItem({
             from: getCurrentSlidedValue() - getCarouselItemWidth() * items.length,
+            velocity,
             customTo:
               getCurrentSlidedValue() -
               getCarouselItemWidth() * items.length +
@@ -677,11 +704,13 @@ function useSpringCarousel({
         } else {
           slideToItem({
             customTo: 0,
+            velocity,
           })
         }
       } else {
         slideToItem({
           customTo: getCurrentSlidedValue() + getSlideValue(),
+          velocity,
         })
       }
     } else {
@@ -693,15 +722,17 @@ function useSpringCarousel({
         slideToItem({
           from: getCurrentSlidedValue() - getSlideValue() * items.length,
           to: items.length - 1,
+          velocity,
         })
       } else {
         slideToItem({
           to: getPrevItem(),
+          velocity,
         })
       }
     }
   }
-  function slideToNextItem() {
+  function slideToNextItem(velocity?: number[]) {
     setSlideActionType('next')
 
     if (slideType === 'fluid') {
@@ -719,6 +750,7 @@ function useSpringCarousel({
         const val = mainCarouselWrapperRef.current!.scrollLeft + getSlideValue()
 
         slideToItem({
+          velocity,
           customTo: willExceed ? fluidTotalWrapperScrollValue.current : val,
           from: mainCarouselWrapperRef.current!.scrollLeft,
         })
@@ -731,6 +763,7 @@ function useSpringCarousel({
         slideToItem({
           from: getCurrentSlidedValue() + currentWidth,
           customTo: getCurrentSlidedValue() + currentWidth - getSlideValue(),
+          velocity,
         })
       } else if (slideEndReached.current) {
         return
@@ -738,10 +771,12 @@ function useSpringCarousel({
         slideEndReached.current = true
         slideToItem({
           customTo: -fluidTotalWrapperScrollValue.current,
+          velocity,
         })
       } else {
         slideToItem({
           customTo: getCurrentSlidedValue() - getSlideValue(),
+          velocity,
         })
       }
     } else {
@@ -761,15 +796,18 @@ function useSpringCarousel({
       } else if (slideEndReached.current) {
         slideToItem({
           to: items.length - itemsPerSlideRef.current,
+          velocity,
         })
       } else if (getIsLastItem()) {
         slideToItem({
           from: getCurrentSlidedValue() + getSlideValue() * items.length,
           to: 0,
+          velocity,
         })
       } else {
         slideToItem({
           to: getNextItem(),
+          velocity,
         })
       }
     }
@@ -988,8 +1026,12 @@ function useSpringCarousel({
     getIsDragging,
     getIsNextItem,
     getIsPrevItem,
-    slideToPrevItem,
-    slideToNextItem,
+    slideToPrevItem() {
+      slideToPrevItem()
+    },
+    slideToNextItem() {
+      slideToNextItem()
+    },
     ...(slideType === 'fixed'
       ? {
           slideToItem: _slideToItem,
