@@ -11,22 +11,17 @@ const items = mockedItems.map(({ id, label, ...rest }) => ({
 }))
 
 export function Development() {
-  const {
-    carouselFragment,
-    slideToPrevItem,
-    slideToNextItem,
-    getCurrentActiveItem,
-    thumbsFragment,
-  } = useSpringCarousel({
-    items,
-    // slideType,
-    withLoop: false,
-    withThumbs: true,
-    slideWhenThresholdIsReached: false,
-    draggingSlideTreshold: 24,
-  })
-
-  getCurrentActiveItem()
+  const { carouselFragment, slideToPrevItem, slideToNextItem, thumbsFragment } =
+    useSpringCarousel({
+      items,
+      // slideType,
+      withLoop: false,
+      withThumbs: true,
+      slideWhenThresholdIsReached: false,
+      draggingSlideTreshold: 24,
+      slideType: 'fluid',
+      freeScroll: true,
+    })
 
   return (
     <div

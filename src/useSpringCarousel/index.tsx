@@ -423,7 +423,9 @@ function useSpringCarousel({
               return
             } else {
               setCarouselStyles.start({
-                immediate: props.down,
+                config: {
+                  velocity: props.velocity,
+                },
                 from: {
                   [carouselSlideAxisRef.current]: getWrapperScrollDirection(),
                 },
@@ -642,7 +644,7 @@ function useSpringCarousel({
         ? { config: { velocity, friction: undefined, tension: undefined } }
         : {
             config: {
-              velocity: undefined,
+              velocity: 0,
               ...springConfig,
             },
           }),
