@@ -30,6 +30,12 @@ type ContextTypes<T> = Omit<ReturnType<T>, 'carouselFragment' | 'thumbsFragment'
 
 const Context = createContext<ContextTypes<'fixed' | 'fluid'> | undefined>(undefined)
 
+const defaultDragSpringConfig = {
+  ...config.default,
+  mass: 1,
+  velocity: 0,
+}
+
 function useSpringCarousel(
   props: UseSpringCarouselBaseProps &
     UseSpringCarouselFluidType &
@@ -120,7 +126,6 @@ function useSpringCarousel({
   const [carouselStyles, setCarouselStyles] = useSpring(() => ({
     y: 0,
     x: 0,
-    config: springConfig,
     onChange: ({ value }) => {
       if (mainCarouselWrapperRef.current && freeScroll) {
         mainCarouselWrapperRef.current[
@@ -418,19 +423,21 @@ function useSpringCarousel({
         setDragDirection()
         emitDragObservable()
         checkBounds()
-        setCarouselStyles.start({
-          from: {
+
+        if (props.first) {
+          setCarouselStyles.start({
             [carouselSlideAxisRef.current]: getWrapperScrollDirection(),
-          },
-          to: {
+            immediate: true,
+          })
+        } else {
+          setCarouselStyles.start({
             [carouselSlideAxisRef.current]: -movement,
-          },
-          config: {
-            velocity: props.last ? 0 : props.velocity,
-            friction: props.last ? springConfig.friction : 50,
-            tension: props.last ? springConfig.tension : 500,
-          },
-        })
+            config: {
+              velocity: props.velocity,
+            },
+          })
+        }
+
         if (getWrapperScrollDirection() === 0 && getSlideActionType() === 'prev') {
           cancelDrag()
           return
@@ -669,13 +676,19 @@ function useSpringCarousel({
         },
       })
     }
-
     prevSlidedValue.current = getToValue(customTo, to)[carouselSlideAxis]
     setCarouselStyles.start({
       ...getFromValue(from),
       to: getToValue(customTo, to),
       ...(velocity
-        ? { config: { velocity, friction: undefined, tension: undefined } }
+        ? {
+            config: {
+              ...defaultDragSpringConfig,
+              velocity,
+              friction: undefined,
+              tension: undefined,
+            },
+          }
         : {
             config: {
               velocity: 0,

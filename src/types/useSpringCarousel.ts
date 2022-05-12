@@ -6,7 +6,7 @@ export type UseSpringCarouselBaseProps = {
   disableGestures?: boolean
   draggingSlideTreshold?: number
   slideWhenThresholdIsReached?: boolean
-  springConfig?: SpringConfig
+  springConfig?: Omit<SpringConfig, 'velocity'>
   carouselSlideAxis?: 'x' | 'y'
   gutter?: number
   shouldResizeOnWindowResize?: boolean

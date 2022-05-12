@@ -20,6 +20,7 @@ export function Development() {
       slideWhenThresholdIsReached: false,
       draggingSlideTreshold: 24,
       slideType: 'fluid',
+      enableFreeScrollDrag: true,
       freeScroll: true,
     })
 
