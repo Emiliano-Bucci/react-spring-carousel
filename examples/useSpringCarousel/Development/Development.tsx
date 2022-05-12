@@ -2,7 +2,7 @@ import { mockedItems } from '../mocked-data'
 import { SliderItem } from 'examples/components/SliderItem/SliderItem'
 import { SliderWrapper } from 'examples/components/SliderWrapper/SliderWrapper'
 import { css } from '@emotion/react'
-import { useSpringCarousel } from 'react-spring-carousel'
+import { useSpringCarousel } from 'src/useSpringCarousel'
 
 const items = mockedItems.map(({ id, label, ...rest }) => ({
   id,
@@ -22,6 +22,7 @@ export function Development() {
     // slideType,
     withLoop: false,
     withThumbs: true,
+    slideWhenThresholdIsReached: false,
   })
 
   getCurrentActiveItem()

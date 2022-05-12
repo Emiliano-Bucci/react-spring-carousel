@@ -53,6 +53,7 @@ function useSpringCarousel({
   shouldResizeOnWindowResize = true,
   withThumbs = false,
   enableThumbsWrapperScroll = true,
+  slideWhenThresholdIsReached = true,
   carouselSlideAxis = 'x',
   thumbsSlideAxis = 'x',
   prepareThumbsData,
@@ -445,23 +446,46 @@ function useSpringCarousel({
           setCarouselStyles.start({
             [carouselSlideAxisRef.current]: -fluidTotalWrapperScrollValue.current,
           })
-        } else if (nextItemTreshold) {
-          cancelDrag()
+        } else if (slideWhenThresholdIsReached) {
+          if (nextItemTreshold) {
+            cancelDrag()
+            if (!withLoop && getIsLastItem()) {
+              resetAnimation()
+            } else {
+              slideToNextItem()
+            }
+            return
+          } else if (prevItemTreshold) {
+            cancelDrag()
+            if (!withLoop && getIsFirstItem()) {
+              resetAnimation()
+            } else {
+              slideToPrevItem()
+            }
+            return
+          }
+        }
+      }
+
+      if (
+        props.last &&
+        !slideWhenThresholdIsReached &&
+        (nextItemTreshold || prevItemTreshold)
+      ) {
+        if (nextItemTreshold) {
           if (!withLoop && getIsLastItem()) {
             resetAnimation()
           } else {
             slideToNextItem()
           }
-          return
         } else if (prevItemTreshold) {
-          cancelDrag()
           if (!withLoop && getIsFirstItem()) {
             resetAnimation()
           } else {
             slideToPrevItem()
           }
-          return
         }
+        return
       }
 
       if (props.last && !nextItemTreshold && !prevItemTreshold) {

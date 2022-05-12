@@ -5,6 +5,7 @@ import { PrepareThumbsData, UseListenToCustomEvent } from './index'
 export type UseSpringCarouselBaseProps = {
   disableGestures?: boolean
   draggingSlideTreshold?: number
+  slideWhenThresholdIsReached?: boolean
   springConfig?: SpringConfig
   carouselSlideAxis?: 'x' | 'y'
   gutter?: number
