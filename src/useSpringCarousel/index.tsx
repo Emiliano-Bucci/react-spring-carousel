@@ -410,6 +410,7 @@ function useSpringCarousel({
               return
             } else {
               setCarouselStyles.start({
+                immediate: props.down,
                 from: {
                   [carouselSlideAxisRef.current]: getWrapperScrollDirection(),
                 },
@@ -422,6 +423,7 @@ function useSpringCarousel({
           return
         } else {
           setCarouselStyles.start({
+            immediate: props.down,
             [carouselSlideAxisRef.current]: movement,
           })
         }
