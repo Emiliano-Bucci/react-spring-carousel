@@ -352,6 +352,20 @@ function useSpringCarousel({
       function cancelDrag() {
         props.cancel()
       }
+      function setDragDirection() {
+        if (direction > 0) {
+          setSlideActionType('prev')
+        } else {
+          setSlideActionType('next')
+        }
+      }
+      function emitDragObservable() {
+        emitObservable({
+          eventName: 'onDrag',
+          slideActionType: getSlideActionType(),
+          ...props,
+        })
+      }
       function resetAnimation() {
         if (slideType === 'fluid') {
           if (
@@ -388,24 +402,7 @@ function useSpringCarousel({
           })
         }
       }
-
-      if (isDragging) {
-        if (!getIsDragging()) {
-          setIsDragging(true)
-        }
-
-        emitObservable({
-          eventName: 'onDrag',
-          slideActionType: getSlideActionType(),
-          ...props,
-        })
-
-        if (direction > 0) {
-          setSlideActionType('prev')
-        } else {
-          setSlideActionType('next')
-        }
-
+      function checkBounds() {
         const nextItemWillExceed =
           Math.abs(getCurrentSlidedValue()) + 100 >= fluidTotalWrapperScrollValue.current
 
@@ -415,6 +412,40 @@ function useSpringCarousel({
         if (getSlideActionType() === 'prev') {
           slideEndReached.current = false
         }
+      }
+
+      if (freeScroll && getIfShouldEnableFluidDrag()) {
+        setDragDirection()
+        emitDragObservable()
+        checkBounds()
+        setCarouselStyles.start({
+          from: {
+            [carouselSlideAxisRef.current]: getWrapperScrollDirection(),
+          },
+          to: {
+            [carouselSlideAxisRef.current]: -movement,
+          },
+          config: {
+            velocity: props.last ? 0 : props.velocity,
+            friction: props.last ? springConfig.friction : 50,
+            tension: props.last ? springConfig.tension : 500,
+          },
+        })
+        if (getWrapperScrollDirection() === 0 && getSlideActionType() === 'prev') {
+          cancelDrag()
+          return
+        }
+        return
+      }
+
+      if (isDragging) {
+        if (!getIsDragging()) {
+          setIsDragging(true)
+        }
+
+        emitDragObservable()
+        setDragDirection()
+        checkBounds()
 
         if (freeScroll) {
           if (getIfShouldEnableFluidDrag()) {
@@ -425,6 +456,8 @@ function useSpringCarousel({
               setCarouselStyles.start({
                 config: {
                   velocity: props.velocity,
+                  friction: 50,
+                  tension: 1000,
                 },
                 from: {
                   [carouselSlideAxisRef.current]: getWrapperScrollDirection(),
@@ -488,7 +521,8 @@ function useSpringCarousel({
       if (
         props.last &&
         !slideWhenThresholdIsReached &&
-        (nextItemTreshold || prevItemTreshold)
+        (nextItemTreshold || prevItemTreshold) &&
+        !freeScroll
       ) {
         if (nextItemTreshold) {
           if (!withLoop && getIsLastItem()) {
