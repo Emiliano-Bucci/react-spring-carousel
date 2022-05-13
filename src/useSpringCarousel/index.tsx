@@ -424,19 +424,17 @@ function useSpringCarousel({
         emitDragObservable()
         checkBounds()
 
-        if (props.first) {
-          setCarouselStyles.start({
+        setCarouselStyles.start({
+          from: {
             [carouselSlideAxisRef.current]: getWrapperScrollDirection(),
-            immediate: true,
-          })
-        } else {
-          setCarouselStyles.start({
+          },
+          to: {
             [carouselSlideAxisRef.current]: -movement,
-            config: {
-              velocity: props.velocity,
-            },
-          })
-        }
+          },
+          config: {
+            velocity: props.velocity,
+          },
+        })
 
         if (getWrapperScrollDirection() === 0 && getSlideActionType() === 'prev') {
           cancelDrag()
@@ -560,6 +558,7 @@ function useSpringCarousel({
     },
     {
       enabled: !disableGestures,
+      axis: carouselSlideAxisRef.current,
       from: () => {
         if (freeScroll) {
           if (carouselSlideAxisRef.current === 'x') {
