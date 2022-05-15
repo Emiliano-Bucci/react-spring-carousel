@@ -420,9 +420,15 @@ function useSpringCarousel({
       }
 
       if (freeScroll && getIfShouldEnableFluidDrag()) {
-        setDragDirection()
-        emitDragObservable()
-        checkBounds()
+        if (isDragging) {
+          if (!getIsDragging()) {
+            setIsDragging(true)
+          }
+
+          setDragDirection()
+          emitDragObservable()
+          checkBounds()
+        }
 
         setCarouselStyles.start({
           from: {
@@ -433,12 +439,22 @@ function useSpringCarousel({
           },
           config: {
             velocity: props.velocity,
+            friction: 50,
+            tension: 1400,
           },
         })
 
         if (getWrapperScrollDirection() === 0 && getSlideActionType() === 'prev') {
           cancelDrag()
           return
+        }
+        if (props.last) {
+          if (getSlideActionType() === 'prev') {
+            slideToPrevItem(props.velocity)
+          } else {
+            slideToNextItem(props.velocity)
+          }
+          setIsDragging(false)
         }
         return
       }
@@ -462,7 +478,7 @@ function useSpringCarousel({
                 config: {
                   velocity: props.velocity,
                   friction: 50,
-                  tension: 1000,
+                  tension: 1400,
                 },
                 from: {
                   [carouselSlideAxisRef.current]: getWrapperScrollDirection(),
@@ -529,6 +545,7 @@ function useSpringCarousel({
         (nextItemTreshold || prevItemTreshold) &&
         !freeScroll
       ) {
+        setIsDragging(false)
         if (nextItemTreshold) {
           if (!withLoop && getIsLastItem()) {
             resetAnimation()
