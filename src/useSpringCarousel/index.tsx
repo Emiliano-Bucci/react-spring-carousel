@@ -381,6 +381,7 @@ function useSpringCarousel({
               [carouselSlideAxisRef.current]: 0,
               config: {
                 velocity: props.velocity,
+                ...springConfig,
               },
             })
           } else if (slideEndReached.current && getSlideActionType() === 'next') {
@@ -388,6 +389,7 @@ function useSpringCarousel({
               [carouselSlideAxisRef.current]: -fluidTotalWrapperScrollValue.current,
               config: {
                 velocity: props.velocity,
+                ...springConfig,
               },
             })
           } else {
@@ -395,6 +397,7 @@ function useSpringCarousel({
               [carouselSlideAxisRef.current]: prevSlidedValue.current,
               config: {
                 velocity: props.velocity,
+                ...springConfig,
               },
             })
           }
@@ -403,6 +406,7 @@ function useSpringCarousel({
             [carouselSlideAxisRef.current]: -(getCurrentActiveItem() * getSlideValue()),
             config: {
               velocity: props.velocity,
+              ...springConfig,
             },
           })
         }
