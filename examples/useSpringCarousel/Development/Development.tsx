@@ -7,16 +7,13 @@ import { useSpringCarousel } from 'src/useSpringCarousel'
 const items = mockedItems.map(({ id, label, ...rest }) => ({
   id,
   renderItem: <SliderItem {...rest}>{label}</SliderItem>,
-  renderThumb: <div>asd</div>,
+  // renderThumb: <div>asd</div>,
 }))
 
 export function Development() {
   const { carouselFragment, slideToPrevItem, slideToNextItem, thumbsFragment } =
     useSpringCarousel({
       items,
-      slideWhenThresholdIsReached: false,
-      draggingSlideTreshold: 24,
-      slideType: 'fluid',
     })
 
   return (

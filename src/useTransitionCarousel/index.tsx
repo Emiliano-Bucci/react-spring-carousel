@@ -264,7 +264,6 @@ function useTransitionCarousel({
   }
   function slideToNextItem() {
     const isLastItem = activeItem === items.length - 1
-
     if (withLoop) {
       setSlideActionType('next')
       if (isLastItem) {
@@ -313,7 +312,6 @@ function useTransitionCarousel({
   }
   function slideToPrevItem() {
     const isFirstItem = activeItem === 0
-
     if (withLoop) {
       setSlideActionType('prev')
       if (isFirstItem) {

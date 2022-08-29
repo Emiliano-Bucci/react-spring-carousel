@@ -825,12 +825,12 @@ function useSpringCarousel({
   }
   function slideToNextItem(velocity?: number[]) {
     setSlideActionType('next')
+    slideStartReached.current = false
 
     if (slideType === 'fluid') {
       if (getIfItemsNotFillTheCarousel()) {
         return
       }
-      slideStartReached.current = false
 
       const nextItemWillExceed =
         Math.abs(getCurrentSlidedValue() - getSlideValue()) + 100 >=
