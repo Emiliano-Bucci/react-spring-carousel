@@ -184,6 +184,8 @@ function useTransitionCarousel({
           currentItem: {
             index: activeItem,
             id: items[activeItem].id,
+            startReached: activeItem === 0,
+            endReached: activeItem === items.length - 1,
           },
         })
       }
@@ -243,6 +245,8 @@ function useTransitionCarousel({
       nextItem: {
         index: newActiveItem,
         id: items[itemIndex].id,
+        startReached: newActiveItem === 0,
+        endReached: newActiveItem === items.length - 1,
       },
     })
 
@@ -270,32 +274,40 @@ function useTransitionCarousel({
           nextItem: {
             index: 0,
             id: items[0].id,
+            startReached: false,
+            endReached: false,
           },
         })
         setActiveItem(0)
       } else {
+        const newItem = activeItem + 1
         emitObservable({
           eventName: 'onSlideStartChange',
           slideActionType: getSlideActionType(),
           nextItem: {
-            index: activeItem + 1,
-            id: items[activeItem + 1].id,
+            index: newItem,
+            id: items[newItem].id,
+            startReached: false,
+            endReached: false,
           },
         })
-        setActiveItem(activeItem + 1)
+        setActiveItem(newItem)
       }
     } else {
       if (!isLastItem) {
+        const newItem = activeItem + 1
         emitObservable({
           eventName: 'onSlideStartChange',
           slideActionType: getSlideActionType(),
           nextItem: {
-            index: activeItem + 1,
-            id: items[activeItem + 1].id,
+            index: newItem,
+            id: items[newItem].id,
+            startReached: false,
+            endReached: newItem === items.length - 1,
           },
         })
         setSlideActionType('next')
-        setActiveItem(activeItem + 1)
+        setActiveItem(newItem)
       }
     }
   }
@@ -305,39 +317,48 @@ function useTransitionCarousel({
     if (withLoop) {
       setSlideActionType('prev')
       if (isFirstItem) {
+        const newItem = items.length - 1
         emitObservable({
           eventName: 'onSlideStartChange',
           slideActionType: getSlideActionType(),
           nextItem: {
-            index: items.length - 1,
-            id: items[items.length - 1].id,
+            index: newItem,
+            id: items[newItem].id,
+            startReached: false,
+            endReached: false,
           },
         })
 
-        setActiveItem(items.length - 1)
+        setActiveItem(newItem)
       } else {
+        const newItem = activeItem - 1
         emitObservable({
           eventName: 'onSlideStartChange',
           slideActionType: getSlideActionType(),
           nextItem: {
-            index: activeItem - 1,
-            id: items[activeItem - 1].id,
+            index: newItem,
+            id: items[newItem].id,
+            startReached: false,
+            endReached: false,
           },
         })
-        setActiveItem(activeItem - 1)
+        setActiveItem(newItem)
       }
     } else {
       if (!isFirstItem) {
-        setSlideActionType('prev')
+        const newItem = activeItem - 1
         emitObservable({
           eventName: 'onSlideStartChange',
           slideActionType: getSlideActionType(),
           nextItem: {
-            index: activeItem - 1,
-            id: items[activeItem - 1].id,
+            index: newItem,
+            id: items[newItem].id,
+            startReached: newItem === 0,
+            endReached: false,
           },
         })
-        setActiveItem(activeItem - 1)
+        setSlideActionType('prev')
+        setActiveItem(newItem)
       }
     }
   }
@@ -346,7 +367,6 @@ function useTransitionCarousel({
   }
   function getIsNextItem(id: string) {
     const itemIndex = findItemIndex(id)
-
     if (withLoop && activeItem === items.length - 1) {
       return itemIndex === 0
     }
@@ -355,7 +375,6 @@ function useTransitionCarousel({
   }
   function getIsPrevItem(id: string) {
     const itemIndex = findItemIndex(id)
-
     if (withLoop && activeItem === 0) {
       return itemIndex === items.length - 1
     }
