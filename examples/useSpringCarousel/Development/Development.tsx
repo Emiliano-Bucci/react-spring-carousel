@@ -14,6 +14,7 @@ export function Development() {
   const { carouselFragment, slideToPrevItem, slideToNextItem, thumbsFragment } =
     useSpringCarousel({
       items,
+      slideType: 'fluid',
     })
 
   return (

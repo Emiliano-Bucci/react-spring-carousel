@@ -295,6 +295,7 @@ function useSpringCarousel({
       }
 
       initialWindowWidth.current = window.innerWidth
+      prevSlidedValue.current = getCurrentSlidedValue()
     } else {
       setCarouselStyles.start({
         immediate: true,
@@ -794,7 +795,7 @@ function useSpringCarousel({
         }
       } else {
         slideToItem({
-          customTo: getCurrentSlidedValue() + getSlideValue(),
+          customTo: prevSlidedValue.current + getSlideValue(),
           velocity,
           endReached: false,
           startReached: false,
@@ -877,7 +878,7 @@ function useSpringCarousel({
         })
       } else {
         slideToItem({
-          customTo: getCurrentSlidedValue() - getSlideValue(),
+          customTo: prevSlidedValue.current - getSlideValue(),
           velocity,
           startReached: false,
           endReached: false,
