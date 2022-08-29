@@ -95,6 +95,7 @@ function useSpringCarousel({
   const isAnimating = useRef(false)
   const windowIsHidden = useRef(false)
   const fluidTotalWrapperScrollValue = useRef(0)
+  const slideStartReached = useRef(initialActiveItem === 0)
   const slideEndReached = useRef(false)
   const currentWindowWidth = useRef(0)
   const initialWindowWidth = useRef(0)
@@ -379,35 +380,23 @@ function useSpringCarousel({
           ) {
             setCarouselStyles.start({
               [carouselSlideAxisRef.current]: 0,
-              config: {
-                velocity: props.velocity,
-                ...springConfig,
-              },
+              ...getSpringConfig(props.velocity),
             })
           } else if (slideEndReached.current && getSlideActionType() === 'next') {
             setCarouselStyles.start({
               [carouselSlideAxisRef.current]: -fluidTotalWrapperScrollValue.current,
-              config: {
-                velocity: props.velocity,
-                ...springConfig,
-              },
+              ...getSpringConfig(props.velocity),
             })
           } else {
             setCarouselStyles.start({
               [carouselSlideAxisRef.current]: prevSlidedValue.current,
-              config: {
-                velocity: props.velocity,
-                ...springConfig,
-              },
+              ...getSpringConfig(props.velocity),
             })
           }
         } else {
           setCarouselStyles.start({
             [carouselSlideAxisRef.current]: -(getCurrentActiveItem() * getSlideValue()),
-            config: {
-              velocity: props.velocity,
-              ...springConfig,
-            },
+            ...getSpringConfig(props.velocity),
           })
         }
       }
@@ -517,10 +506,20 @@ function useSpringCarousel({
           getSlideActionType() === 'next' &&
           nextItemTreshold
         ) {
-          slideEndReached.current = false
           cancelDrag()
           setCarouselStyles.start({
             [carouselSlideAxisRef.current]: -fluidTotalWrapperScrollValue.current,
+            ...getSpringConfig(props.velocity),
+          })
+        } else if (
+          slideStartReached.current &&
+          getSlideActionType() === 'prev' &&
+          prevItemTreshold
+        ) {
+          cancelDrag()
+          setCarouselStyles.start({
+            [carouselSlideAxisRef.current]: 0,
+            ...getSpringConfig(props.velocity),
           })
         } else if (slideWhenThresholdIsReached) {
           if (nextItemTreshold) {
@@ -675,6 +674,24 @@ function useSpringCarousel({
       [carouselSlideAxisRef.current]: -(getSlideValue() * to!),
     }
   }
+  function getSpringConfig(velocity?: number[]) {
+    if (velocity) {
+      return {
+        config: {
+          ...defaultDragSpringConfig,
+          velocity,
+          friction: undefined,
+          tension: undefined,
+        },
+      }
+    }
+    return {
+      config: {
+        velocity: 0,
+        ...springConfig,
+      },
+    }
+  }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   function slideToItem({
     from,
@@ -683,6 +700,8 @@ function useSpringCarousel({
     immediate = false,
     onRest = () => {},
     velocity,
+    startReached = false,
+    endReached = false,
   }: SlideToItemFnProps) {
     if (!immediate) {
       setActiveItem(to)
@@ -691,8 +710,10 @@ function useSpringCarousel({
         eventName: 'onSlideStartChange',
         slideActionType: getSlideActionType(),
         nextItem: {
-          index: slideType === 'fluid' ? -1 : to,
+          index: slideType === 'fluid' ? 0 : to,
           id: slideType === 'fluid' ? '' : items[to].id,
+          startReached,
+          endReached,
         },
       })
     }
@@ -700,21 +721,7 @@ function useSpringCarousel({
     setCarouselStyles.start({
       ...getFromValue(from),
       to: getToValue(customTo, to),
-      ...(velocity
-        ? {
-            config: {
-              ...defaultDragSpringConfig,
-              velocity,
-              friction: undefined,
-              tension: undefined,
-            },
-          }
-        : {
-            config: {
-              velocity: 0,
-              ...springConfig,
-            },
-          }),
+      ...getSpringConfig(velocity),
       immediate,
       onRest: val => {
         if (val.finished) {
@@ -728,6 +735,8 @@ function useSpringCarousel({
               currentItem: {
                 index: slideType === 'fluid' ? -1 : getCurrentActiveItem(),
                 id: slideType === 'fluid' ? '' : items[getCurrentActiveItem()].id,
+                startReached,
+                endReached,
               },
             })
           }
@@ -759,27 +768,36 @@ function useSpringCarousel({
           customTo: nextValue < 0 ? 0 : nextValue,
           from: mainCarouselWrapperRef.current!.scrollLeft,
           velocity,
+          endReached: false,
+          startReached: false,
         })
       } else if (nextPrevValue >= 0) {
         if (withLoop) {
           slideToItem({
             from: getCurrentSlidedValue() - getCarouselItemWidth() * items.length,
             velocity,
+            endReached: false,
+            startReached: false,
             customTo:
               getCurrentSlidedValue() -
               getCarouselItemWidth() * items.length +
               getSlideValue(),
           })
-        } else {
+        } else if (getCurrentSlidedValue() !== 0) {
+          slideStartReached.current = true
           slideToItem({
             customTo: 0,
             velocity,
+            endReached: false,
+            startReached: true,
           })
         }
       } else {
         slideToItem({
           customTo: getCurrentSlidedValue() + getSlideValue(),
           velocity,
+          endReached: false,
+          startReached: false,
         })
       }
     } else {
@@ -792,11 +810,15 @@ function useSpringCarousel({
           from: getCurrentSlidedValue() - getSlideValue() * items.length,
           to: items.length - 1,
           velocity,
+          endReached: false,
+          startReached: false,
         })
       } else {
         slideToItem({
           to: getPrevItem(),
           velocity,
+          endReached: false,
+          startReached: getPrevItem() === 0,
         })
       }
     }
@@ -808,6 +830,7 @@ function useSpringCarousel({
       if (getIfItemsNotFillTheCarousel()) {
         return
       }
+      slideStartReached.current = false
 
       const nextItemWillExceed =
         Math.abs(getCurrentSlidedValue() - getSlideValue()) + 100 >=
@@ -818,10 +841,16 @@ function useSpringCarousel({
         const willExceed = nextValue > fluidTotalWrapperScrollValue.current
         const val = mainCarouselWrapperRef.current!.scrollLeft + getSlideValue()
 
+        if (willExceed) {
+          slideEndReached.current = true
+        }
+
         slideToItem({
           velocity,
           customTo: willExceed ? fluidTotalWrapperScrollValue.current : val,
           from: mainCarouselWrapperRef.current!.scrollLeft,
+          startReached: false,
+          endReached: willExceed,
         })
       } else if (
         withLoop &&
@@ -833,6 +862,8 @@ function useSpringCarousel({
           from: getCurrentSlidedValue() + currentWidth,
           customTo: getCurrentSlidedValue() + currentWidth - getSlideValue(),
           velocity,
+          startReached: false,
+          endReached: false,
         })
       } else if (slideEndReached.current) {
         return
@@ -841,11 +872,15 @@ function useSpringCarousel({
         slideToItem({
           customTo: -fluidTotalWrapperScrollValue.current,
           velocity,
+          startReached: false,
+          endReached: true,
         })
       } else {
         slideToItem({
           customTo: getCurrentSlidedValue() - getSlideValue(),
           velocity,
+          startReached: false,
+          endReached: false,
         })
       }
     } else {
@@ -860,23 +895,34 @@ function useSpringCarousel({
         Math.abs(getCurrentSlidedValue() - getSlideValue() + 25) >
         fluidTotalWrapperScrollValue.current
 
-      if (nextItemWillExceed && !getIsDragging()) {
+      if (
+        (nextItemWillExceed && !getIsDragging()) ||
+        getNextItem() === items.length - 1
+      ) {
         slideEndReached.current = true
-      } else if (slideEndReached.current) {
+      }
+
+      if (slideEndReached.current) {
         slideToItem({
           to: items.length - itemsPerSlideRef.current,
           velocity,
+          startReached: false,
+          endReached: true,
         })
       } else if (getIsLastItem()) {
         slideToItem({
           from: getCurrentSlidedValue() + getSlideValue() * items.length,
           to: 0,
           velocity,
+          startReached: false,
+          endReached: false,
         })
       } else {
         slideToItem({
           to: getNextItem(),
           velocity,
+          startReached: false,
+          endReached: slideEndReached.current,
         })
       }
     }
@@ -916,6 +962,8 @@ function useSpringCarousel({
 
     slideToItem({
       to: itemIndex,
+      startReached: itemIndex === 0,
+      endReached: itemIndex === items.length - 1,
     })
   }
   function getItemStyles(_itemsPerSlide: number) {
@@ -1038,6 +1086,8 @@ function useSpringCarousel({
       slideToItem({
         to: initialActiveItem,
         immediate: true,
+        startReached: initialActiveItem === 0,
+        endReached: initialActiveItem === items.length - 1,
       })
       setActiveItem(initialActiveItem)
       if (!withLoop && carouselTrackWrapperRef.current) {
@@ -1051,6 +1101,8 @@ function useSpringCarousel({
       slideToItem({
         to: initialActiveItem,
         immediate: true,
+        startReached: initialActiveItem === 0,
+        endReached: initialActiveItem === items.length - 1,
       })
       setActiveItem(initialActiveItem)
     }

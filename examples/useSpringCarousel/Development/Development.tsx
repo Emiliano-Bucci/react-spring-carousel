@@ -16,6 +16,7 @@ export function Development() {
       items,
       slideWhenThresholdIsReached: false,
       draggingSlideTreshold: 24,
+      slideType: 'fluid',
     })
 
   return (

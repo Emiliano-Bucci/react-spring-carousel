@@ -12,6 +12,8 @@ export type SlideToItemFnProps = {
   immediate?: boolean
   customTo?: number
   velocity?: number[]
+  startReached: boolean
+  endReached: boolean
   onRest?(): void
 }
 
@@ -23,6 +25,8 @@ type OnSlideStartChange = {
   nextItem: {
     index: number
     id: string
+    startReached: boolean
+    endReached: boolean
   }
 }
 type OnSlideChange = {
@@ -31,6 +35,8 @@ type OnSlideChange = {
   currentItem: {
     index: number
     id: string
+    startReached: boolean
+    endReached: boolean
   }
 }
 
