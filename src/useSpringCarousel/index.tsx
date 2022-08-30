@@ -717,8 +717,8 @@ function useSpringCarousel({
         eventName: 'onSlideStartChange',
         slideActionType: getSlideActionType(),
         nextItem: {
-          index: slideType === 'fluid' ? 0 : to,
-          id: slideType === 'fluid' ? '' : items[to].id,
+          index: to,
+          id: items[to].id,
           startReached,
           endReached,
         },
@@ -741,8 +741,8 @@ function useSpringCarousel({
               eventName: 'onSlideChange',
               slideActionType: getSlideActionType(),
               currentItem: {
-                index: slideType === 'fluid' ? -1 : getCurrentActiveItem(),
-                id: slideType === 'fluid' ? '' : items[getCurrentActiveItem()].id,
+                index: getCurrentActiveItem(),
+                id: items[getCurrentActiveItem()].id,
                 startReached,
                 endReached,
               },
