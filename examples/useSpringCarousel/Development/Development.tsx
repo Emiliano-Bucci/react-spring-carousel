@@ -36,7 +36,7 @@ export function Development() {
             overflow: hidden;
           `}
         >
-          <button onClick={() => slideToItem(-1)}>prev</button>
+          <button onClick={() => slideToItem(2)}>prev</button>
           <SliderWrapper>{carouselFragment}</SliderWrapper>
           <button onClick={slideToNextItem}>next</button>
         </div>
