@@ -80,7 +80,7 @@ function useSpringCarousel({
       if (items.length === itemsPerSlide) {
         return [...items, ...items, ...items, ...items, ...items]
       }
-      return [...items, ...items, ...items]
+      return [...items, ...items, ...items, ...items]
     }
     return items
   }
@@ -713,8 +713,8 @@ function useSpringCarousel({
         nextItem: {
           index: slideType === 'fluid' ? 0 : to,
           id: slideType === 'fluid' ? '' : items[to].id,
-          startReached,
-          endReached,
+          startReached: withLoop ? false : startReached,
+          endReached: withLoop ? false : endReached,
         },
       })
     }
@@ -780,7 +780,7 @@ function useSpringCarousel({
             endReached: false,
             startReached: false,
             customTo:
-              getCurrentSlidedValue() -
+              prevSlidedValue.current -
               getCarouselItemWidth() * items.length +
               getSlideValue(),
           })
@@ -861,7 +861,7 @@ function useSpringCarousel({
         const currentWidth = getCarouselItemWidth() * items.length
         slideToItem({
           from: getCurrentSlidedValue() + currentWidth,
-          customTo: getCurrentSlidedValue() + currentWidth - getSlideValue(),
+          customTo: prevSlidedValue.current + currentWidth - getSlideValue(),
           velocity,
           startReached: false,
           endReached: false,

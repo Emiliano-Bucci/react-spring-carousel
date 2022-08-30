@@ -15,6 +15,7 @@ export function Development() {
     useSpringCarousel({
       items,
       slideType: 'fluid',
+      withLoop: true,
     })
 
   return (
