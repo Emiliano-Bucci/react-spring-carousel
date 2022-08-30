@@ -11,11 +11,11 @@ const items = mockedItems.map(({ id, label, ...rest }) => ({
 }))
 
 export function Development() {
-  const { carouselFragment, slideToPrevItem, slideToNextItem, thumbsFragment } =
+  const { carouselFragment, slideToNextItem, thumbsFragment, slideToItem } =
     useSpringCarousel({
       items,
       slideType: 'fluid',
-      withLoop: true,
+      gutter: 8,
     })
 
   return (
@@ -36,7 +36,7 @@ export function Development() {
             overflow: hidden;
           `}
         >
-          <button onClick={slideToPrevItem}>prev</button>
+          <button onClick={() => slideToItem(-1)}>prev</button>
           <SliderWrapper>{carouselFragment}</SliderWrapper>
           <button onClick={slideToNextItem}>next</button>
         </div>

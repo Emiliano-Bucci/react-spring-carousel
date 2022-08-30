@@ -1156,7 +1156,6 @@ function useSpringCarousel({
     },
     ...(slideType === 'fixed'
       ? {
-          slideToItem: _slideToItem,
           getIsActiveItem: (id: string) => {
             return findItemIndex(id) === getCurrentActiveItem()
           },
@@ -1166,6 +1165,7 @@ function useSpringCarousel({
           }),
         }
       : {}),
+    slideToItem: _slideToItem,
   }
 
   const handleCarouselFragmentRef = (ref: HTMLDivElement | null) => {

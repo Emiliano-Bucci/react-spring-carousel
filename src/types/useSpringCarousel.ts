@@ -118,6 +118,7 @@ export type UseSpringFluidSlideTypeReturnProps = {
   slideToPrevItem(): void
   getIsAnimating(): boolean
   getIsDragging(): boolean
+  slideToItem(item: number): void
 }
 
 export type UseSpringFixedSlideTypeReturnProps = {
