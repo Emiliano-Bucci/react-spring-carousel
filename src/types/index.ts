@@ -14,14 +14,17 @@ export type SlideToItemFnProps = {
   velocity?: number[]
   startReached: boolean
   endReached: boolean
+  mode: SlideMode
   onRest?(): void
 }
 
 export type SlideActionType = 'prev' | 'next'
+export type SlideMode = 'drag' | 'click'
 
 type OnSlideStartChange = {
   eventName: 'onSlideStartChange'
   slideActionType: SlideActionType
+  slideMode: SlideMode
   nextItem: {
     index: number
     id: string
@@ -32,6 +35,7 @@ type OnSlideStartChange = {
 type OnSlideChange = {
   eventName: 'onSlideChange'
   slideActionType: SlideActionType
+  slideMode: SlideMode
   currentItem: {
     index: number
     id: string
@@ -64,8 +68,8 @@ export type UseSpringCarouselEventsObservableProps =
   | OnDrag
   | OnFullscreenChange
 export type UseTransitionCarouselEventsObservableProps =
-  | OnSlideStartChange
-  | OnSlideChange
+  | Omit<OnSlideStartChange, 'slideMode'>
+  | Omit<OnSlideChange, 'slideMode'>
   | OnFullscreenChange
   | OnLeftSwipe
   | OnRightSwipe
