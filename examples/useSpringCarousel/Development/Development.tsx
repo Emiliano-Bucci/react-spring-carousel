@@ -16,6 +16,7 @@ export function Development() {
       items,
       slideType: 'fluid',
       gutter: 8,
+      withLoop: true,
     })
 
   return (

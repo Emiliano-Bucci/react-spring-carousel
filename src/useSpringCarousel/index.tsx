@@ -505,7 +505,8 @@ function useSpringCarousel({
         } else if (
           slideEndReached.current &&
           getSlideActionType() === 'next' &&
-          nextItemTreshold
+          nextItemTreshold &&
+          !withLoop
         ) {
           cancelDrag()
           setCarouselStyles.start({
@@ -515,7 +516,8 @@ function useSpringCarousel({
         } else if (
           slideStartReached.current &&
           getSlideActionType() === 'prev' &&
-          prevItemTreshold
+          prevItemTreshold &&
+          !withLoop
         ) {
           cancelDrag()
           setCarouselStyles.start({
