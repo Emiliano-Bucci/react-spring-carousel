@@ -10,6 +10,7 @@ export type UseSpringCarouselBaseProps = {
   carouselSlideAxis?: 'x' | 'y'
   gutter?: number
   shouldResizeOnWindowResize?: boolean
+  init?: boolean
 }
 
 /**

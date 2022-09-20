@@ -1,4 +1,4 @@
-import { useRef, createContext, useContext } from 'react'
+import { useRef, createContext, useContext, useEffect } from 'react'
 import { useSpring, config, animated } from 'react-spring'
 import { useDrag } from '@use-gesture/react'
 import { useCustomEventsModule, useFullscreenModule, useThumbsModule } from '../modules'
@@ -75,6 +75,7 @@ function useSpringCarousel({
   enableFreeScrollDrag,
   itemsPerSlide = 1,
   slideType = 'fixed',
+  init = true,
 }: UseSpringCarouselProps): ReturnType<'fixed' | 'fluid'> {
   function getItems() {
     if (withLoop) {
@@ -128,6 +129,7 @@ function useSpringCarousel({
   const [carouselStyles, setCarouselStyles] = useSpring(() => ({
     y: 0,
     x: 0,
+    pause: !init,
     onChange: ({ value }) => {
       if (mainCarouselWrapperRef.current && freeScroll) {
         mainCarouselWrapperRef.current[
@@ -137,7 +139,7 @@ function useSpringCarousel({
     },
   }))
 
-  useIsomorphicLayoutEffect(() => {
+  useEffect(() => {
     if (draggingSlideTreshold) {
       draggingSlideTresholdRef.current = draggingSlideTreshold
     } else {
@@ -145,6 +147,7 @@ function useSpringCarousel({
     }
 
     resize()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     draggingSlideTreshold,
     itemsPerSlide,
@@ -199,6 +202,7 @@ function useSpringCarousel({
   function getIsFirstItem() {
     return getCurrentActiveItem() === 0
   }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   function getSlideValue() {
     if (!carouselTrackWrapperRef.current) {
       return 0
@@ -275,6 +279,7 @@ function useSpringCarousel({
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   function resize() {
+    if (!init) return
     currentWindowWidth.current = window.innerWidth
 
     if (slideType === 'fluid') {
@@ -308,7 +313,7 @@ function useSpringCarousel({
     adjustCarouselWrapperPosition(carouselTrackWrapperRef.current!)
   }
   function handleResize() {
-    if (window.innerWidth === currentWindowWidth.current || freeScroll) {
+    if (window.innerWidth === currentWindowWidth.current || freeScroll || !init) {
       return
     }
     resize()
@@ -581,7 +586,7 @@ function useSpringCarousel({
       }
     },
     {
-      enabled: !disableGestures,
+      enabled: init && !disableGestures,
       axis: carouselSlideAxisRef.current,
       from: () => {
         if (freeScroll) {
@@ -708,6 +713,8 @@ function useSpringCarousel({
     endReached: _endReached = false,
     mode,
   }: SlideToItemFnProps) {
+    if (!init) return
+
     const startReached = withLoop ? false : _startReached
     const endReached = withLoop ? false : _endReached
 
@@ -736,6 +743,7 @@ function useSpringCarousel({
       to: getToValue(customTo, to),
       ...getSpringConfig(velocity),
       immediate,
+      pause: !init,
       onRest: val => {
         if (val.finished) {
           setIsDragging(false)
@@ -765,6 +773,7 @@ function useSpringCarousel({
     return getCurrentActiveItem() === items.length - 1
   }
   function slideToPrevItem(velocity: number[] | undefined = undefined, mode: SlideMode) {
+    if (!init) return
     setSlideActionType('prev')
     slideEndReached.current = false
 
@@ -847,6 +856,7 @@ function useSpringCarousel({
     }
   }
   function slideToNextItem(velocity: number[] | undefined = undefined, mode: SlideMode) {
+    if (!init) return
     setSlideActionType('next')
     slideStartReached.current = false
 
@@ -963,6 +973,7 @@ function useSpringCarousel({
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   function _slideToItem(item: string | number) {
+    if (!init) return
     let itemIndex = 0
 
     if (typeof item === 'string') {
@@ -1063,46 +1074,49 @@ function useSpringCarousel({
     }
     return touchAction
   }
-  // Perform some check on first mount
-  useIsomorphicMount(() => {
-    if (itemsPerSlide % 2 === 0 && initialStartingPositionRef.current) {
-      throw new Error(
-        `initialStartingPosition can be only used if itemsPerSlide is an even value.`,
-      )
+  // Perform some check when carousel should be initialized
+  useEffect(() => {
+    if (init) {
+      if (itemsPerSlide % 2 === 0 && initialStartingPositionRef.current) {
+        throw new Error(
+          `initialStartingPosition can be only used if itemsPerSlide is an even value.`,
+        )
+      }
+      if (draggingSlideTresholdRef.current < 0) {
+        throw new Error('draggingSlideTreshold must be greater than 0')
+      }
+      if (draggingSlideTresholdRef.current > getSlideValue() / 2) {
+        throw new Error(
+          `draggingSlideTreshold must be equal or less than the half of the width of an item, which is ${Math.floor(
+            getSlideValue() / 2,
+          )}`,
+        )
+      }
+      if (itemsPerSlideRef.current < 1) {
+        throw new Error(`The itemsPerSlide prop can't be less than 1.`)
+      }
+      if (itemsPerSlideRef.current > items.length) {
+        throw new Error(
+          `The itemsPerSlide prop can't be greater than the total length of the items you provide.`,
+        )
+      }
+      if (initialActiveItemRef.current < 0) {
+        throw new Error('The initialActiveItem cannot be less than 0.')
+      }
+      if (initialActiveItemRef.current > items.length) {
+        throw new Error(
+          'The initialActiveItem cannot be greater than the total length of the items you provide.',
+        )
+      }
+      if (!shouldResizeOnWindowResize) {
+        console.warn(
+          'You set shouldResizeOnWindowResize={false}; be aware that the carousel could behave in a strange way if you also use the fullscreen functionality or if you change the mobile orientation.',
+        )
+      }
     }
-    if (draggingSlideTresholdRef.current < 0) {
-      throw new Error('draggingSlideTreshold must be greater than 0')
-    }
-    if (draggingSlideTresholdRef.current > getSlideValue() / 2) {
-      throw new Error(
-        `draggingSlideTreshold must be equal or less than the half of the width of an item, which is ${Math.floor(
-          getSlideValue() / 2,
-        )}`,
-      )
-    }
-    if (itemsPerSlideRef.current < 1) {
-      throw new Error(`The itemsPerSlide prop can't be less than 1.`)
-    }
-    if (itemsPerSlideRef.current > items.length) {
-      throw new Error(
-        `The itemsPerSlide prop can't be greater than the total length of the items you provide.`,
-      )
-    }
-    if (initialActiveItemRef.current < 0) {
-      throw new Error('The initialActiveItem cannot be less than 0.')
-    }
-    if (initialActiveItemRef.current > items.length) {
-      throw new Error(
-        'The initialActiveItem cannot be greater than the total length of the items you provide.',
-      )
-    }
-    if (!shouldResizeOnWindowResize) {
-      console.warn(
-        'You set shouldResizeOnWindowResize={false}; be aware that the carousel could behave in a strange way if you also use the fullscreen functionality or if you change the mobile orientation.',
-      )
-    }
-  })
-  useIsomorphicMount(() => {
+  }, [getSlideValue, init, items.length, itemsPerSlide, shouldResizeOnWindowResize])
+  useIsomorphicLayoutEffect(() => {
+    if (!init) return
     function handleVisibilityChange() {
       if (document.hidden) {
         windowIsHidden.current = true
@@ -1114,8 +1128,9 @@ function useSpringCarousel({
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  })
+  }, [init])
   useIsomorphicMount(() => {
+    if (!init) return
     isFirstMount.current = false
     fluidTotalWrapperScrollValue.current = getFluidWrapperScrollValue()
     initialWindowWidth.current = window.innerWidth
@@ -1136,7 +1151,8 @@ function useSpringCarousel({
       }
     }
   })
-  useIsomorphicLayoutEffect(() => {
+  useEffect(() => {
+    if (!init) return
     if (initialActiveItem < items.length && initialActiveItem !== activeItem.current) {
       slideToItem({
         to: initialActiveItem,
@@ -1147,17 +1163,24 @@ function useSpringCarousel({
       })
       setActiveItem(initialActiveItem)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialActiveItem])
-  useIsomorphicLayoutEffect(() => {
+  useEffect(() => {
+    if (!init) return
     if (shouldResizeOnWindowResize) {
       window.addEventListener('resize', handleResize)
       return () => {
         window.removeEventListener('resize', handleResize)
       }
     }
+    if (!init && carouselTrackWrapperRef.current) {
+      carouselTrackWrapperRef.current.style.left = '0px'
+      carouselTrackWrapperRef.current.style.top = '0px'
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldResizeOnWindowResize])
-  useIsomorphicLayoutEffect(() => {
+  }, [shouldResizeOnWindowResize, init])
+  useEffect(() => {
+    if (!init) return
     if (carouselTrackWrapperRef.current) {
       if (carouselSlideAxisRef.current === 'x') {
         carouselTrackWrapperRef.current.style.top = '0px'
@@ -1166,8 +1189,9 @@ function useSpringCarousel({
         carouselTrackWrapperRef.current.style.left = '0px'
       }
     }
-  }, [carouselSlideAxis])
-  useIsomorphicLayoutEffect(() => {
+  }, [carouselSlideAxis, init])
+  useEffect(() => {
+    if (!init) return
     fluidTotalWrapperScrollValue.current = getFluidWrapperScrollValue()
     const itemsAreEqual = items.length === prevItems.current.length
 
@@ -1177,7 +1201,7 @@ function useSpringCarousel({
 
     prevItems.current = items
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getFluidWrapperScrollValue, items])
+  }, [getFluidWrapperScrollValue, items, init])
 
   const contextProps = {
     useListenToCustomEvent,

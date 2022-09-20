@@ -3,6 +3,7 @@ import { SliderItem } from 'examples/components/SliderItem/SliderItem'
 import { SliderWrapper } from 'examples/components/SliderWrapper/SliderWrapper'
 import { css } from '@emotion/react'
 import { useSpringCarousel } from 'src/useSpringCarousel'
+import { useState } from 'react'
 
 const items = mockedItems.map(({ id, label, ...rest }) => ({
   id,
@@ -11,13 +12,13 @@ const items = mockedItems.map(({ id, label, ...rest }) => ({
 }))
 
 export function Development() {
-  const { carouselFragment, slideToNextItem, thumbsFragment, slideToItem } =
-    useSpringCarousel({
-      items,
-      slideType: 'fluid',
-      gutter: 8,
-      withLoop: true,
-    })
+  const [init, set] = useState(false)
+  const { carouselFragment, slideToNextItem, thumbsFragment } = useSpringCarousel({
+    items,
+    gutter: 8,
+    withLoop: true,
+    init,
+  })
 
   return (
     <div
@@ -37,7 +38,7 @@ export function Development() {
             overflow: hidden;
           `}
         >
-          <button onClick={() => slideToItem(2)}>prev</button>
+          <button onClick={() => set(p => !p)}>prev</button>
           <SliderWrapper>{carouselFragment}</SliderWrapper>
           <button onClick={slideToNextItem}>next</button>
         </div>
