@@ -107,10 +107,11 @@ export function useSpringCarousel({
 
     lastItemReached.current = false;
 
-    if (slideType === "fixed") {
-      const nextItemWillEceed =
-        (activeItem.current - 1) * (getSlideValue() - getSlideValue() / 2) < 0;
+    const nextItemWillEceed = withLoop
+      ? (activeItem.current - 1) * getSlideValue() < 0
+      : (activeItem.current - 1) * (getSlideValue() - getSlideValue() / 2) < 0;
 
+    if (slideType === "fixed") {
       if (nextItemWillEceed) {
         firstItemReached.current = true;
 
@@ -129,11 +130,6 @@ export function useSpringCarousel({
         });
       }
     } else {
-      const nextItemWillEceed = withLoop
-        ? (activeItem.current - 1) * getSlideValue() < 0
-        : (activeItem.current - 1) * (getSlideValue() - getSlideValue() / 2) <
-          0;
-
       if (nextItemWillEceed) {
         firstItemReached.current = true;
 
@@ -165,10 +161,12 @@ export function useSpringCarousel({
 
     firstItemReached.current = false;
 
-    if (slideType === "fixed") {
-      const nextItemWillExceed =
-        (activeItem.current + 1) * (getSlideValue() + getSlideValue() / 2) >=
+    const nextItemWillExceed = withLoop
+      ? (activeItem.current + 1) * getSlideValue() >= getTotalScrollValue()
+      : (activeItem.current + 1) * (getSlideValue() + getSlideValue() / 2) >=
         getTotalScrollValue();
+
+    if (slideType === "fixed") {
       if (nextItemWillExceed) {
         lastItemReached.current = true;
 
@@ -187,11 +185,6 @@ export function useSpringCarousel({
         });
       }
     } else {
-      const nextItemWillExceed = withLoop
-        ? (activeItem.current + 1) * getSlideValue() >= getTotalScrollValue()
-        : (activeItem.current + 1) * (getSlideValue() + getSlideValue() / 2) >=
-          getTotalScrollValue();
-
       if (nextItemWillExceed) {
         lastItemReached.current = true;
 
