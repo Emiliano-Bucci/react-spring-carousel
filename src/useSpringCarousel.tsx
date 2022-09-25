@@ -105,6 +105,7 @@ export function useSpringCarousel({
   function slideToPrevItem() {
     if (!init || (firstItemReached.current && !withLoop)) return;
 
+    slideActionType.current = "prev";
     lastItemReached.current = false;
 
     const nextItemWillEceed = withLoop
@@ -159,6 +160,7 @@ export function useSpringCarousel({
   function slideToNextItem() {
     if (!init || (lastItemReached.current && !withLoop)) return;
 
+    slideActionType.current = "next";
     firstItemReached.current = false;
 
     const nextItemWillExceed = withLoop
