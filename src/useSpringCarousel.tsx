@@ -94,15 +94,19 @@ export function useSpringCarousel({
   }
 
   function getTotalScrollValue() {
-    return getSlideValue() * items.length;
+    return Math.round(
+      Number(carouselTrackWrapperRef.current?.scrollWidth) -
+        carouselTrackWrapperRef.current!.getBoundingClientRect().width
+    );
   }
   function slideToPrevItem() {
-    if (!init) return;
+    if (!init || (firstItemReached.current && !withLoop)) return;
+
+    lastItemReached.current = false;
+    const nextItemWillEceed =
+      (activeItem.current - 1) * (getSlideValue() - getSlideValue() / 2) < 0;
 
     if (slideType === "fixed") {
-      const nextItemWillEceed = (activeItem.current - 1) * getSlideValue() < 0;
-      lastItemReached.current = false;
-
       if (nextItemWillEceed) {
         firstItemReached.current = true;
 
@@ -113,25 +117,40 @@ export function useSpringCarousel({
             nextActiveItem: items.length - 1,
           });
         }
-        return;
+      } else {
+        slideToItem({
+          from: spring.x.get(),
+          to: -((activeItem.current - 1) * getSlideValue()),
+          nextActiveItem: activeItem.current - 1,
+        });
       }
-
-      slideToItem({
-        from: spring.x.get(),
-        to: -((activeItem.current - 1) * getSlideValue()),
-        nextActiveItem: activeItem.current - 1,
-      });
+    } else {
+      if (nextItemWillEceed) {
+        firstItemReached.current = true;
+        slideToItem({
+          from: spring.x.get(),
+          to: 0,
+          nextActiveItem: 0,
+        });
+      } else {
+        slideToItem({
+          from: spring.x.get(),
+          to: -((activeItem.current - 1) * getSlideValue()),
+          nextActiveItem: activeItem.current - 1,
+        });
+      }
     }
   }
 
   function slideToNextItem() {
-    if (!init) return;
+    if (!init || (lastItemReached.current && !withLoop)) return;
+
+    firstItemReached.current = false;
+    const nextItemWillExceed =
+      (activeItem.current + 1) * (getSlideValue() + getSlideValue() / 2) >=
+      getTotalScrollValue();
 
     if (slideType === "fixed") {
-      const nextItemWillExceed =
-        (activeItem.current + 1) * getSlideValue() >= getTotalScrollValue();
-      firstItemReached.current = false;
-
       if (nextItemWillExceed) {
         lastItemReached.current = true;
 
@@ -142,14 +161,28 @@ export function useSpringCarousel({
             nextActiveItem: 0,
           });
         }
-        return;
+      } else {
+        slideToItem({
+          from: spring.x.get(),
+          to: -((activeItem.current + 1) * getSlideValue()),
+          nextActiveItem: activeItem.current + 1,
+        });
       }
-
-      slideToItem({
-        from: spring.x.get(),
-        to: -((activeItem.current + 1) * getSlideValue()),
-        nextActiveItem: activeItem.current + 1,
-      });
+    } else {
+      if (nextItemWillExceed) {
+        lastItemReached.current = true;
+        slideToItem({
+          from: spring.x.get(),
+          to: -getTotalScrollValue(),
+          nextActiveItem: activeItem.current + 1,
+        });
+      } else {
+        slideToItem({
+          from: spring.x.get(),
+          to: -((activeItem.current + 1) * getSlideValue()),
+          nextActiveItem: activeItem.current + 1,
+        });
+      }
     }
   }
 
@@ -172,7 +205,6 @@ export function useSpringCarousel({
         position: "relative",
         width: "100%",
         height: "100%",
-        overflow: "hidden",
       }}
     >
       <a.div
