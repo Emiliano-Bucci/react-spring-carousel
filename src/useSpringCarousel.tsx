@@ -106,10 +106,11 @@ export function useSpringCarousel({
     if (!init || (firstItemReached.current && !withLoop)) return;
 
     lastItemReached.current = false;
-    const nextItemWillEceed =
-      (activeItem.current - 1) * (getSlideValue() - getSlideValue() / 2) < 0;
 
     if (slideType === "fixed") {
+      const nextItemWillEceed =
+        (activeItem.current - 1) * (getSlideValue() - getSlideValue() / 2) < 0;
+
       if (nextItemWillEceed) {
         firstItemReached.current = true;
 
@@ -128,6 +129,11 @@ export function useSpringCarousel({
         });
       }
     } else {
+      const nextItemWillEceed = withLoop
+        ? (activeItem.current - 1) * getSlideValue() < 0
+        : (activeItem.current - 1) * (getSlideValue() - getSlideValue() / 2) <
+          0;
+
       if (nextItemWillEceed) {
         firstItemReached.current = true;
 

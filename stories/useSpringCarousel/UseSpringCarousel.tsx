@@ -7,7 +7,7 @@ export function UseSpringCarousel() {
     useSpringCarousel({
       items: mockedItems,
       slideType: "fluid",
-      // withLoop: true,
+      withLoop: true,
     });
 
   return (
