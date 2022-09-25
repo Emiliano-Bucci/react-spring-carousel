@@ -94,6 +94,9 @@ export function useSpringCarousel({
   }
 
   function getTotalScrollValue() {
+    if (withLoop) {
+      return getSlideValue() * items.length;
+    }
     return Math.round(
       Number(carouselTrackWrapperRef.current?.scrollWidth) -
         carouselTrackWrapperRef.current!.getBoundingClientRect().width
@@ -127,11 +130,20 @@ export function useSpringCarousel({
     } else {
       if (nextItemWillEceed) {
         firstItemReached.current = true;
-        slideToItem({
-          from: spring.x.get(),
-          to: 0,
-          nextActiveItem: 0,
-        });
+
+        if (withLoop) {
+          slideToItem({
+            from: spring.x.get() - getSlideValue() * items.length,
+            to: -(getSlideValue() * items.length) + getSlideValue(),
+            nextActiveItem: items.length - 1,
+          });
+        } else {
+          slideToItem({
+            from: spring.x.get(),
+            to: 0,
+            nextActiveItem: 0,
+          });
+        }
       } else {
         slideToItem({
           from: spring.x.get(),
@@ -146,11 +158,11 @@ export function useSpringCarousel({
     if (!init || (lastItemReached.current && !withLoop)) return;
 
     firstItemReached.current = false;
-    const nextItemWillExceed =
-      (activeItem.current + 1) * (getSlideValue() + getSlideValue() / 2) >=
-      getTotalScrollValue();
 
     if (slideType === "fixed") {
+      const nextItemWillExceed =
+        (activeItem.current + 1) * (getSlideValue() + getSlideValue() / 2) >=
+        getTotalScrollValue();
       if (nextItemWillExceed) {
         lastItemReached.current = true;
 
@@ -169,13 +181,27 @@ export function useSpringCarousel({
         });
       }
     } else {
+      const nextItemWillExceed = withLoop
+        ? (activeItem.current + 1) * getSlideValue() >= getTotalScrollValue()
+        : (activeItem.current + 1) * (getSlideValue() + getSlideValue() / 2) >=
+          getTotalScrollValue();
+
       if (nextItemWillExceed) {
         lastItemReached.current = true;
-        slideToItem({
-          from: spring.x.get(),
-          to: -getTotalScrollValue(),
-          nextActiveItem: activeItem.current + 1,
-        });
+
+        if (withLoop) {
+          slideToItem({
+            from: spring.x.get() + getSlideValue() * items.length,
+            to: 0,
+            nextActiveItem: 0,
+          });
+        } else {
+          slideToItem({
+            from: spring.x.get(),
+            to: -getTotalScrollValue(),
+            nextActiveItem: activeItem.current + 1,
+          });
+        }
       } else {
         slideToItem({
           from: spring.x.get(),
