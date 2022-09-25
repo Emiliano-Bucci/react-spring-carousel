@@ -29,8 +29,16 @@ type SpringCarouselWithNoFixedItems = {
   itemsPerSlide?: never;
 };
 
+type SpringCarouselWithLoop = {
+  withLoop?: true;
+};
+type SpringCarouselWithNoLoop = {
+  withLoop?: false;
+};
+
 export type SpringCarouselBaseProps = {
   init?: boolean;
   gutter?: number;
 } & (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs) &
-  (SpringCarouselWithFixedItems | SpringCarouselWithNoFixedItems);
+  (SpringCarouselWithFixedItems | SpringCarouselWithNoFixedItems) &
+  (SpringCarouselWithLoop | SpringCarouselWithNoLoop);

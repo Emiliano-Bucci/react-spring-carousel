@@ -3,18 +3,54 @@ import React from "react";
 export const mockedItems = [
   {
     id: "1",
-    renderItem: <div>div 1</div>,
+    renderItem: (
+      <div
+        style={{
+          flex: "1",
+          background: "#34495E",
+        }}
+      >
+        div 1
+      </div>
+    ),
   },
   {
     id: "2",
-    renderItem: <div>div 2</div>,
+    renderItem: (
+      <div
+        style={{
+          flex: "1",
+          background: "#E74C3C",
+        }}
+      >
+        div 2
+      </div>
+    ),
   },
   {
     id: "3",
-    renderItem: <div>div 3</div>,
+    renderItem: (
+      <div
+        style={{
+          flex: "1",
+          background: "#2ECC71",
+        }}
+      >
+        div 3
+      </div>
+    ),
   },
   {
     id: "4",
-    renderItem: <div>div 4</div>,
+    renderItem: (
+      <div
+        style={{
+          flex: "1",
+          background: "#F39C12",
+        }}
+      >
+        div 4
+      </div>
+    ),
   },
 ];
