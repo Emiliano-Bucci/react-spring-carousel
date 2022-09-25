@@ -38,9 +38,10 @@ export function useSpringCarousel({
   }
 
   const mainCarouselWrapperRef = useRef<HTMLDivElement | null>(null);
+  const carouselTrackWrapperRef = useRef<HTMLDivElement | null>(null);
   const internalItems = getItems();
 
-  function getCarouselSlideValue() {
+  function getSlideValue() {
     const carouselItem = mainCarouselWrapperRef.current?.querySelector(
       ".use-spring-carousel-item"
     );
@@ -59,7 +60,7 @@ export function useSpringCarousel({
     to: number;
     nextActiveItem?: number;
   }) {
-    if (nextActiveItem) {
+    if (typeof nextActiveItem === "number") {
       activeItem.current = nextActiveItem;
     }
 
@@ -73,24 +74,37 @@ export function useSpringCarousel({
     });
   }
 
+  function getTotalScrollValue() {
+    return getSlideValue() * items.length;
+  }
   function slideToPrevItem() {
     if (!init) return;
 
     if (slideType === "fixed") {
+      const nextItemWillEceed = (activeItem.current - 1) * getSlideValue() < 0;
+
+      if (nextItemWillEceed) return;
+
       slideToItem({
-        from: -(activeItem.current * getCarouselSlideValue()),
-        to: -((activeItem.current - 1) * getCarouselSlideValue()),
+        from: -(activeItem.current * getSlideValue()),
+        to: -((activeItem.current - 1) * getSlideValue()),
         nextActiveItem: activeItem.current - 1,
       });
     }
   }
+
   function slideToNextItem() {
     if (!init) return;
 
     if (slideType === "fixed") {
+      const nextItemWillExceed =
+        (activeItem.current + 1) * getSlideValue() >= getTotalScrollValue();
+
+      if (nextItemWillExceed) return;
+
       slideToItem({
-        from: -(activeItem.current * getCarouselSlideValue()),
-        to: -((activeItem.current + 1) * getCarouselSlideValue()),
+        from: -(activeItem.current * getSlideValue()),
+        to: -((activeItem.current + 1) * getSlideValue()),
         nextActiveItem: activeItem.current + 1,
       });
     }
@@ -108,6 +122,7 @@ export function useSpringCarousel({
       }}
     >
       <a.div
+        ref={carouselTrackWrapperRef}
         style={{
           ...spring,
           display: "flex",
