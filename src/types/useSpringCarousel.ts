@@ -23,10 +23,12 @@ type SpringCarouselWithNoThumbs = {
 type SpringCarouselWithFixedItems = {
   slideType?: "fixed";
   itemsPerSlide?: number;
+  startEndGutter?: number;
 };
 type SpringCarouselWithNoFixedItems = {
   slideType?: "fluid";
   itemsPerSlide?: never;
+  startEndGutter?: never;
 };
 
 type SpringCarouselWithLoop = {
@@ -39,6 +41,7 @@ type SpringCarouselWithNoLoop = {
 export type SpringCarouselBaseProps = {
   init?: boolean;
   gutter?: number;
+  carouselSlideAxis?: "x" | "y";
 } & (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs) &
   (SpringCarouselWithFixedItems | SpringCarouselWithNoFixedItems) &
   (SpringCarouselWithLoop | SpringCarouselWithNoLoop);

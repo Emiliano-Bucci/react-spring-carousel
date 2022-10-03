@@ -1,5 +1,5 @@
-import { a, useSpring } from "@react-spring/web";
-import React, { useCallback, useLayoutEffect, useRef } from "react";
+import { useSpring } from "@react-spring/web";
+import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { SpringCarouselBaseProps } from "./types/useSpringCarousel";
 import { SlideActionType } from "./types/common";
 
@@ -11,12 +11,22 @@ export function useSpringCarousel({
   slideType = "fixed",
   gutter = 0,
   withLoop = false,
+  startEndGutter = 0,
+  carouselSlideAxis = "x",
 }: SpringCarouselBaseProps) {
   const slideActionType = useRef<SlideActionType>("initial");
   const [spring, setSpring] = useSpring(() => ({
-    x: 0,
-    y: 0,
+    val: 0,
     pause: !init,
+    onChange({ value }) {
+      if (carouselTrackWrapperRef.current) {
+        if (carouselSlideAxis === "x") {
+          carouselTrackWrapperRef.current.style.transform = `translate3d(${value.val}px, 0px,0px)`;
+        } else {
+          carouselTrackWrapperRef.current.style.transform = `translate3d(0px,${value.val}px,0px)`;
+        }
+      }
+    },
   }));
   const activeItem = useRef(0);
   const firstItemReached = useRef(false);
@@ -85,10 +95,10 @@ export function useSpringCarousel({
     setSpring.start({
       immediate,
       from: {
-        x: from,
+        val: from,
       },
       to: {
-        x: to,
+        val: to,
       },
     });
   }
@@ -98,10 +108,91 @@ export function useSpringCarousel({
       return getSlideValue() * items.length;
     }
     return Math.round(
-      Number(carouselTrackWrapperRef.current?.scrollWidth) -
-        carouselTrackWrapperRef.current!.getBoundingClientRect().width
+      Number(
+        carouselTrackWrapperRef.current?.[
+          carouselSlideAxis === "x" ? "scrollWidth" : "scrollHeight"
+        ]
+      ) -
+        carouselTrackWrapperRef.current!.getBoundingClientRect()[
+          carouselSlideAxis === "x" ? "width" : "height"
+        ]
     );
   }
+  function getAnimatedWrapperStyles() {
+    const percentValue = `calc(100% - ${startEndGutter * 2}px)`;
+    return {
+      width: carouselSlideAxis === "x" ? percentValue : "100%",
+      height: carouselSlideAxis === "y" ? percentValue : "100%",
+    };
+  }
+  function getInitialStyles() {
+    const totalValue = (items.length / itemsPerSlide) * 100;
+    const singleItemValue = 100 / itemsPerSlide;
+    const cssProp = carouselSlideAxis === "x" ? "left" : "y";
+    const quantityToMove = Math.floor(50 / singleItemValue);
+
+    // if (slideType === 'fixed') {
+    //   if (initialStartingPositionRef.current === 'center') {
+    //     return {
+    //       [cssProp]: `calc(-${totalValue}% + ${singleItemValue * quantityToMove}%)`,
+    //     }
+    //   }
+    //   if (initialStartingPositionRef.current === 'end') {
+    //     return {
+    //       [cssProp]: `calc(-${totalValue}% + ${singleItemValue * (quantityToMove * 2)}%)`,
+    //     }
+    //   }
+    // }
+    return {
+      [cssProp]: `0px`,
+    };
+  }
+
+  function getCarouselItemWidth() {
+    const carouselItem = carouselTrackWrapperRef.current?.querySelector(
+      ".use-spring-carousel-item"
+    );
+    if (!carouselItem) {
+      throw Error("No carousel items available!");
+    }
+    return (
+      carouselItem.getBoundingClientRect()[
+        carouselSlideAxis === "x" ? "width" : "height"
+      ] + gutter
+    );
+  }
+  function adjustCarouselWrapperPosition(resize = false) {
+    const positionProperty = carouselSlideAxis === "x" ? "left" : "top";
+
+    function setPosition(v: number) {
+      const ref = carouselTrackWrapperRef.current;
+      if (!ref) return;
+
+      if (withLoop) {
+        ref.style.top = "0px";
+        ref.style[positionProperty] = `-${v - startEndGutter}px`;
+      } else {
+        ref.style.left = "0px";
+        ref.style.top = "0px";
+        // if (_initialActiveItem && isFirstMount.current) {
+        //   ref.style[positionProperty] = `calc(-${_initialActiveItem} * 100%)`
+        // }
+      }
+    }
+
+    if (slideType === "fixed") {
+      setPosition(getCarouselItemWidth() * items.length);
+    }
+
+    if (resize) {
+      console.log("here");
+      setSpring.start({
+        immediate: true,
+        val: -(getSlideValue() * activeItem.current),
+      });
+    }
+  }
+
   function slideToPrevItem() {
     if (!init || (firstItemReached.current && !withLoop)) return;
 
@@ -118,14 +209,14 @@ export function useSpringCarousel({
 
         if (withLoop) {
           slideToItem({
-            from: spring.x.get() - getSlideValue() * items.length,
+            from: spring.val.get() - getSlideValue() * items.length,
             to: -(getSlideValue() * items.length) + getSlideValue(),
             nextActiveItem: items.length - 1,
           });
         }
       } else {
         slideToItem({
-          from: spring.x.get(),
+          from: spring.val.get(),
           to: -((activeItem.current - 1) * getSlideValue()),
           nextActiveItem: activeItem.current - 1,
         });
@@ -136,20 +227,20 @@ export function useSpringCarousel({
 
         if (withLoop) {
           slideToItem({
-            from: spring.x.get() - getSlideValue() * items.length,
+            from: spring.val.get() - getSlideValue() * items.length,
             to: -(getSlideValue() * items.length) + getSlideValue(),
             nextActiveItem: items.length - 1,
           });
         } else {
           slideToItem({
-            from: spring.x.get(),
+            from: spring.val.get(),
             to: 0,
             nextActiveItem: 0,
           });
         }
       } else {
         slideToItem({
-          from: spring.x.get(),
+          from: spring.val.get(),
           to: -((activeItem.current - 1) * getSlideValue()),
           nextActiveItem: activeItem.current - 1,
         });
@@ -174,14 +265,14 @@ export function useSpringCarousel({
 
         if (withLoop) {
           slideToItem({
-            from: spring.x.get() + getSlideValue() * items.length,
+            from: spring.val.get() + getSlideValue() * items.length,
             to: 0,
             nextActiveItem: 0,
           });
         }
       } else {
         slideToItem({
-          from: spring.x.get(),
+          from: spring.val.get(),
           to: -((activeItem.current + 1) * getSlideValue()),
           nextActiveItem: activeItem.current + 1,
         });
@@ -192,20 +283,20 @@ export function useSpringCarousel({
 
         if (withLoop) {
           slideToItem({
-            from: spring.x.get() + getSlideValue() * items.length,
+            from: spring.val.get() + getSlideValue() * items.length,
             to: 0,
             nextActiveItem: 0,
           });
         } else {
           slideToItem({
-            from: spring.x.get(),
+            from: spring.val.get(),
             to: -getTotalScrollValue(),
             nextActiveItem: activeItem.current + 1,
           });
         }
       } else {
         slideToItem({
-          from: spring.x.get(),
+          from: spring.val.get(),
           to: -((activeItem.current + 1) * getSlideValue()),
           nextActiveItem: activeItem.current + 1,
         });
@@ -222,6 +313,18 @@ export function useSpringCarousel({
         getSlideValue() * items.length
       )}px`;
     }
+
+    adjustCarouselWrapperPosition();
+  }, []);
+
+  useEffect(() => {
+    function handleResize() {
+      adjustCarouselWrapperPosition(true);
+    }
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   const carouselFragment = (
@@ -234,15 +337,14 @@ export function useSpringCarousel({
         height: "100%",
       }}
     >
-      <a.div
+      <div
         ref={carouselTrackWrapperRef}
         style={{
-          ...spring,
           position: "relative",
           display: "flex",
-          flex: "1",
-          width: "100%",
-          height: "100%",
+          flexDirection: carouselSlideAxis === "x" ? "row" : "column",
+          ...getAnimatedWrapperStyles(),
+          ...getInitialStyles(),
         }}
       >
         {internalItems.map((item, index) => {
@@ -262,7 +364,7 @@ export function useSpringCarousel({
             </div>
           );
         })}
-      </a.div>
+      </div>
     </div>
   );
 
