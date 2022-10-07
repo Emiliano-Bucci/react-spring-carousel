@@ -121,18 +121,20 @@ export function useSpringCarousel({
       to: {
         val: to,
       },
-      onRest() {
-        emitEvent({
-          eventName: "onSlideChange",
-          slideActionType: slideActionType.current,
-          slideMode: slideModeType.current,
-          currentItem: {
-            index: activeItem.current,
-            startReached: firstItemReached.current,
-            endReached: lastItemReached.current,
-            id: items[activeItem.current].id,
-          },
-        });
+      onRest(value) {
+        if (!immediate && value.finished) {
+          emitEvent({
+            eventName: "onSlideChange",
+            slideActionType: slideActionType.current,
+            slideMode: slideModeType.current,
+            currentItem: {
+              index: activeItem.current,
+              startReached: firstItemReached.current,
+              endReached: lastItemReached.current,
+              id: items[activeItem.current].id,
+            },
+          });
+        }
       },
     });
   }
@@ -149,7 +151,9 @@ export function useSpringCarousel({
       ) -
         carouselTrackWrapperRef.current!.getBoundingClientRect()[
           carouselSlideAxis === "x" ? "width" : "height"
-        ]
+        ] -
+        gutter -
+        startEndGutter
     );
   }
   function getAnimatedWrapperStyles() {
@@ -231,59 +235,41 @@ export function useSpringCarousel({
     if (!init || (firstItemReached.current && !withLoop)) return;
 
     slideActionType.current = "prev";
+    firstItemReached.current = false;
     lastItemReached.current = false;
 
     const nextItemWillEceed = withLoop
       ? (activeItem.current - 1) * getSlideValue() < 0
       : (activeItem.current - 1) * (getSlideValue() - getSlideValue() / 2) < 0;
+    const nextItem = activeItem.current - 1;
 
-    if (slideType === "fixed") {
-      if (nextItemWillEceed) {
-        firstItemReached.current = true;
-
-        if (withLoop) {
-          slideToItem({
-            slideMode: "click",
-            from: spring.val.get() - getSlideValue() * items.length,
-            to: -(getSlideValue() * items.length) + getSlideValue(),
-            nextActiveItem: items.length - 1,
-          });
-        }
+    if (nextItemWillEceed) {
+      if (withLoop) {
+        slideToItem({
+          slideMode: "click",
+          from: spring.val.get() - getSlideValue() * items.length,
+          to: -(getSlideValue() * items.length) + getSlideValue(),
+          nextActiveItem: items.length - 1,
+        });
       } else {
+        firstItemReached.current = true;
         slideToItem({
           slideMode: "click",
           from: spring.val.get(),
-          to: -((activeItem.current - 1) * getSlideValue()),
-          nextActiveItem: activeItem.current - 1,
+          to: 0,
+          nextActiveItem: 0,
         });
       }
     } else {
-      if (nextItemWillEceed) {
+      if (nextItem === 0) {
         firstItemReached.current = true;
-
-        if (withLoop) {
-          slideToItem({
-            slideMode: "click",
-            from: spring.val.get() - getSlideValue() * items.length,
-            to: -(getSlideValue() * items.length) + getSlideValue(),
-            nextActiveItem: items.length - 1,
-          });
-        } else {
-          slideToItem({
-            slideMode: "click",
-            from: spring.val.get(),
-            to: 0,
-            nextActiveItem: 0,
-          });
-        }
-      } else {
-        slideToItem({
-          slideMode: "click",
-          from: spring.val.get(),
-          to: -((activeItem.current - 1) * getSlideValue()),
-          nextActiveItem: activeItem.current - 1,
-        });
       }
+      slideToItem({
+        slideMode: "click",
+        from: spring.val.get(),
+        to: -(nextItem * getSlideValue()),
+        nextActiveItem: nextItem,
+      });
     }
   }
 
@@ -292,59 +278,42 @@ export function useSpringCarousel({
 
     slideActionType.current = "next";
     firstItemReached.current = false;
+    lastItemReached.current = false;
+
+    const nextItem = activeItem.current + 1;
 
     const nextItemWillExceed = withLoop
       ? (activeItem.current + 1) * getSlideValue() >= getTotalScrollValue()
       : (activeItem.current + 1) * (getSlideValue() + getSlideValue() / 2) >=
         getTotalScrollValue();
 
-    if (slideType === "fixed") {
-      if (nextItemWillExceed) {
-        lastItemReached.current = true;
-
-        if (withLoop) {
-          slideToItem({
-            slideMode: "click",
-            from: spring.val.get() + getSlideValue() * items.length,
-            to: 0,
-            nextActiveItem: 0,
-          });
-        }
+    if (nextItemWillExceed) {
+      if (withLoop) {
+        slideToItem({
+          slideMode: "click",
+          from: spring.val.get() + getSlideValue() * items.length,
+          to: 0,
+          nextActiveItem: 0,
+        });
       } else {
+        lastItemReached.current = true;
         slideToItem({
           slideMode: "click",
           from: spring.val.get(),
-          to: -((activeItem.current + 1) * getSlideValue()),
-          nextActiveItem: activeItem.current + 1,
+          to: -getTotalScrollValue(),
+          nextActiveItem: nextItem,
         });
       }
     } else {
-      if (nextItemWillExceed) {
+      if (nextItem === items.length - 1) {
         lastItemReached.current = true;
-
-        if (withLoop) {
-          slideToItem({
-            slideMode: "click",
-            from: spring.val.get() + getSlideValue() * items.length,
-            to: 0,
-            nextActiveItem: 0,
-          });
-        } else {
-          slideToItem({
-            slideMode: "click",
-            from: spring.val.get(),
-            to: -getTotalScrollValue(),
-            nextActiveItem: activeItem.current + 1,
-          });
-        }
-      } else {
-        slideToItem({
-          slideMode: "click",
-          from: spring.val.get(),
-          to: -((activeItem.current + 1) * getSlideValue()),
-          nextActiveItem: activeItem.current + 1,
-        });
       }
+      slideToItem({
+        slideMode: "click",
+        from: spring.val.get(),
+        to: -(nextItem * getSlideValue()),
+        nextActiveItem: nextItem,
+      });
     }
   }
 
