@@ -2,6 +2,7 @@ import { useSpring } from "@react-spring/web";
 import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { SpringCarouselBaseProps } from "./types/useSpringCarousel";
 import { SlideActionType } from "./types/common";
+import { useEventsModule } from "./modules/useEventsModule";
 
 export function useSpringCarousel({
   items,
@@ -49,6 +50,8 @@ export function useSpringCarousel({
     return [...items];
   }, [items, withLoop]);
 
+  const { emitEvent, useListenToCustomEvent } = useEventsModule();
+
   function getItemStyles() {
     if (slideType === "fixed") {
       return {
@@ -90,6 +93,17 @@ export function useSpringCarousel({
   }) {
     if (typeof nextActiveItem === "number") {
       activeItem.current = nextActiveItem;
+      emitEvent({
+        name: "slideStartChange",
+        slideActionType: "next",
+        slideMode: "click",
+        nextItem: {
+          index: nextActiveItem,
+          endReached: false,
+          startReached: false,
+          id: "12321",
+        },
+      });
     }
 
     setSpring.start({
@@ -372,5 +386,6 @@ export function useSpringCarousel({
     carouselFragment,
     slideToPrevItem,
     slideToNextItem,
+    useListenToCustomEvent,
   };
 }
