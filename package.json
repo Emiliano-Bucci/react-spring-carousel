@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@react-spring/web": "^9.5.4",
-    "@use-gesture/react": "^10.2.20"
+    "@use-gesture/react": "^10.2.20",
+    "screenfull": "^5.2.0"
   }
 }

@@ -4,6 +4,7 @@ import { SpringCarouselBaseProps } from "./types/useSpringCarousel";
 import { SlideActionType, SlideMode } from "./types/common";
 import { useEventsModule } from "./modules/useEventsModule";
 import { useDrag } from "@use-gesture/react";
+import { useFullscreenModule } from "./modules/useFullscreenModule";
 
 export function useSpringCarousel({
   items,
@@ -15,6 +16,7 @@ export function useSpringCarousel({
   withLoop = false,
   startEndGutter = 0,
   carouselSlideAxis = "x",
+  disableGestures = false,
   draggingSlideTreshold: _draggingSlideTreshold = 0,
   slideWhenThresholdIsReached = false,
 }: SpringCarouselBaseProps) {
@@ -38,6 +40,8 @@ export function useSpringCarousel({
   const activeItem = useRef(0);
   const firstItemReached = useRef(false);
   const lastItemReached = useRef(false);
+  const mainCarouselWrapperRef = useRef<HTMLDivElement | null>(null);
+  const carouselTrackWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const getItems = useCallback(() => {
     if (withLoop) {
@@ -55,8 +59,15 @@ export function useSpringCarousel({
     }
     return [...items];
   }, [items, withLoop]);
+  const internalItems = getItems();
 
   const { emitEvent, useListenToCustomEvent } = useEventsModule();
+  const { enterFullscreen, exitFullscreen, getIsFullscreen } =
+    useFullscreenModule({
+      mainCarouselWrapperRef,
+      emitEvent,
+      handleResize: () => adjustCarouselWrapperPosition(true),
+    });
 
   function getItemStyles() {
     if (slideType === "fixed") {
@@ -71,10 +82,6 @@ export function useSpringCarousel({
       ...{ marginRight: `${gutter}px` },
     };
   }
-
-  const mainCarouselWrapperRef = useRef<HTMLDivElement | null>(null);
-  const carouselTrackWrapperRef = useRef<HTMLDivElement | null>(null);
-  const internalItems = getItems();
 
   function getSlideValue() {
     const carouselItem = mainCarouselWrapperRef.current?.querySelector(
@@ -420,7 +427,7 @@ export function useSpringCarousel({
       }
     },
     {
-      // enabled: init && !disableGestures,
+      enabled: init && !disableGestures,
       axis: carouselSlideAxis,
       from: () => {
         if (carouselSlideAxis === "x") {
@@ -475,13 +482,16 @@ export function useSpringCarousel({
   );
 
   return {
+    useListenToCustomEvent,
     carouselFragment,
+    enterFullscreen,
+    exitFullscreen,
+    getIsFullscreen,
     slideToPrevItem() {
       slideToPrevItem();
     },
     slideToNextItem() {
       slideToNextItem();
     },
-    useListenToCustomEvent,
   };
 }

@@ -26,14 +26,20 @@ type OnSlideChange = {
     endReached: boolean;
   };
 };
+type OnFullscreenChange = {
+  eventName: "onFullscreenChange";
+  isFullscreen: boolean;
+};
 type OnDrag = Omit<FullGestureState<"drag">, "event"> & {
   eventName: "onDrag";
   slideActionType: SlideActionType;
 };
 
-type Events = OnSlideStartChange | OnSlideChange | OnDrag;
+type Events = OnSlideStartChange | OnSlideChange | OnDrag | OnFullscreenChange;
 
 type EventHandler = (props: Events) => void;
+
+export type EmitEvent = (event: Events) => void;
 
 export function useEventsModule() {
   const targetEvent = useRef<HTMLDivElement | null>(null);

@@ -8,6 +8,7 @@ export function UseSpringCarousel() {
     slideToPrevItem,
     slideToNextItem,
     useListenToCustomEvent,
+    enterFullscreen,
   } = useSpringCarousel({
     items: mockedItems,
     startEndGutter: 20,
@@ -23,7 +24,9 @@ export function UseSpringCarousel() {
   return (
     <div className="wrapper">
       <button onClick={slideToPrevItem}>PREV</button>
-      <div className="carousel-wrapper">{carouselFragment}</div>
+      <div className="carousel-wrapper" onClick={() => enterFullscreen()}>
+        {carouselFragment}
+      </div>
       <button onClick={slideToNextItem}>NEXT</button>
     </div>
   );
