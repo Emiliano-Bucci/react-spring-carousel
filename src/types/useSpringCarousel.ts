@@ -42,6 +42,8 @@ export type SpringCarouselBaseProps = {
   init?: boolean;
   gutter?: number;
   carouselSlideAxis?: "x" | "y";
+  draggingSlideTreshold?: number;
+  slideWhenThresholdIsReached?: boolean;
 } & (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs) &
   (SpringCarouselWithFixedItems | SpringCarouselWithNoFixedItems) &
   (SpringCarouselWithLoop | SpringCarouselWithNoLoop);

@@ -1,8 +1,9 @@
-import { useSpring } from "@react-spring/web";
+import { config, useSpring } from "@react-spring/web";
 import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { SpringCarouselBaseProps } from "./types/useSpringCarousel";
 import { SlideActionType, SlideMode } from "./types/common";
 import { useEventsModule } from "./modules/useEventsModule";
+import { useDrag } from "@use-gesture/react";
 
 export function useSpringCarousel({
   items,
@@ -14,9 +15,13 @@ export function useSpringCarousel({
   withLoop = false,
   startEndGutter = 0,
   carouselSlideAxis = "x",
+  draggingSlideTreshold: _draggingSlideTreshold = 0,
+  slideWhenThresholdIsReached = false,
 }: SpringCarouselBaseProps) {
+  const draggingSlideTreshold = useRef(_draggingSlideTreshold);
   const slideActionType = useRef<SlideActionType>("initial");
   const slideModeType = useRef<SlideMode>("initial");
+  const prevSlidedValue = useRef(0);
   const [spring, setSpring] = useSpring(() => ({
     val: 0,
     pause: !init,
@@ -113,6 +118,7 @@ export function useSpringCarousel({
       });
     }
 
+    prevSlidedValue.current = to;
     setSpring.start({
       immediate,
       from: {
@@ -120,6 +126,10 @@ export function useSpringCarousel({
       },
       to: {
         val: to,
+      },
+      config: {
+        ...config.default,
+        velocity: spring.val.velocity,
       },
       onRest(value) {
         if (!immediate && value.finished) {
@@ -223,7 +233,6 @@ export function useSpringCarousel({
     }
 
     if (resize) {
-      console.log("here");
       setSpring.start({
         immediate: true,
         val: -(getSlideValue() * activeItem.current),
@@ -281,7 +290,6 @@ export function useSpringCarousel({
     lastItemReached.current = false;
 
     const nextItem = activeItem.current + 1;
-
     const nextItemWillExceed = withLoop
       ? (activeItem.current + 1) * getSlideValue() >= getTotalScrollValue()
       : (activeItem.current + 1) * (getSlideValue() + getSlideValue() / 2) >=
@@ -331,6 +339,14 @@ export function useSpringCarousel({
   }, []);
 
   useEffect(() => {
+    if (_draggingSlideTreshold) {
+      draggingSlideTreshold.current = _draggingSlideTreshold;
+    } else {
+      draggingSlideTreshold.current = Math.floor(getSlideValue() / 2 / 2);
+    }
+  }, [_draggingSlideTreshold]);
+
+  useEffect(() => {
     function handleResize() {
       adjustCarouselWrapperPosition(true);
     }
@@ -339,6 +355,68 @@ export function useSpringCarousel({
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  const bindDrag = useDrag(
+    (state) => {
+      const isDragging = state.dragging;
+      const movement = state.offset[carouselSlideAxis === "x" ? 0 : 1];
+      const currentMovement = state.movement[carouselSlideAxis === "x" ? 0 : 1];
+      const direction = state.direction[carouselSlideAxis === "x" ? 0 : 1];
+
+      const prevItemTreshold = currentMovement > draggingSlideTreshold.current;
+      const nextItemTreshold = currentMovement < -draggingSlideTreshold.current;
+
+      if (isDragging) {
+        if (direction > 0) {
+          slideActionType.current = "prev";
+        } else {
+          slideActionType.current = "next";
+        }
+
+        setSpring.start({
+          val: movement,
+          config: {
+            velocity: state.velocity,
+            friction: 50,
+            tension: 1000,
+          },
+        });
+
+        if (slideWhenThresholdIsReached && nextItemTreshold) {
+          slideToNextItem();
+        } else if (slideWhenThresholdIsReached && prevItemTreshold) {
+          slideToPrevItem();
+        }
+        return;
+      }
+
+      if (state.last) {
+        if (nextItemTreshold) {
+          slideToNextItem();
+        } else if (prevItemTreshold) {
+          slideToPrevItem();
+        } else {
+          setSpring.start({
+            val: prevSlidedValue.current,
+            config: {
+              ...config.default,
+              velocity: state.velocity,
+            },
+          });
+        }
+      }
+    },
+    {
+      // enabled: init && !disableGestures,
+      axis: carouselSlideAxis,
+      from: () => {
+        if (carouselSlideAxis === "x") {
+          return [spring.val.get(), spring.val.get()];
+        }
+        return [spring.val.get(), spring.val.get()];
+      },
+    }
+  );
 
   const carouselFragment = (
     <div
@@ -352,10 +430,12 @@ export function useSpringCarousel({
     >
       <div
         ref={carouselTrackWrapperRef}
+        {...bindDrag()}
         style={{
           position: "relative",
           display: "flex",
           flexDirection: carouselSlideAxis === "x" ? "row" : "column",
+          touchAction: "none",
           ...getAnimatedWrapperStyles(),
           ...getInitialStyles(),
         }}

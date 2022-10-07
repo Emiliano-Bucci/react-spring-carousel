@@ -11,6 +11,7 @@ export function UseSpringCarousel() {
   } = useSpringCarousel({
     items: mockedItems,
     startEndGutter: 20,
+    withLoop: true,
     itemsPerSlide: 3,
     gutter: 20,
   });
