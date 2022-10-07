@@ -1,7 +1,7 @@
 import { useSpring } from "@react-spring/web";
 import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { SpringCarouselBaseProps } from "./types/useSpringCarousel";
-import { SlideActionType } from "./types/common";
+import { SlideActionType, SlideMode } from "./types/common";
 import { useEventsModule } from "./modules/useEventsModule";
 
 export function useSpringCarousel({
@@ -16,6 +16,7 @@ export function useSpringCarousel({
   carouselSlideAxis = "x",
 }: SpringCarouselBaseProps) {
   const slideActionType = useRef<SlideActionType>("initial");
+  const slideModeType = useRef<SlideMode>("initial");
   const [spring, setSpring] = useSpring(() => ({
     val: 0,
     pause: !init,
@@ -80,28 +81,34 @@ export function useSpringCarousel({
     return carouselItem.getBoundingClientRect().width + gutter;
   }
 
+  type SlideToItem = {
+    from: number;
+    to: number;
+    nextActiveItem?: number;
+    immediate?: boolean;
+    slideMode: "click" | "drag";
+  };
+
   function slideToItem({
     from,
     to,
     nextActiveItem,
     immediate = false,
-  }: {
-    from: number;
-    to: number;
-    nextActiveItem?: number;
-    immediate?: boolean;
-  }) {
+    slideMode,
+  }: SlideToItem) {
+    slideModeType.current = slideMode;
+
     if (typeof nextActiveItem === "number") {
       activeItem.current = nextActiveItem;
       emitEvent({
-        name: "slideStartChange",
-        slideActionType: "next",
-        slideMode: "click",
+        eventName: "onSlideStartChange",
+        slideActionType: slideActionType.current,
+        slideMode: slideModeType.current,
         nextItem: {
-          index: nextActiveItem,
-          endReached: false,
-          startReached: false,
-          id: "12321",
+          index: activeItem.current,
+          startReached: firstItemReached.current,
+          endReached: lastItemReached.current,
+          id: items[activeItem.current].id,
         },
       });
     }
@@ -113,6 +120,19 @@ export function useSpringCarousel({
       },
       to: {
         val: to,
+      },
+      onRest() {
+        emitEvent({
+          eventName: "onSlideChange",
+          slideActionType: slideActionType.current,
+          slideMode: slideModeType.current,
+          currentItem: {
+            index: activeItem.current,
+            startReached: firstItemReached.current,
+            endReached: lastItemReached.current,
+            id: items[activeItem.current].id,
+          },
+        });
       },
     });
   }
@@ -223,6 +243,7 @@ export function useSpringCarousel({
 
         if (withLoop) {
           slideToItem({
+            slideMode: "click",
             from: spring.val.get() - getSlideValue() * items.length,
             to: -(getSlideValue() * items.length) + getSlideValue(),
             nextActiveItem: items.length - 1,
@@ -230,6 +251,7 @@ export function useSpringCarousel({
         }
       } else {
         slideToItem({
+          slideMode: "click",
           from: spring.val.get(),
           to: -((activeItem.current - 1) * getSlideValue()),
           nextActiveItem: activeItem.current - 1,
@@ -241,12 +263,14 @@ export function useSpringCarousel({
 
         if (withLoop) {
           slideToItem({
+            slideMode: "click",
             from: spring.val.get() - getSlideValue() * items.length,
             to: -(getSlideValue() * items.length) + getSlideValue(),
             nextActiveItem: items.length - 1,
           });
         } else {
           slideToItem({
+            slideMode: "click",
             from: spring.val.get(),
             to: 0,
             nextActiveItem: 0,
@@ -254,6 +278,7 @@ export function useSpringCarousel({
         }
       } else {
         slideToItem({
+          slideMode: "click",
           from: spring.val.get(),
           to: -((activeItem.current - 1) * getSlideValue()),
           nextActiveItem: activeItem.current - 1,
@@ -279,6 +304,7 @@ export function useSpringCarousel({
 
         if (withLoop) {
           slideToItem({
+            slideMode: "click",
             from: spring.val.get() + getSlideValue() * items.length,
             to: 0,
             nextActiveItem: 0,
@@ -286,6 +312,7 @@ export function useSpringCarousel({
         }
       } else {
         slideToItem({
+          slideMode: "click",
           from: spring.val.get(),
           to: -((activeItem.current + 1) * getSlideValue()),
           nextActiveItem: activeItem.current + 1,
@@ -297,12 +324,14 @@ export function useSpringCarousel({
 
         if (withLoop) {
           slideToItem({
+            slideMode: "click",
             from: spring.val.get() + getSlideValue() * items.length,
             to: 0,
             nextActiveItem: 0,
           });
         } else {
           slideToItem({
+            slideMode: "click",
             from: spring.val.get(),
             to: -getTotalScrollValue(),
             nextActiveItem: activeItem.current + 1,
@@ -310,6 +339,7 @@ export function useSpringCarousel({
         }
       } else {
         slideToItem({
+          slideMode: "click",
           from: spring.val.get(),
           to: -((activeItem.current + 1) * getSlideValue()),
           nextActiveItem: activeItem.current + 1,

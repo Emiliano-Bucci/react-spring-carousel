@@ -3,8 +3,8 @@ import { SlideActionType, SlideMode } from "../types/common";
 
 const eventLabel = "RSC::Event";
 
-type SlideStartChangeEvent = {
-  name: "slideStartChange";
+type OnSlideStartChange = {
+  eventName: "onSlideStartChange";
   slideActionType: SlideActionType;
   slideMode: SlideMode;
   nextItem: {
@@ -14,8 +14,19 @@ type SlideStartChangeEvent = {
     endReached: boolean;
   };
 };
+type OnSlideChange = {
+  eventName: "onSlideChange";
+  slideActionType: SlideActionType;
+  slideMode: SlideMode;
+  currentItem: {
+    index: number;
+    id: string;
+    startReached: boolean;
+    endReached: boolean;
+  };
+};
 
-type Events = SlideStartChangeEvent;
+type Events = OnSlideStartChange | OnSlideChange;
 
 type EventHandler = (props: Events) => void;
 
