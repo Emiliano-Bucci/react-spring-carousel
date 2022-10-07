@@ -384,13 +384,15 @@ export function useSpringCarousel({
 
         if (slideWhenThresholdIsReached && nextItemTreshold) {
           slideToNextItem();
+          state.cancel();
         } else if (slideWhenThresholdIsReached && prevItemTreshold) {
           slideToPrevItem();
+          state.cancel();
         }
         return;
       }
 
-      if (state.last) {
+      if (state.last && !state.canceled) {
         if (nextItemTreshold) {
           slideToNextItem();
         } else if (prevItemTreshold) {
