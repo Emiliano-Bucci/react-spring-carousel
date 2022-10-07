@@ -80,10 +80,16 @@ export function useSpringCarousel({
     const carouselItem = mainCarouselWrapperRef.current?.querySelector(
       ".use-spring-carousel-item"
     );
+
     if (!carouselItem) {
       throw Error("No carousel items available!");
     }
-    return carouselItem.getBoundingClientRect().width + gutter;
+
+    return (
+      carouselItem.getBoundingClientRect()[
+        carouselSlideAxis === "x" ? "width" : "height"
+      ] + gutter
+    );
   }
 
   type SlideToItem = {
@@ -240,7 +246,7 @@ export function useSpringCarousel({
     }
   }
 
-  function slideToPrevItem() {
+  function slideToPrevItem(type: Exclude<SlideMode, "initial"> = "click") {
     if (!init || (firstItemReached.current && !withLoop)) return;
 
     slideActionType.current = "prev";
@@ -255,7 +261,7 @@ export function useSpringCarousel({
     if (nextItemWillEceed) {
       if (withLoop) {
         slideToItem({
-          slideMode: "click",
+          slideMode: type,
           from: spring.val.get() - getSlideValue() * items.length,
           to: -(getSlideValue() * items.length) + getSlideValue(),
           nextActiveItem: items.length - 1,
@@ -263,7 +269,7 @@ export function useSpringCarousel({
       } else {
         firstItemReached.current = true;
         slideToItem({
-          slideMode: "click",
+          slideMode: type,
           from: spring.val.get(),
           to: 0,
           nextActiveItem: 0,
@@ -274,15 +280,14 @@ export function useSpringCarousel({
         firstItemReached.current = true;
       }
       slideToItem({
-        slideMode: "click",
+        slideMode: type,
         from: spring.val.get(),
         to: -(nextItem * getSlideValue()),
         nextActiveItem: nextItem,
       });
     }
   }
-
-  function slideToNextItem() {
+  function slideToNextItem(type: Exclude<SlideMode, "initial"> = "click") {
     if (!init || (lastItemReached.current && !withLoop)) return;
 
     slideActionType.current = "next";
@@ -298,7 +303,7 @@ export function useSpringCarousel({
     if (nextItemWillExceed) {
       if (withLoop) {
         slideToItem({
-          slideMode: "click",
+          slideMode: type,
           from: spring.val.get() + getSlideValue() * items.length,
           to: 0,
           nextActiveItem: 0,
@@ -306,7 +311,7 @@ export function useSpringCarousel({
       } else {
         lastItemReached.current = true;
         slideToItem({
-          slideMode: "click",
+          slideMode: type,
           from: spring.val.get(),
           to: -getTotalScrollValue(),
           nextActiveItem: nextItem,
@@ -317,7 +322,7 @@ export function useSpringCarousel({
         lastItemReached.current = true;
       }
       slideToItem({
-        slideMode: "click",
+        slideMode: type,
         from: spring.val.get(),
         to: -(nextItem * getSlideValue()),
         nextActiveItem: nextItem,
@@ -373,6 +378,12 @@ export function useSpringCarousel({
           slideActionType.current = "next";
         }
 
+        emitEvent({
+          ...state,
+          eventName: "onDrag",
+          slideActionType: slideActionType.current,
+        });
+
         setSpring.start({
           val: movement,
           config: {
@@ -383,10 +394,10 @@ export function useSpringCarousel({
         });
 
         if (slideWhenThresholdIsReached && nextItemTreshold) {
-          slideToNextItem();
+          slideToNextItem("drag");
           state.cancel();
         } else if (slideWhenThresholdIsReached && prevItemTreshold) {
-          slideToPrevItem();
+          slideToPrevItem("drag");
           state.cancel();
         }
         return;
@@ -394,9 +405,9 @@ export function useSpringCarousel({
 
       if (state.last && !state.canceled) {
         if (nextItemTreshold) {
-          slideToNextItem();
+          slideToNextItem("drag");
         } else if (prevItemTreshold) {
-          slideToPrevItem();
+          slideToPrevItem("drag");
         } else {
           setSpring.start({
             val: prevSlidedValue.current,
@@ -465,8 +476,12 @@ export function useSpringCarousel({
 
   return {
     carouselFragment,
-    slideToPrevItem,
-    slideToNextItem,
+    slideToPrevItem() {
+      slideToPrevItem();
+    },
+    slideToNextItem() {
+      slideToNextItem();
+    },
     useListenToCustomEvent,
   };
 }

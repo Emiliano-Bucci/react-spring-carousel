@@ -1,3 +1,4 @@
+import { FullGestureState } from "@use-gesture/react";
 import { useEffect, useRef } from "react";
 import { SlideActionType, SlideMode } from "../types/common";
 
@@ -25,8 +26,12 @@ type OnSlideChange = {
     endReached: boolean;
   };
 };
+type OnDrag = Omit<FullGestureState<"drag">, "event"> & {
+  eventName: "onDrag";
+  slideActionType: SlideActionType;
+};
 
-type Events = OnSlideStartChange | OnSlideChange;
+type Events = OnSlideStartChange | OnSlideChange | OnDrag;
 
 type EventHandler = (props: Events) => void;
 
