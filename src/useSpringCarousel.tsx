@@ -1,15 +1,20 @@
 import { config, useSpring } from "@react-spring/web";
 import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
-import { SpringCarouselBaseProps } from "./types/useSpringCarousel";
+import {
+  SpringCarouselBaseProps,
+  SpringCarouselWithThumbs,
+} from "./types/useSpringCarousel";
 import { SlideActionType, SlideMode } from "./types/common";
 import { useEventsModule } from "./modules/useEventsModule";
 import { useDrag } from "@use-gesture/react";
 import { useFullscreenModule } from "./modules/useFullscreenModule";
+import { useThumbsModule } from "./modules/useThumbsModule";
 
 export function useSpringCarousel({
   items,
   init = true,
   withThumbs,
+  thumbsSlideAxis,
   itemsPerSlide = 1,
   slideType = "fixed",
   gutter = 0,
@@ -22,6 +27,7 @@ export function useSpringCarousel({
   freeScroll,
   enableFreeScrollDrag,
   initialStartingPosition,
+  prepareThumbsData,
 }: SpringCarouselBaseProps) {
   const draggingSlideTreshold = useRef(_draggingSlideTreshold ?? 0);
   const slideActionType = useRef<SlideActionType>("initial");
@@ -72,6 +78,12 @@ export function useSpringCarousel({
   const internalItems = getItems();
 
   const { emitEvent, useListenToCustomEvent } = useEventsModule();
+  const { thumbsFragment, handleScroll } = useThumbsModule({
+    withThumbs,
+    thumbsSlideAxis,
+    prepareThumbsData,
+    items: items as SpringCarouselWithThumbs["items"],
+  });
   const { enterFullscreen, exitFullscreen, getIsFullscreen } =
     useFullscreenModule({
       mainCarouselWrapperRef,
@@ -172,6 +184,9 @@ export function useSpringCarousel({
         }
       },
     });
+    if (withThumbs && !immediate) {
+      handleScroll(activeItem.current, slideActionType.current);
+    }
   }
 
   function getTotalScrollValue() {
@@ -307,7 +322,6 @@ export function useSpringCarousel({
         return;
       }
     }
-
     if (withLoop && firstItemReached.current) {
       firstItemReached.current = false;
       lastItemReached.current = true;
@@ -319,7 +333,6 @@ export function useSpringCarousel({
       });
       return;
     }
-
     if (nextItem === 0) {
       firstItemReached.current = true;
     }
@@ -360,7 +373,6 @@ export function useSpringCarousel({
         return;
       }
     }
-
     if (withLoop && lastItemReached.current) {
       lastItemReached.current = false;
       firstItemReached.current = true;
@@ -372,7 +384,6 @@ export function useSpringCarousel({
       });
       return;
     }
-
     if (nextItem === 0) {
       firstItemReached.current = true;
     }
@@ -668,6 +679,7 @@ export function useSpringCarousel({
     enterFullscreen,
     exitFullscreen,
     getIsFullscreen,
+    thumbsFragment,
     slideToPrevItem() {
       slideToPrevItem();
     },

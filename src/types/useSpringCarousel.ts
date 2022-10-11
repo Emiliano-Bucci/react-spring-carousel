@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 type ItemWithThumb = {
   id: string;
   renderItem: ReactNode;
-  renderThumn: ReactNode;
+  renderThumb: ReactNode;
 };
 type ItemWithNoThumb = {
   id: string;
@@ -11,13 +11,21 @@ type ItemWithNoThumb = {
   renderThumb?: never;
 };
 
-type SpringCarouselWithThumbs = {
+export type PrepareThumbsData = (
+  items: Omit<ItemWithThumb, "renderItem">[]
+) => Omit<ItemWithThumb, "renderItem">[];
+
+export type SpringCarouselWithThumbs = {
   withThumbs?: true;
+  thumbsSlideAxis?: "x" | "y";
   items: ItemWithThumb[];
+  prepareThumbsData?: PrepareThumbsData;
 };
 type SpringCarouselWithNoThumbs = {
   withThumbs?: false;
+  thumbsSlideAxis?: never;
   items: ItemWithNoThumb[];
+  prepareThumbsData?: never;
 };
 
 type SpringCarouselWithFixedItems = {
