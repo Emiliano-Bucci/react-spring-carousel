@@ -265,7 +265,7 @@ export function useSpringCarousel({
       : (activeItem.current - 1) * (getSlideValue() - getSlideValue() / 2) < 0;
     const nextItem = activeItem.current - 1;
 
-    if (nextItemWillEceed) {
+    if (nextItemWillEceed && type === "click") {
       if (withLoop) {
         slideToItem({
           slideMode: type,
@@ -307,7 +307,7 @@ export function useSpringCarousel({
       : (activeItem.current + 1) * (getSlideValue() + getSlideValue() / 2) >=
         getTotalScrollValue();
 
-    if (nextItemWillExceed) {
+    if (nextItemWillExceed && type === "click") {
       if (withLoop) {
         slideToItem({
           slideMode: type,
@@ -412,9 +412,29 @@ export function useSpringCarousel({
 
       if (state.last && !state.canceled) {
         if (nextItemTreshold) {
-          slideToNextItem("drag");
+          if (!withLoop && lastItemReached.current) {
+            setSpring.start({
+              val: -getTotalScrollValue(),
+              config: {
+                ...config.default,
+                velocity: state.velocity,
+              },
+            });
+          } else {
+            slideToNextItem("drag");
+          }
         } else if (prevItemTreshold) {
-          slideToPrevItem("drag");
+          if (!withLoop && firstItemReached.current) {
+            setSpring.start({
+              val: 0,
+              config: {
+                ...config.default,
+                velocity: state.velocity,
+              },
+            });
+          } else {
+            slideToPrevItem("drag");
+          }
         } else {
           setSpring.start({
             val: prevSlidedValue.current,
