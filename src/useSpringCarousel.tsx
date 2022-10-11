@@ -30,6 +30,7 @@ export function useSpringCarousel({
     pause: !init,
     onChange({ value }) {
       if (freeScroll && mainCarouselWrapperRef.current) {
+        setStartEndItemReachedOnFreeScroll();
         if (carouselSlideAxis === "x") {
           mainCarouselWrapperRef.current.scrollLeft = Math.abs(value.val);
         } else {
@@ -124,7 +125,9 @@ export function useSpringCarousel({
     slideModeType.current = slideMode;
 
     if (typeof nextActiveItem === "number") {
-      activeItem.current = nextActiveItem;
+      if (!freeScroll) {
+        activeItem.current = nextActiveItem;
+      }
       emitEvent({
         eventName: "onSlideStartChange",
         slideActionType: slideActionType.current,
@@ -526,41 +529,48 @@ export function useSpringCarousel({
     }
     return {};
   }
+
+  function setStartEndItemReachedOnFreeScroll() {
+    if (mainCarouselWrapperRef.current) {
+      prevSlidedValue.current =
+        mainCarouselWrapperRef.current[
+          carouselSlideAxis === "x" ? "scrollLeft" : "scrollTop"
+        ];
+      if (
+        mainCarouselWrapperRef.current[
+          carouselSlideAxis === "x" ? "scrollLeft" : "scrollTop"
+        ] === 0
+      ) {
+        firstItemReached.current = true;
+        lastItemReached.current = false;
+      }
+      if (
+        mainCarouselWrapperRef.current[
+          carouselSlideAxis === "x" ? "scrollLeft" : "scrollTop"
+        ] > 0 &&
+        mainCarouselWrapperRef.current[
+          carouselSlideAxis === "x" ? "scrollLeft" : "scrollTop"
+        ] < getTotalScrollValue()
+      ) {
+        firstItemReached.current = false;
+        lastItemReached.current = false;
+      }
+      if (
+        mainCarouselWrapperRef.current[
+          carouselSlideAxis === "x" ? "scrollLeft" : "scrollTop"
+        ] === getTotalScrollValue()
+      ) {
+        firstItemReached.current = false;
+        lastItemReached.current = true;
+      }
+    }
+  }
   function getScrollHandlers() {
     if (freeScroll) {
       return {
         onWheel(e: React.WheelEvent<HTMLDivElement>) {
           spring.val.stop();
-          if (mainCarouselWrapperRef.current) {
-            prevSlidedValue.current =
-              mainCarouselWrapperRef.current[
-                carouselSlideAxis === "x" ? "scrollLeft" : "scrollTop"
-              ];
-            if (
-              mainCarouselWrapperRef.current[
-                carouselSlideAxis === "x" ? "scrollLeft" : "scrollTop"
-              ] === 0
-            ) {
-              firstItemReached.current = true;
-              lastItemReached.current = false;
-            }
-            if (
-              mainCarouselWrapperRef.current[
-                carouselSlideAxis === "x" ? "scrollLeft" : "scrollTop"
-              ] > 0
-            ) {
-              firstItemReached.current = false;
-              lastItemReached.current = false;
-            }
-            if (
-              mainCarouselWrapperRef.current[
-                carouselSlideAxis === "x" ? "scrollLeft" : "scrollTop"
-              ] === getTotalScrollValue()
-            ) {
-              firstItemReached.current = false;
-              lastItemReached.current = true;
-            }
-          }
+          setStartEndItemReachedOnFreeScroll();
         },
       };
     }
