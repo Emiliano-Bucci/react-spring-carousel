@@ -6,9 +6,8 @@ export function UseSpringCarousel() {
   const { carouselFragment, slideToPrevItem, slideToNextItem } =
     useSpringCarousel({
       items: mockedItems,
-      // withLoop: true,
       gutter: 20,
-      slideType: "fluid",
+      freeScroll: true,
     });
 
   return (

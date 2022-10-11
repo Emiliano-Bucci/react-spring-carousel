@@ -19,6 +19,7 @@ export function useSpringCarousel({
   disableGestures = false,
   draggingSlideTreshold: _draggingSlideTreshold = 0,
   slideWhenThresholdIsReached = false,
+  freeScroll = false,
 }: SpringCarouselBaseProps) {
   const draggingSlideTreshold = useRef(_draggingSlideTreshold);
   const slideActionType = useRef<SlideActionType>("initial");
@@ -28,7 +29,13 @@ export function useSpringCarousel({
     val: 0,
     pause: !init,
     onChange({ value }) {
-      if (carouselTrackWrapperRef.current) {
+      if (freeScroll && mainCarouselWrapperRef.current) {
+        if (carouselSlideAxis === "x") {
+          mainCarouselWrapperRef.current.scrollLeft = Math.abs(value.val);
+        } else {
+          mainCarouselWrapperRef.current.scrollTop = Math.abs(value.val);
+        }
+      } else if (carouselTrackWrapperRef.current) {
         if (carouselSlideAxis === "x") {
           carouselTrackWrapperRef.current.style.transform = `translate3d(${value.val}px, 0px,0px)`;
         } else {
@@ -70,7 +77,7 @@ export function useSpringCarousel({
     });
 
   function getItemStyles() {
-    if (slideType === "fixed") {
+    if (slideType === "fixed" && !freeScroll) {
       return {
         ...{ marginRight: `${gutter}px` },
         flex: `1 0 calc(100% / ${itemsPerSlide} - ${
@@ -174,9 +181,7 @@ export function useSpringCarousel({
       ) -
         carouselTrackWrapperRef.current!.getBoundingClientRect()[
           carouselSlideAxis === "x" ? "width" : "height"
-        ] -
-        gutter -
-        startEndGutter
+        ]
     );
   }
   function getAnimatedWrapperStyles() {
@@ -254,10 +259,22 @@ export function useSpringCarousel({
   }
 
   function getFromValue() {
+    if (freeScroll) {
+      if (carouselSlideAxis === "x") {
+        return mainCarouselWrapperRef?.current?.scrollLeft ?? 0;
+      }
+      return mainCarouselWrapperRef?.current?.scrollTop ?? 0;
+    }
     return spring.val.get();
   }
   function getToValue(type: "next" | "prev") {
     if (type === "next") {
+      if (freeScroll) {
+        return prevSlidedValue.current + getSlideValue();
+      }
+      return prevSlidedValue.current - getSlideValue();
+    }
+    if (freeScroll) {
       return prevSlidedValue.current - getSlideValue();
     }
     return prevSlidedValue.current + getSlideValue();
@@ -269,9 +286,10 @@ export function useSpringCarousel({
     lastItemReached.current = false;
 
     const nextItem = activeItem.current - 1;
-    const nextItemWillExceed = getToValue("prev") + getSlideValue() / 4 > 0;
 
     if (!withLoop && slideType === "fluid") {
+      const nextItemWillExceed = getToValue("prev") + getSlideValue() / 3 > 0;
+
       if (firstItemReached.current) return;
       if (nextItemWillExceed) {
         firstItemReached.current = true;
@@ -319,11 +337,12 @@ export function useSpringCarousel({
     firstItemReached.current = false;
 
     const nextItem = activeItem.current + 1;
-    const nextItemWillExceed =
-      Math.abs(getToValue("next")) >
-      getTotalScrollValue() - getSlideValue() / 4;
 
     if (!withLoop && slideType === "fluid") {
+      const nextItemWillExceed =
+        Math.abs(getToValue("next")) >
+        getTotalScrollValue() - getSlideValue() / 3;
+
       if (lastItemReached.current) return;
       if (nextItemWillExceed) {
         firstItemReached.current = false;
@@ -473,7 +492,7 @@ export function useSpringCarousel({
       }
     },
     {
-      enabled: init && !disableGestures,
+      enabled: init && !disableGestures && !freeScroll,
       axis: carouselSlideAxis,
       from: () => {
         if (carouselSlideAxis === "x") {
@@ -484,14 +503,63 @@ export function useSpringCarousel({
     }
   );
 
+  function getWrapperOverflowStyles() {
+    if (freeScroll) {
+      if (carouselSlideAxis === "x") {
+        return {
+          overflowX: "auto",
+        };
+      }
+      return {
+        overflowY: "auto",
+      };
+    }
+    return {};
+  }
+  function getScrollHandlers() {
+    if (freeScroll) {
+      return {
+        onWheel(e: React.WheelEvent<HTMLDivElement>) {
+          if (mainCarouselWrapperRef.current) {
+            if (
+              carouselSlideAxis === "x" &&
+              mainCarouselWrapperRef.current.scrollLeft === 0
+            ) {
+              firstItemReached.current = true;
+              lastItemReached.current = false;
+            }
+            if (
+              carouselSlideAxis === "x" &&
+              mainCarouselWrapperRef.current.scrollLeft > 0
+            ) {
+              firstItemReached.current = false;
+              lastItemReached.current = false;
+            }
+            if (
+              carouselSlideAxis === "x" &&
+              mainCarouselWrapperRef.current.scrollLeft ===
+                getTotalScrollValue()
+            ) {
+              firstItemReached.current = false;
+              lastItemReached.current = true;
+            }
+          }
+        },
+      };
+    }
+    return {};
+  }
+
   const carouselFragment = (
     <div
       ref={mainCarouselWrapperRef}
+      {...getScrollHandlers()}
       style={{
         display: "flex",
         position: "relative",
         width: "100%",
         height: "100%",
+        ...(getWrapperOverflowStyles() as React.CSSProperties),
       }}
     >
       <div

@@ -37,6 +37,16 @@ type SpringCarouselWithLoop = {
 type SpringCarouselWithNoLoop = {
   withLoop?: false;
 };
+type SpringCarouselFreeScroll = {
+  freeScroll?: true;
+  withLoop?: never;
+  slideType?: never;
+};
+type SpringCarouselNoFreeScroll = {
+  freeScroll?: never | false;
+  withLoop?: boolean;
+  slideType?: "fixed" | "fluid";
+};
 
 export type SpringCarouselBaseProps = {
   init?: boolean;
@@ -47,4 +57,5 @@ export type SpringCarouselBaseProps = {
   disableGestures?: boolean;
 } & (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs) &
   (SpringCarouselWithFixedItems | SpringCarouselWithNoFixedItems) &
-  (SpringCarouselWithLoop | SpringCarouselWithNoLoop);
+  (SpringCarouselWithLoop | SpringCarouselWithNoLoop) &
+  (SpringCarouselFreeScroll | SpringCarouselNoFreeScroll);
