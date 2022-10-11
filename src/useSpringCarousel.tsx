@@ -130,10 +130,10 @@ export function useSpringCarousel({
         slideActionType: slideActionType.current,
         slideMode: slideModeType.current,
         nextItem: {
-          index: activeItem.current,
           startReached: firstItemReached.current,
           endReached: lastItemReached.current,
-          id: items[activeItem.current].id,
+          index: freeScroll ? -1 : activeItem.current,
+          id: freeScroll ? "" : items[activeItem.current].id,
         },
       });
     }
@@ -158,10 +158,10 @@ export function useSpringCarousel({
             slideActionType: slideActionType.current,
             slideMode: slideModeType.current,
             currentItem: {
-              index: activeItem.current,
               startReached: firstItemReached.current,
               endReached: lastItemReached.current,
-              id: items[activeItem.current].id,
+              index: freeScroll ? -1 : activeItem.current,
+              id: freeScroll ? "" : items[activeItem.current].id,
             },
           });
         }
@@ -259,23 +259,30 @@ export function useSpringCarousel({
   }
 
   function getFromValue() {
-    if (freeScroll) {
-      if (carouselSlideAxis === "x") {
-        return mainCarouselWrapperRef?.current?.scrollLeft ?? 0;
-      }
-      return mainCarouselWrapperRef?.current?.scrollTop ?? 0;
+    if (freeScroll && mainCarouselWrapperRef.current) {
+      return mainCarouselWrapperRef.current[
+        carouselSlideAxis === "x" ? "scrollLeft" : "scrollTop"
+      ];
     }
     return spring.val.get();
   }
   function getToValue(type: "next" | "prev") {
     if (type === "next") {
       if (freeScroll) {
-        return prevSlidedValue.current + getSlideValue();
+        const next = prevSlidedValue.current + getSlideValue();
+        if (next > getTotalScrollValue()) {
+          return getTotalScrollValue();
+        }
+        return next;
       }
       return prevSlidedValue.current - getSlideValue();
     }
     if (freeScroll) {
-      return prevSlidedValue.current - getSlideValue();
+      const next = prevSlidedValue.current - getSlideValue();
+      if (next < 0) {
+        return 0;
+      }
+      return next;
     }
     return prevSlidedValue.current + getSlideValue();
   }
@@ -521,24 +528,30 @@ export function useSpringCarousel({
       return {
         onWheel(e: React.WheelEvent<HTMLDivElement>) {
           if (mainCarouselWrapperRef.current) {
+            prevSlidedValue.current =
+              mainCarouselWrapperRef.current[
+                carouselSlideAxis === "x" ? "scrollLeft" : "scrollTop"
+              ];
             if (
-              carouselSlideAxis === "x" &&
-              mainCarouselWrapperRef.current.scrollLeft === 0
+              mainCarouselWrapperRef.current[
+                carouselSlideAxis === "x" ? "scrollLeft" : "scrollTop"
+              ] === 0
             ) {
               firstItemReached.current = true;
               lastItemReached.current = false;
             }
             if (
-              carouselSlideAxis === "x" &&
-              mainCarouselWrapperRef.current.scrollLeft > 0
+              mainCarouselWrapperRef.current[
+                carouselSlideAxis === "x" ? "scrollLeft" : "scrollTop"
+              ] > 0
             ) {
               firstItemReached.current = false;
               lastItemReached.current = false;
             }
             if (
-              carouselSlideAxis === "x" &&
-              mainCarouselWrapperRef.current.scrollLeft ===
-                getTotalScrollValue()
+              mainCarouselWrapperRef.current[
+                carouselSlideAxis === "x" ? "scrollLeft" : "scrollTop"
+              ] === getTotalScrollValue()
             ) {
               firstItemReached.current = false;
               lastItemReached.current = true;
