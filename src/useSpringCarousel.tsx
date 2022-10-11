@@ -38,7 +38,7 @@ export function useSpringCarousel({
     },
   }));
   const activeItem = useRef(0);
-  const firstItemReached = useRef(false);
+  const firstItemReached = useRef(true);
   const lastItemReached = useRef(false);
   const mainCarouselWrapperRef = useRef<HTMLDivElement | null>(null);
   const carouselTrackWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -272,8 +272,9 @@ export function useSpringCarousel({
 
     // const nextItemWillExceed = getToValue("prev") >= 0;
 
-    if (withLoop && firstItemReached.current && type === "click") {
+    if (withLoop && firstItemReached.current) {
       firstItemReached.current = false;
+      lastItemReached.current = true;
       slideToItem({
         slideMode: type,
         from: getFromValue() - getSlideValue() * items.length,
@@ -286,7 +287,7 @@ export function useSpringCarousel({
     if (nextItem === 0) {
       firstItemReached.current = true;
     }
-    if (nextItem === items.length - 1) {
+    if (nextItem === items.length - 1 || nextItem === -1) {
       lastItemReached.current = true;
     }
     slideToItem({
@@ -307,8 +308,9 @@ export function useSpringCarousel({
     // const nextItemWillExceed =
     //   Math.abs(getToValue("next")) >= getTotalScrollValue();
 
-    if (withLoop && lastItemReached.current && type === "click") {
+    if (withLoop && lastItemReached.current) {
       lastItemReached.current = false;
+      firstItemReached.current = true;
       slideToItem({
         slideMode: type,
         from: getFromValue() + getSlideValue() * items.length,
