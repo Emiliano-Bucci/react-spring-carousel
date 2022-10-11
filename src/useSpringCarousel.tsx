@@ -267,23 +267,26 @@ export function useSpringCarousel({
     return spring.val.get();
   }
   function getToValue(type: "next" | "prev") {
-    if (type === "next") {
-      if (freeScroll) {
-        const next = prevSlidedValue.current + getSlideValue();
-        if (next > getTotalScrollValue()) {
-          return getTotalScrollValue();
-        }
-        return next;
+    if (freeScroll && type === "next") {
+      const next = prevSlidedValue.current + getSlideValue();
+      if (next > getTotalScrollValue()) {
+        return getTotalScrollValue();
       }
-      return prevSlidedValue.current - getSlideValue();
+      return next;
     }
-    if (freeScroll) {
+
+    if (freeScroll && type === "prev") {
       const next = prevSlidedValue.current - getSlideValue();
       if (next < 0) {
         return 0;
       }
       return next;
     }
+
+    if (type === "next") {
+      return prevSlidedValue.current - getSlideValue();
+    }
+
     return prevSlidedValue.current + getSlideValue();
   }
   function slideToPrevItem(type: Exclude<SlideMode, "initial"> = "click") {
