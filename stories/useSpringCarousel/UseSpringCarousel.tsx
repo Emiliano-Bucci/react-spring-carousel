@@ -11,8 +11,7 @@ export function UseSpringCarousel() {
       })),
       withThumbs: true,
       gutter: 24,
-      slideType: "fixed",
-      initialActiveItem: 2,
+      slideType: "fluid",
     });
 
   return (

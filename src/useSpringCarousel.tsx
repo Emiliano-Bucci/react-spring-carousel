@@ -30,6 +30,7 @@ export function useSpringCarousel({
   prepareThumbsData,
   initialActiveItem = 0,
 }: SpringCarouselBaseProps) {
+  const prevWindowWidth = useRef(0);
   const draggingSlideTreshold = useRef(_draggingSlideTreshold ?? 0);
   const slideActionType = useRef<SlideActionType>("initial");
   const slideModeType = useRef<SlideMode>("initial");
@@ -243,6 +244,22 @@ export function useSpringCarousel({
       }
     }
 
+    const currentFromValue = Math.abs(getFromValue());
+
+    if (currentFromValue < getTotalScrollValue() && lastItemReached.current) {
+      lastItemReached.current = false;
+    }
+    if (currentFromValue > getTotalScrollValue()) {
+      const val = -getTotalScrollValue();
+      lastItemReached.current = true;
+      prevSlidedValue.current = val;
+      setSpring.start({
+        immediate: true,
+        val,
+      });
+      return;
+    }
+
     if (initialStartingPosition === "center") {
       setPosition(
         getCarouselItemWidth() * items.length -
@@ -400,6 +417,9 @@ export function useSpringCarousel({
   }
 
   useEffect(() => {
+    prevWindowWidth.current = window.innerWidth;
+  }, []);
+  useEffect(() => {
     adjustCarouselWrapperPosition();
   }, [
     initialStartingPosition,
@@ -428,6 +448,8 @@ export function useSpringCarousel({
   }, [_draggingSlideTreshold]);
   useEffect(() => {
     function handleResize() {
+      if (window.innerWidth === prevWindowWidth.current) return;
+      prevWindowWidth.current = window.innerWidth;
       adjustCarouselWrapperPosition();
     }
     window.addEventListener("resize", handleResize);
