@@ -31,6 +31,15 @@ type SpringCarouselWithNoFixedItems = {
   startEndGutter?: never;
 };
 
+type SpringCarouselStartingPosition = {
+  slideType?: "fixed";
+  initialStartingPosition?: "start" | "center" | "end";
+};
+type SpringCarouselWithoutStartingPosition = {
+  slideType?: "fluid";
+  initialStartingPosition?: never;
+};
+
 type SpringCarouselWithLoop = {
   withLoop?: true;
 };
@@ -60,4 +69,5 @@ export type SpringCarouselBaseProps = {
 } & (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs) &
   (SpringCarouselWithFixedItems | SpringCarouselWithNoFixedItems) &
   (SpringCarouselWithLoop | SpringCarouselWithNoLoop) &
-  (SpringCarouselFreeScroll | SpringCarouselNoFreeScroll);
+  (SpringCarouselFreeScroll | SpringCarouselNoFreeScroll) &
+  (SpringCarouselStartingPosition | SpringCarouselWithoutStartingPosition);

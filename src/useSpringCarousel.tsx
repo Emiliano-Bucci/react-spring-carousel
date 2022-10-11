@@ -17,12 +17,13 @@ export function useSpringCarousel({
   startEndGutter = 0,
   carouselSlideAxis = "x",
   disableGestures = false,
-  draggingSlideTreshold: _draggingSlideTreshold = 0,
+  draggingSlideTreshold: _draggingSlideTreshold,
   slideWhenThresholdIsReached = false,
   freeScroll,
   enableFreeScrollDrag,
+  initialStartingPosition,
 }: SpringCarouselBaseProps) {
-  const draggingSlideTreshold = useRef(_draggingSlideTreshold);
+  const draggingSlideTreshold = useRef(_draggingSlideTreshold ?? 0);
   const slideActionType = useRef<SlideActionType>("initial");
   const slideModeType = useRef<SlideMode>("initial");
   const prevSlidedValue = useRef(0);
@@ -75,13 +76,13 @@ export function useSpringCarousel({
     useFullscreenModule({
       mainCarouselWrapperRef,
       emitEvent,
-      handleResize: () => adjustCarouselWrapperPosition(true),
+      handleResize: () => adjustCarouselWrapperPosition(),
     });
 
   function getItemStyles() {
     if (slideType === "fixed" && !freeScroll) {
       return {
-        ...{ marginRight: `${gutter}px` },
+        marginRight: `${gutter}px`,
         flex: `1 0 calc(100% / ${itemsPerSlide} - ${
           (gutter * (itemsPerSlide - 1)) / itemsPerSlide
         }px)`,
@@ -195,28 +196,30 @@ export function useSpringCarousel({
       height: carouselSlideAxis === "y" ? percentValue : "100%",
     };
   }
-  function getInitialStyles() {
-    const totalValue = (items.length / itemsPerSlide) * 100;
-    const singleItemValue = 100 / itemsPerSlide;
-    const cssProp = carouselSlideAxis === "x" ? "left" : "y";
-    const quantityToMove = Math.floor(50 / singleItemValue);
+  // function getInitialStyles() {
+  //   const totalValue = (items.length / itemsPerSlide) * 100;
+  //   const singleItemValue = 100 / itemsPerSlide;
+  //   const cssProp = carouselSlideAxis === "x" ? "left" : "y";
+  //   const quantityToMove = Math.floor(50 / singleItemValue);
 
-    // if (slideType === 'fixed') {
-    //   if (initialStartingPositionRef.current === 'center') {
-    //     return {
-    //       [cssProp]: `calc(-${totalValue}% + ${singleItemValue * quantityToMove}%)`,
-    //     }
-    //   }
-    //   if (initialStartingPositionRef.current === 'end') {
-    //     return {
-    //       [cssProp]: `calc(-${totalValue}% + ${singleItemValue * (quantityToMove * 2)}%)`,
-    //     }
-    //   }
-    // }
-    return {
-      [cssProp]: `0px`,
-    };
-  }
+  //   if (initialStartingPosition === "center") {
+  //     return {
+  //       [cssProp]: `calc(-${166}% + ${
+  //         33 * quantityToMove
+  //       }% + ${startEndGutter}px)`,
+  //     };
+  //   }
+  //   // if (slideType === 'fixed') {
+  //   //   if (initialStartingPositionRef.current === 'end') {
+  //   //     return {
+  //   //       [cssProp]: `calc(-${totalValue}% + ${singleItemValue * (quantityToMove * 2)}%)`,
+  //   //     }
+  //   //   }
+  //   // }
+  //   return {
+  //     [cssProp]: `0px`,
+  //   };
+  // }
 
   function getCarouselItemWidth() {
     const carouselItem = carouselTrackWrapperRef.current?.querySelector(
@@ -231,7 +234,7 @@ export function useSpringCarousel({
       ] + gutter
     );
   }
-  function adjustCarouselWrapperPosition(resize = false) {
+  function adjustCarouselWrapperPosition() {
     const positionProperty = carouselSlideAxis === "x" ? "left" : "top";
 
     function setPosition(v: number) {
@@ -240,24 +243,34 @@ export function useSpringCarousel({
 
       if (withLoop) {
         ref.style.top = "0px";
+        ref.style.left = "0px";
         ref.style[positionProperty] = `-${v - startEndGutter}px`;
       } else {
         ref.style.left = "0px";
         ref.style.top = "0px";
-        // if (_initialActiveItem && isFirstMount.current) {
-        //   ref.style[positionProperty] = `calc(-${_initialActiveItem} * 100%)`
-        // }
       }
     }
 
-    if (slideType === "fixed") {
+    if (initialStartingPosition === "center") {
+      setPosition(
+        getCarouselItemWidth() * items.length -
+          getSlideValue() * Math.round((itemsPerSlide - 1) / 2)
+      );
+    } else if (initialStartingPosition === "end") {
+      setPosition(
+        getCarouselItemWidth() * items.length -
+          getSlideValue() * Math.round(itemsPerSlide - 1)
+      );
+    } else {
       setPosition(getCarouselItemWidth() * items.length);
     }
 
-    if (resize) {
+    if (!freeScroll && slideType === "fixed") {
+      const val = -(getSlideValue() * activeItem.current);
+      prevSlidedValue.current = val;
       setSpring.start({
         immediate: true,
-        val: -(getSlideValue() * activeItem.current),
+        val,
       });
     }
   }
@@ -398,17 +411,16 @@ export function useSpringCarousel({
     });
   }
 
+  useEffect(() => {
+    adjustCarouselWrapperPosition();
+  }, [initialStartingPosition, itemsPerSlide, withLoop]);
   useLayoutEffect(() => {
     /**
      * Set initial track position
      */
-    if (withLoop && carouselTrackWrapperRef.current) {
-      carouselTrackWrapperRef.current.style.left = `${-(
-        getSlideValue() * items.length
-      )}px`;
+    if (carouselTrackWrapperRef.current) {
+      adjustCarouselWrapperPosition();
     }
-
-    adjustCarouselWrapperPosition();
   }, []);
   useEffect(() => {
     if (_draggingSlideTreshold) {
@@ -419,7 +431,7 @@ export function useSpringCarousel({
   }, [_draggingSlideTreshold]);
   useEffect(() => {
     function handleResize() {
-      adjustCarouselWrapperPosition(true);
+      adjustCarouselWrapperPosition();
     }
     window.addEventListener("resize", handleResize);
     return () => {
@@ -651,7 +663,6 @@ export function useSpringCarousel({
           flexDirection: carouselSlideAxis === "x" ? "row" : "column",
           touchAction: "none",
           ...getAnimatedWrapperStyles(),
-          ...getInitialStyles(),
         }}
       >
         {internalItems.map((item, index) => {
