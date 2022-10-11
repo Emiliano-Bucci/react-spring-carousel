@@ -269,8 +269,23 @@ export function useSpringCarousel({
     lastItemReached.current = false;
 
     const nextItem = activeItem.current - 1;
+    const nextItemWillExceed = getToValue("prev") + getSlideValue() / 4 > 0;
 
-    // const nextItemWillExceed = getToValue("prev") >= 0;
+    if (!withLoop && slideType === "fluid") {
+      if (firstItemReached.current) return;
+      if (nextItemWillExceed) {
+        firstItemReached.current = true;
+        lastItemReached.current = false;
+
+        slideToItem({
+          slideMode: type,
+          from: getFromValue(),
+          to: 0,
+          nextActiveItem: 0,
+        });
+        return;
+      }
+    }
 
     if (withLoop && firstItemReached.current) {
       firstItemReached.current = false;
@@ -304,9 +319,25 @@ export function useSpringCarousel({
     firstItemReached.current = false;
 
     const nextItem = activeItem.current + 1;
+    const nextItemWillExceed =
+      Math.abs(getToValue("next")) >
+      getTotalScrollValue() - getSlideValue() / 4;
 
-    // const nextItemWillExceed =
-    //   Math.abs(getToValue("next")) >= getTotalScrollValue();
+    if (!withLoop && slideType === "fluid") {
+      if (lastItemReached.current) return;
+      if (nextItemWillExceed) {
+        firstItemReached.current = false;
+        lastItemReached.current = true;
+
+        slideToItem({
+          slideMode: type,
+          from: getFromValue(),
+          to: -getTotalScrollValue(),
+          nextActiveItem: nextItem,
+        });
+        return;
+      }
+    }
 
     if (withLoop && lastItemReached.current) {
       lastItemReached.current = false;
