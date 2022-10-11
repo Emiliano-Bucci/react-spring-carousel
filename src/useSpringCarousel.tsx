@@ -256,79 +256,80 @@ export function useSpringCarousel({
   function getFromValue() {
     return spring.val.get();
   }
-  function getStaticFromValue() {
-    return -(activeItem.current * getSlideValue());
-  }
-  function getNextSlideValue(type: "next" | "prev") {
+  function getToValue(type: "next" | "prev") {
     if (type === "next") {
-      return getStaticFromValue() - getSlideValue();
+      return prevSlidedValue.current - getSlideValue();
     }
-    return getStaticFromValue() + getSlideValue();
+    return prevSlidedValue.current + getSlideValue();
   }
   function slideToPrevItem(type: Exclude<SlideMode, "initial"> = "click") {
     if (!init || (firstItemReached.current && !withLoop)) return;
 
     slideActionType.current = "prev";
-    firstItemReached.current = false;
     lastItemReached.current = false;
 
     const nextItem = activeItem.current - 1;
 
-    if (withLoop) {
-      const nextItemWillEceed = (activeItem.current - 1) * getSlideValue() < 0;
+    // const nextItemWillExceed = getToValue("prev") >= 0;
 
-      if (nextItemWillEceed && type === "click") {
-        slideToItem({
-          slideMode: type,
-          from: spring.val.get() - getSlideValue() * items.length,
-          to: -(getSlideValue() * items.length) + getSlideValue(),
-          nextActiveItem: items.length - 1,
-        });
-      }
-    } else {
-      if (nextItem === 0) {
-        firstItemReached.current = true;
-      }
+    if (withLoop && firstItemReached.current && type === "click") {
+      firstItemReached.current = false;
       slideToItem({
         slideMode: type,
-        from: getFromValue(),
-        to: getNextSlideValue("prev"),
-        nextActiveItem: nextItem,
+        from: getFromValue() - getSlideValue() * items.length,
+        to: -(getSlideValue() * items.length) + getSlideValue(),
+        nextActiveItem: items.length - 1,
       });
+      return;
     }
+
+    if (nextItem === 0) {
+      firstItemReached.current = true;
+    }
+    if (nextItem === items.length - 1) {
+      lastItemReached.current = true;
+    }
+    slideToItem({
+      slideMode: type,
+      from: getFromValue(),
+      to: getToValue("prev"),
+      nextActiveItem: nextItem,
+    });
   }
   function slideToNextItem(type: Exclude<SlideMode, "initial"> = "click") {
     if (!init || (lastItemReached.current && !withLoop)) return;
 
     slideActionType.current = "next";
     firstItemReached.current = false;
-    lastItemReached.current = false;
 
     const nextItem = activeItem.current + 1;
 
-    if (withLoop) {
-      const nextItemWillExceed =
-        (activeItem.current + 1) * getSlideValue() >= getTotalScrollValue();
+    // const nextItemWillExceed =
+    //   Math.abs(getToValue("next")) >= getTotalScrollValue();
 
-      if (nextItemWillExceed && type === "click") {
-        slideToItem({
-          slideMode: type,
-          from: getFromValue() + getSlideValue() * items.length,
-          to: 0,
-          nextActiveItem: 0,
-        });
-      }
-    } else {
-      if (nextItem === items.length - 1) {
-        lastItemReached.current = true;
-      }
+    if (withLoop && lastItemReached.current && type === "click") {
+      lastItemReached.current = false;
       slideToItem({
         slideMode: type,
-        from: getFromValue(),
-        to: getNextSlideValue("next"),
-        nextActiveItem: nextItem,
+        from: getFromValue() + getSlideValue() * items.length,
+        to: 0,
+        nextActiveItem: 0,
       });
+      return;
     }
+
+    if (nextItem === 0) {
+      firstItemReached.current = true;
+    }
+    if (nextItem === items.length - 1) {
+      lastItemReached.current = true;
+    }
+    slideToItem({
+      slideMode: type,
+      from: getFromValue(),
+      to: getToValue("next"),
+      nextActiveItem: nextItem,
+    });
   }
 
   useLayoutEffect(() => {
