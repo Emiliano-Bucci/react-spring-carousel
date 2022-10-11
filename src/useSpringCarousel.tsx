@@ -28,6 +28,7 @@ export function useSpringCarousel({
   enableFreeScrollDrag,
   initialStartingPosition,
   prepareThumbsData,
+  initialActiveItem = 0,
 }: SpringCarouselBaseProps) {
   const draggingSlideTreshold = useRef(_draggingSlideTreshold ?? 0);
   const slideActionType = useRef<SlideActionType>("initial");
@@ -53,8 +54,8 @@ export function useSpringCarousel({
       }
     },
   }));
-  const activeItem = useRef(0);
-  const firstItemReached = useRef(true);
+  const activeItem = useRef(initialActiveItem);
+  const firstItemReached = useRef(initialActiveItem === 0);
   const lastItemReached = useRef(false);
   const mainCarouselWrapperRef = useRef<HTMLDivElement | null>(null);
   const carouselTrackWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -400,7 +401,16 @@ export function useSpringCarousel({
 
   useEffect(() => {
     adjustCarouselWrapperPosition();
-  }, [initialStartingPosition, itemsPerSlide, withLoop]);
+  }, [
+    initialStartingPosition,
+    itemsPerSlide,
+    withLoop,
+    startEndGutter,
+    gutter,
+    freeScroll,
+    slideType,
+    init,
+  ]);
   useLayoutEffect(() => {
     /**
      * Set initial track position

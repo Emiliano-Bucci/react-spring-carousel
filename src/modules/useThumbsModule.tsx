@@ -39,6 +39,19 @@ export function useThumbsModule({
     val: 0,
   }));
 
+  function getTotalScrollValue() {
+    return Math.round(
+      Number(
+        wrapperRef.current?.[
+          thumbsSlideAxis === "x" ? "scrollWidth" : "scrollHeight"
+        ]
+      ) -
+        wrapperRef.current!.getBoundingClientRect()[
+          thumbsSlideAxis === "x" ? "width" : "height"
+        ]
+    );
+  }
+
   function handleScroll(activeItem: number, slideActionType: SlideActionType) {
     function getThumbNode() {
       if (wrapperRef.current) {
@@ -52,9 +65,20 @@ export function useThumbsModule({
     const thumbNode = getThumbNode();
     if (thumbNode && wrapperRef.current) {
       if (!isInViewport(thumbNode)) {
-        console.log(thumbNode.offsetLeft);
+        const offset = thumbNode.offsetLeft;
+        const val =
+          offset > getTotalScrollValue() ? getTotalScrollValue() : offset;
+
         setSpring.start({
-          val: thumbNode.offsetLeft,
+          from: {
+            val:
+              wrapperRef.current?.[
+                thumbsSlideAxis === "x" ? "scrollLeft" : "scrollTop"
+              ] ?? 0,
+          },
+          to: {
+            val,
+          },
           onChange: ({ value }) => {
             if (wrapperRef.current) {
               wrapperRef.current[
@@ -119,126 +143,3 @@ export function useThumbsModule({
     handleScroll,
   };
 }
-
-// function handleScroll(activeItem: number, slideActionType: SlideActionType) {
-//   function getOffsetDirection() {
-//     return thumbsSlideAxis === "x" ? "offsetLeft" : "offsetTop";
-//   }
-//   function getOffsetDimension() {
-//     return thumbsSlideAxis === "x" ? "offsetWidth" : "offsetHeight";
-//   }
-//   function getScrollDirecton() {
-//     return thumbsSlideAxis === "x" ? "scrollLeft" : "scrollTop";
-//   }
-//   function getThumbNode() {
-//     if (wrapperRef.current) {
-//       return wrapperRef.current.querySelector(
-//         `#thumb-item-${items[activeItem].id}`
-//       ) as HTMLElement;
-//     }
-//     return null;
-//   }
-//   function getThumbOffsetPosition({
-//     thumbNode,
-//     offsetDirection,
-//     offsetDimension,
-//   }: {
-//     thumbNode: HTMLElement;
-//     offsetDirection: OffsetDirection;
-//     offsetDimension: OffsetDimension;
-//   }) {
-//     return thumbNode[offsetDirection] + thumbNode[offsetDimension] / 2;
-//   }
-//   function getThumbScrollDimension({
-//     thumbWrapper,
-//     offsetDimension,
-//   }: {
-//     thumbWrapper: HTMLDivElement;
-//     offsetDimension: OffsetDimension;
-//   }) {
-//     return thumbWrapper[offsetDimension] / 2;
-//   }
-//   function getScrollFromValue({
-//     thumbWrapper,
-//     scrollDirection,
-//   }: {
-//     thumbWrapper: HTMLDivElement;
-//     scrollDirection: ScrollDirection;
-//   }) {
-//     return thumbWrapper[scrollDirection];
-//   }
-//   function getScrollToValue({
-//     thumbWrapper,
-//     thumbOffsetPosition,
-//     thumbScrollDimension,
-//     offsetDimension,
-//   }: {
-//     thumbWrapper: HTMLDivElement;
-//     thumbOffsetPosition: number;
-//     thumbScrollDimension: number;
-//     offsetDimension: OffsetDimension;
-//   }) {
-//     const scrollDimensionProperty =
-//       thumbsSlideAxis === "x" ? "scrollWidth" : "scrollHeight";
-
-//     if (
-//       activeItem === items.length - 1 ||
-//       thumbOffsetPosition - thumbScrollDimension >
-//         thumbWrapper[scrollDimensionProperty] - thumbWrapper[offsetDimension]
-//     ) {
-//       return (
-//         thumbWrapper[scrollDimensionProperty] - thumbWrapper[offsetDimension]
-//       );
-//     }
-//     if (activeItem === 0) {
-//       return 0;
-//     }
-
-//     return thumbOffsetPosition - thumbScrollDimension;
-//   }
-
-//   const thumbNode = getThumbNode();
-
-//   if (thumbNode && wrapperRef.current) {
-//     const thumbWrapper = wrapperRef.current;
-//     const offsetDirection = getOffsetDirection();
-//     const offsetDimension = getOffsetDimension();
-//     const scrollDirection = getScrollDirecton();
-//     const thumbOffsetPosition = getThumbOffsetPosition({
-//       thumbNode,
-//       offsetDimension,
-//       offsetDirection,
-//     });
-//     const thumbScrollDimension = getThumbScrollDimension({
-//       thumbWrapper,
-//       offsetDimension,
-//     });
-
-//     const fromValue = getScrollFromValue({
-//       thumbWrapper,
-//       scrollDirection,
-//     });
-//     const toValue = getScrollToValue({
-//       thumbWrapper,
-//       thumbOffsetPosition,
-//       thumbScrollDimension,
-//       offsetDimension,
-//     });
-
-//     setSpring.start({
-//       from: {
-//         val: fromValue,
-//       },
-//       to: {
-//         val: slideActionType === "prev" && toValue < 0 ? 0 : toValue,
-//       },
-//       onChange: ({ value }) => {
-//         if (wrapperRef.current) {
-//           wrapperRef.current[
-//             thumbsSlideAxis === "x" ? "scrollLeft" : "scrollTop"
-//           ] = Math.abs(value.val);
-//         }
-//       },
-//     });
-//   }
-// }

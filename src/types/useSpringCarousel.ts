@@ -42,10 +42,12 @@ type SpringCarouselWithNoFixedItems = {
 type SpringCarouselStartingPosition = {
   slideType?: "fixed";
   initialStartingPosition?: "start" | "center" | "end";
+  initialActiveItem?: number;
 };
 type SpringCarouselWithoutStartingPosition = {
   slideType?: "fluid";
   initialStartingPosition?: never;
+  initialActiveItem?: never;
 };
 
 type SpringCarouselWithLoop = {

@@ -10,8 +10,9 @@ export function UseSpringCarousel() {
         renderThumb: <div>Thumb</div>,
       })),
       withThumbs: true,
-      itemsPerSlide: 3,
       gutter: 24,
+      slideType: "fixed",
+      initialActiveItem: 2,
     });
 
   return (
