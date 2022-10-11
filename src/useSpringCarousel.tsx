@@ -530,6 +530,7 @@ export function useSpringCarousel({
     if (freeScroll) {
       return {
         onWheel(e: React.WheelEvent<HTMLDivElement>) {
+          spring.val.stop();
           if (mainCarouselWrapperRef.current) {
             prevSlidedValue.current =
               mainCarouselWrapperRef.current[
