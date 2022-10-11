@@ -253,6 +253,18 @@ export function useSpringCarousel({
     }
   }
 
+  function getFromValue() {
+    return spring.val.get();
+  }
+  function getStaticFromValue() {
+    return -(activeItem.current * getSlideValue());
+  }
+  function getNextSlideValue(type: "next" | "prev") {
+    if (type === "next") {
+      return getStaticFromValue() - getSlideValue();
+    }
+    return getStaticFromValue() + getSlideValue();
+  }
   function slideToPrevItem(type: Exclude<SlideMode, "initial"> = "click") {
     if (!init || (firstItemReached.current && !withLoop)) return;
 
@@ -260,26 +272,17 @@ export function useSpringCarousel({
     firstItemReached.current = false;
     lastItemReached.current = false;
 
-    const nextItemWillEceed = withLoop
-      ? (activeItem.current - 1) * getSlideValue() < 0
-      : (activeItem.current - 1) * (getSlideValue() - getSlideValue() / 2) < 0;
     const nextItem = activeItem.current - 1;
 
-    if (nextItemWillEceed && type === "click") {
-      if (withLoop) {
+    if (withLoop) {
+      const nextItemWillEceed = (activeItem.current - 1) * getSlideValue() < 0;
+
+      if (nextItemWillEceed && type === "click") {
         slideToItem({
           slideMode: type,
           from: spring.val.get() - getSlideValue() * items.length,
           to: -(getSlideValue() * items.length) + getSlideValue(),
           nextActiveItem: items.length - 1,
-        });
-      } else {
-        firstItemReached.current = true;
-        slideToItem({
-          slideMode: type,
-          from: spring.val.get(),
-          to: 0,
-          nextActiveItem: 0,
         });
       }
     } else {
@@ -288,8 +291,8 @@ export function useSpringCarousel({
       }
       slideToItem({
         slideMode: type,
-        from: spring.val.get(),
-        to: -(nextItem * getSlideValue()),
+        from: getFromValue(),
+        to: getNextSlideValue("prev"),
         nextActiveItem: nextItem,
       });
     }
@@ -302,26 +305,17 @@ export function useSpringCarousel({
     lastItemReached.current = false;
 
     const nextItem = activeItem.current + 1;
-    const nextItemWillExceed = withLoop
-      ? (activeItem.current + 1) * getSlideValue() >= getTotalScrollValue()
-      : (activeItem.current + 1) * (getSlideValue() + getSlideValue() / 2) >=
-        getTotalScrollValue();
 
-    if (nextItemWillExceed && type === "click") {
-      if (withLoop) {
+    if (withLoop) {
+      const nextItemWillExceed =
+        (activeItem.current + 1) * getSlideValue() >= getTotalScrollValue();
+
+      if (nextItemWillExceed && type === "click") {
         slideToItem({
           slideMode: type,
-          from: spring.val.get() + getSlideValue() * items.length,
+          from: getFromValue() + getSlideValue() * items.length,
           to: 0,
           nextActiveItem: 0,
-        });
-      } else {
-        lastItemReached.current = true;
-        slideToItem({
-          slideMode: type,
-          from: spring.val.get(),
-          to: -getTotalScrollValue(),
-          nextActiveItem: nextItem,
         });
       }
     } else {
@@ -330,8 +324,8 @@ export function useSpringCarousel({
       }
       slideToItem({
         slideMode: type,
-        from: spring.val.get(),
-        to: -(nextItem * getSlideValue()),
+        from: getFromValue(),
+        to: getNextSlideValue("next"),
         nextActiveItem: nextItem,
       });
     }
@@ -349,7 +343,6 @@ export function useSpringCarousel({
 
     adjustCarouselWrapperPosition();
   }, []);
-
   useEffect(() => {
     if (_draggingSlideTreshold) {
       draggingSlideTreshold.current = _draggingSlideTreshold;
@@ -357,7 +350,6 @@ export function useSpringCarousel({
       draggingSlideTreshold.current = Math.floor(getSlideValue() / 2 / 2);
     }
   }, [_draggingSlideTreshold]);
-
   useEffect(() => {
     function handleResize() {
       adjustCarouselWrapperPosition(true);
