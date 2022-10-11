@@ -8,6 +8,7 @@ export function UseSpringCarousel() {
       items: mockedItems,
       gutter: 20,
       freeScroll: true,
+      enableFreeScrollDrag: true,
     });
 
   return (

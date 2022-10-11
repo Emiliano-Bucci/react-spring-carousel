@@ -19,7 +19,8 @@ export function useSpringCarousel({
   disableGestures = false,
   draggingSlideTreshold: _draggingSlideTreshold = 0,
   slideWhenThresholdIsReached = false,
-  freeScroll = false,
+  freeScroll,
+  enableFreeScrollDrag,
 }: SpringCarouselBaseProps) {
   const draggingSlideTreshold = useRef(_draggingSlideTreshold);
   const slideActionType = useRef<SlideActionType>("initial");
@@ -449,6 +450,41 @@ export function useSpringCarousel({
           slideActionType: slideActionType.current,
         });
 
+        if (freeScroll) {
+          if (slideActionType.current === "prev" && movement > 0) {
+            state.cancel();
+            setSpring.start({
+              from: {
+                val: getFromValue(),
+              },
+              to: {
+                val: 0,
+              },
+              config: {
+                velocity: state.velocity,
+                friction: 50,
+                tension: 1000,
+              },
+            });
+            return;
+          }
+
+          setSpring.start({
+            from: {
+              val: getFromValue(),
+            },
+            to: {
+              val: -movement,
+            },
+            config: {
+              velocity: state.velocity,
+              friction: 50,
+              tension: 1000,
+            },
+          });
+          return;
+        }
+
         setSpring.start({
           val: movement,
           config: {
@@ -468,7 +504,16 @@ export function useSpringCarousel({
         return;
       }
 
-      if (state.last && !state.canceled) {
+      if (state.last && !state.canceled && freeScroll) {
+        if (slideActionType.current === "prev") {
+          slideToPrevItem("drag");
+        }
+        if (slideActionType.current === "next") {
+          slideToNextItem("drag");
+        }
+      }
+
+      if (state.last && !state.canceled && !freeScroll) {
         if (nextItemTreshold) {
           if (!withLoop && lastItemReached.current) {
             setSpring.start({
@@ -505,9 +550,17 @@ export function useSpringCarousel({
       }
     },
     {
-      enabled: init && !disableGestures && !freeScroll,
+      enabled:
+        (init && !disableGestures && !freeScroll) ||
+        (freeScroll && !!enableFreeScrollDrag),
       axis: carouselSlideAxis,
       from: () => {
+        if (freeScroll && mainCarouselWrapperRef.current) {
+          return [
+            -mainCarouselWrapperRef.current.scrollLeft,
+            -mainCarouselWrapperRef.current.scrollTop,
+          ];
+        }
         if (carouselSlideAxis === "x") {
           return [spring.val.get(), spring.val.get()];
         }

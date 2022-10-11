@@ -41,11 +41,13 @@ type SpringCarouselFreeScroll = {
   freeScroll?: true;
   withLoop?: never;
   slideType?: never;
+  enableFreeScrollDrag?: true;
 };
 type SpringCarouselNoFreeScroll = {
-  freeScroll?: never | false;
+  freeScroll?: never;
   withLoop?: boolean;
   slideType?: "fixed" | "fluid";
+  enableFreeScrollDrag?: never;
 };
 
 export type SpringCarouselBaseProps = {
