@@ -196,30 +196,6 @@ export function useSpringCarousel({
       height: carouselSlideAxis === "y" ? percentValue : "100%",
     };
   }
-  // function getInitialStyles() {
-  //   const totalValue = (items.length / itemsPerSlide) * 100;
-  //   const singleItemValue = 100 / itemsPerSlide;
-  //   const cssProp = carouselSlideAxis === "x" ? "left" : "y";
-  //   const quantityToMove = Math.floor(50 / singleItemValue);
-
-  //   if (initialStartingPosition === "center") {
-  //     return {
-  //       [cssProp]: `calc(-${166}% + ${
-  //         33 * quantityToMove
-  //       }% + ${startEndGutter}px)`,
-  //     };
-  //   }
-  //   // if (slideType === 'fixed') {
-  //   //   if (initialStartingPositionRef.current === 'end') {
-  //   //     return {
-  //   //       [cssProp]: `calc(-${totalValue}% + ${singleItemValue * (quantityToMove * 2)}%)`,
-  //   //     }
-  //   //   }
-  //   // }
-  //   return {
-  //     [cssProp]: `0px`,
-  //   };
-  // }
 
   function getCarouselItemWidth() {
     const carouselItem = carouselTrackWrapperRef.current?.querySelector(
@@ -314,7 +290,7 @@ export function useSpringCarousel({
 
     const nextItem = activeItem.current - 1;
 
-    if (!withLoop && slideType === "fluid") {
+    if (!withLoop) {
       const nextItemWillExceed = getToValue("prev") + getSlideValue() / 3 > 0;
 
       if (firstItemReached.current) return;
@@ -365,7 +341,7 @@ export function useSpringCarousel({
 
     const nextItem = activeItem.current + 1;
 
-    if (!withLoop && slideType === "fluid") {
+    if (!withLoop) {
       const nextItemWillExceed =
         Math.abs(getToValue("next")) >
         getTotalScrollValue() - getSlideValue() / 3;
