@@ -1,13 +1,16 @@
 import React from 'react'
 
 import { mockedItems } from '../../src/mockedItems'
-import { useSpringCarousel } from 'react-spring-carousel'
+import { useSpringCarousel, ItemWithThumb } from 'react-spring-carousel'
+
+const items = mockedItems as ItemWithThumb[]
 
 export function UseSpringCarousel() {
   const { carouselFragment, slideToPrevItem, slideToNextItem, thumbsFragment } =
     useSpringCarousel({
       gutter: 24,
-      items: mockedItems,
+      withThumbs: false,
+      items,
     })
 
   return (

@@ -1,6 +1,6 @@
 {
   "name": "react-spring-carousel",
-  "version": "3.0.0-beta008",
+  "version": "3.0.0-beta010",
   "description": "A new <Carousel /> experience for the web",
   "homepage": "https://react-spring-carousel.emilianobucci.com",
   "repository": "https://github.com/Emiliano-Bucci/react-spring-carousel",
@@ -79,7 +79,7 @@
   },
   "dependencies": {
     "@use-gesture/react": "^10.2.20",
-    "react-spring-carousel": "^3.0.0-beta008",
+    "react-spring-carousel": "^3.0.0-beta010",
     "screenfull": "^5.2.0"
   }
 }
