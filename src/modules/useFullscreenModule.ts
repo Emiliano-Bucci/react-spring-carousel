@@ -1,75 +1,73 @@
-import { useRef, MutableRefObject, useEffect } from "react";
-import screenfull from "screenfull";
-import { EmitEvent } from "./useEventsModule";
+import { useRef, MutableRefObject, useEffect } from 'react'
+import screenfull from 'screenfull'
+import { EmitEvent } from './useEventsModule'
 
 type FullscreenModule = {
-  mainCarouselWrapperRef: MutableRefObject<HTMLDivElement | null>;
-  emitEvent: EmitEvent;
-  handleResize?(): void;
-};
+  mainCarouselWrapperRef: MutableRefObject<HTMLDivElement | null>
+  emitEvent: EmitEvent
+  handleResize?(): void
+}
 
 export function useFullscreenModule({
   mainCarouselWrapperRef,
   emitEvent,
   handleResize,
 }: FullscreenModule) {
-  const isFullscreen = useRef(false);
+  const isFullscreen = useRef(false)
 
   useEffect(() => {
     function handleFullscreenChange() {
       if (document.fullscreenElement) {
-        setIsFullscreen(true);
+        setIsFullscreen(true)
         emitEvent({
-          eventName: "onFullscreenChange",
+          eventName: 'onFullscreenChange',
           isFullscreen: true,
-        });
+        })
 
-        handleResize && handleResize();
+        handleResize && handleResize()
       }
 
       if (!document.fullscreenElement) {
-        setIsFullscreen(false);
+        setIsFullscreen(false)
         emitEvent({
-          eventName: "onFullscreenChange",
+          eventName: 'onFullscreenChange',
           isFullscreen: false,
-        });
-        handleResize && handleResize();
+        })
+        handleResize && handleResize()
       }
     }
 
     if (screenfull.isEnabled) {
-      screenfull.on("change", handleFullscreenChange);
+      screenfull.on('change', handleFullscreenChange)
       return () => {
         if (screenfull.isEnabled) {
-          screenfull.off("change", handleFullscreenChange);
+          screenfull.off('change', handleFullscreenChange)
         }
-      };
+      }
     }
-  }, []);
+  }, [])
 
   function setIsFullscreen(_isFullscreen: boolean) {
-    isFullscreen.current = _isFullscreen;
+    isFullscreen.current = _isFullscreen
   }
 
   function getIsFullscreen() {
-    return isFullscreen.current;
+    return isFullscreen.current
   }
 
   function enterFullscreen(elementRef?: HTMLElement) {
     if (screenfull.isEnabled) {
-      screenfull.request(
-        (elementRef || mainCarouselWrapperRef.current) as Element
-      );
+      screenfull.request((elementRef || mainCarouselWrapperRef.current) as Element)
     }
   }
 
   function exitFullscreen() {
-    screenfull.isEnabled && screenfull.exit();
+    screenfull.isEnabled && screenfull.exit()
   }
 
   return {
     enterFullscreen,
     exitFullscreen,
     getIsFullscreen,
-  };
+  }
 }

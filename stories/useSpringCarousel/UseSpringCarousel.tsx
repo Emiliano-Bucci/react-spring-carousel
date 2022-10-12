@@ -1,6 +1,6 @@
-import React from "react";
-import { useSpringCarousel } from "../../src/useSpringCarousel";
-import { mockedItems } from "../../src/mockedItems";
+import React from 'react'
+import { useSpringCarousel } from '../../src/useSpringCarousel'
+import { mockedItems } from '../../src/mockedItems'
 
 export function UseSpringCarousel() {
   const {
@@ -12,27 +12,27 @@ export function UseSpringCarousel() {
   } = useSpringCarousel({
     gutter: 24,
     items: mockedItems,
-  });
+  })
 
   return (
     <div
       className="wrapper"
       style={{
-        display: "flex",
-        flexDirection: "column",
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       <div
         style={{
-          display: "flex",
-          flex: "1",
+          display: 'flex',
+          flex: '1',
         }}
       >
         <button onClick={slideToPrevItem}>PREV</button>
         <div
           className="carousel-wrapper"
           style={{
-            flex: "1",
+            flex: '1',
           }}
         >
           {carouselFragment}
@@ -41,12 +41,12 @@ export function UseSpringCarousel() {
       </div>
       <div
         style={{
-          border: "4px solid brown",
-          height: "80px",
+          border: '4px solid brown',
+          height: '80px',
         }}
       >
         {thumbsFragment}
       </div>
     </div>
-  );
+  )
 }

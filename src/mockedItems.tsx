@@ -1,12 +1,12 @@
 export const mockedItems = [
   {
-    id: "1",
+    id: '1',
     renderThumb: <div />,
     renderItem: (
       <div
         style={{
-          flex: "1",
-          background: "#34495E",
+          flex: '1',
+          background: '#34495E',
         }}
       >
         div 1
@@ -14,12 +14,12 @@ export const mockedItems = [
     ),
   },
   {
-    id: "2",
+    id: '2',
     renderItem: (
       <div
         style={{
-          flex: "1",
-          background: "#E74C3C",
+          flex: '1',
+          background: '#E74C3C',
         }}
       >
         div 2
@@ -27,12 +27,12 @@ export const mockedItems = [
     ),
   },
   {
-    id: "3",
+    id: '3',
     renderItem: (
       <div
         style={{
-          flex: "1",
-          background: "#2ECC71",
+          flex: '1',
+          background: '#2ECC71',
         }}
       >
         div 3
@@ -40,12 +40,12 @@ export const mockedItems = [
     ),
   },
   {
-    id: "4",
+    id: '4',
     renderItem: (
       <div
         style={{
-          flex: "1",
-          background: "#F39C12",
+          flex: '1',
+          background: '#F39C12',
         }}
       >
         div 4
@@ -53,16 +53,16 @@ export const mockedItems = [
     ),
   },
   {
-    id: "5",
+    id: '5',
     renderItem: (
       <div
         style={{
-          flex: "5",
-          background: "#16A085",
+          flex: '5',
+          background: '#16A085',
         }}
       >
         div 5
       </div>
     ),
   },
-];
+]

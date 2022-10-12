@@ -41,12 +41,7 @@ const props = {
 
 export default [
   {
-    input: [
-      'src/index.tsx',
-      'src/modules/index.tsx',
-      'src/useSpringCarousel.tsx',
-      // 'src/useTransitionCarousel/index.tsx',
-    ],
+    input: ['src/index.tsx', 'src/modules/index.tsx', 'src/useSpringCarousel.tsx'],
     output: {
       dir: pkg.module,
       format: 'esm',
@@ -72,8 +67,7 @@ export default [
           'react-dom': 'ReactDOM',
           screenfull: 'Screenfull',
           'react/jsx-runtime': 'ReactJSXRuntime',
-          'react-spring': 'ReactSpring',
-          rxjs: 'rxjs',
+          '@react-spring/web': 'ReactSpring',
           '@use-gesture/react': 'UseGestureReact',
         },
       },
