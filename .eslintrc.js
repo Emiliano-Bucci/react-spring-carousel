@@ -3,7 +3,14 @@ module.exports = {
     browser: true,
     es6: true,
   },
-  extends: ["plugin:react/recommended"],
+  plugins: ["react", "@typescript-eslint"],
+  extends: [
+    "prettier",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:prettier/recommended",
+    ,
+  ],
   globals: {
     Atomics: "readonly",
     SharedArrayBuffer: "readonly",
@@ -16,8 +23,29 @@ module.exports = {
     ecmaVersion: 2018,
     sourceType: "module",
   },
-  plugins: ["react", "@typescript-eslint"],
   rules: {
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        ignoreRestSiblings: true,
+        argsIgnorePattern: "^_",
+      },
+    ],
+    "prettier/prettier": [
+      "warn",
+      {
+        singleQuote: true,
+        semi: false,
+        arrowParens: "avoid",
+        printWidth: 90,
+      },
+    ],
+    // Errors
+    "@typescript-eslint/no-explicit-any": 2,
+    "@typescript-eslint/no-var-requires": 2,
+    "react-hooks/rules-of-hooks": 2,
+    "react-hooks/exhaustive-deps": 2,
+    // Allowed
     "react/jsx-uses-react": 0,
     "react/react-in-jsx-scope": 0,
     "@typescript-eslint/no-non-null-assertion": 0,

@@ -1,8 +1,7 @@
-import React from "react";
-
 export const mockedItems = [
   {
     id: "1",
+    renderThumb: <div />,
     renderItem: (
       <div
         style={{

@@ -11,15 +11,7 @@ export function UseSpringCarousel() {
     useListenToCustomEvent,
   } = useSpringCarousel({
     gutter: 24,
-    slideType: "fluid",
-    items: mockedItems.map((i) => ({
-      ...i,
-      renderThumb: <div>Thumb</div>,
-    })),
-  });
-
-  useListenToCustomEvent((event) => {
-    console.log(event);
+    items: mockedItems,
   });
 
   return (
