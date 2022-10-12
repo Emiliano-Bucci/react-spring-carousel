@@ -4,7 +4,7 @@ import external from 'rollup-plugin-peer-deps-external'
 import rollupTS from 'rollup-plugin-typescript2'
 import { terser } from 'rollup-plugin-terser'
 import commonjs from '@rollup/plugin-commonjs'
-import pkg from './package.json'
+import pkg from './package.json' assert { type: 'json' }
 import size from 'rollup-plugin-filesize'
 import excludeDependenciesFromBundle from 'rollup-plugin-exclude-dependencies-from-bundle'
 
@@ -44,8 +44,8 @@ export default [
     input: [
       'src/index.tsx',
       'src/modules/index.tsx',
-      'src/useSpringCarousel/index.tsx',
-      'src/useTransitionCarousel/index.tsx',
+      'src/useSpringCarousel.tsx',
+      // 'src/useTransitionCarousel/index.tsx',
     ],
     output: {
       dir: pkg.module,

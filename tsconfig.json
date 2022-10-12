@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "exactOptionalPropertyTypes": false,
-    "module": "commonjs",
+    "module": "ESNext",
     "esModuleInterop": true,
     "target": "ESNext",
     "lib": ["dom", "dom.iterable", "esnext"],

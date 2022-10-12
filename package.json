@@ -1,6 +1,6 @@
 {
   "name": "react-spring-carousel",
-  "version": "1.0.0",
+  "version": "3.0.0-beta001",
   "description": "A new <Carousel /> experience for the web",
   "homepage": "https://react-spring-carousel.emilianobucci.com",
   "repository": "https://github.com/Emiliano-Bucci/react-spring-carousel",
@@ -8,6 +8,7 @@
   "license": "MIT",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm",
+  "type": "module",
   "files": [
     "dist"
   ],
@@ -33,7 +34,8 @@
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "clean": "rimraf dist",
-    "build:lib": "npm run clean && rollup -c"
+    "build:lib": "npm run clean && rollup -c",
+    "release:beta": "npm run build:lib && npm publish --tag beta"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",
