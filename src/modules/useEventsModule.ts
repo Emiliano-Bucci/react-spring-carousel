@@ -40,6 +40,10 @@ type Events = OnSlideStartChange | OnSlideChange | OnDrag | OnFullscreenChange;
 type EventHandler = (props: Events) => void;
 
 export type EmitEvent = (event: Events) => void;
+export type UseListenToCustomEvent = {
+  useListenToCustomEvent: (eventHandler: EventHandler) => void;
+  emitEvent: (event: Events) => void;
+};
 
 export function useEventsModule() {
   const targetEvent = useRef<HTMLDivElement | null>(null);

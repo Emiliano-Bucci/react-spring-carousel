@@ -1,20 +1,38 @@
 import { config, useSpring } from "@react-spring/web";
 import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
-import {
-  SpringCarouselBaseProps,
-  SpringCarouselWithThumbs,
-} from "./types/useSpringCarousel";
+import { SpringCarouselWithThumbs } from "./types/useSpringCarousel";
 import { SlideActionType, SlideMode } from "./types/common";
 import { useEventsModule } from "./modules/useEventsModule";
 import { useDrag } from "@use-gesture/react";
 import { useFullscreenModule } from "./modules/useFullscreenModule";
 import { useThumbsModule } from "./modules/useThumbsModule";
+import {
+  UseSpringReturnType,
+  UseSpringCarouselWithThumbs,
+  UseSpringCarouselComplete,
+  UseSpringCarouselWithNoThumbs,
+  UseSpringCarouselWithFixedItems,
+  UseSpringCarouselWithNoFixedItems,
+} from "./types/internals";
+
+export function useSpringCarousel(
+  props: UseSpringCarouselWithThumbs
+): UseSpringReturnType;
+export function useSpringCarousel(
+  props: UseSpringCarouselWithNoThumbs
+): UseSpringReturnType;
+export function useSpringCarousel(
+  props: UseSpringCarouselWithFixedItems
+): UseSpringReturnType;
+export function useSpringCarousel(
+  props: UseSpringCarouselWithNoFixedItems
+): UseSpringReturnType;
 
 export function useSpringCarousel({
   items,
   init = true,
   withThumbs,
-  thumbsSlideAxis,
+  thumbsSlideAxis = "x",
   itemsPerSlide = 1,
   slideType = "fixed",
   gutter = 0,
@@ -29,7 +47,7 @@ export function useSpringCarousel({
   initialStartingPosition,
   prepareThumbsData,
   initialActiveItem = 0,
-}: SpringCarouselBaseProps) {
+}: UseSpringCarouselComplete) {
   const prevWindowWidth = useRef(0);
   const draggingSlideTreshold = useRef(_draggingSlideTreshold ?? 0);
   const slideActionType = useRef<SlideActionType>("initial");
@@ -81,7 +99,7 @@ export function useSpringCarousel({
 
   const { emitEvent, useListenToCustomEvent } = useEventsModule();
   const { thumbsFragment, handleScroll } = useThumbsModule({
-    withThumbs,
+    withThumbs: !!withThumbs,
     thumbsSlideAxis,
     prepareThumbsData,
     items: items as SpringCarouselWithThumbs["items"],
@@ -187,7 +205,7 @@ export function useSpringCarousel({
       },
     });
     if (withThumbs && !immediate) {
-      handleScroll(activeItem.current, slideActionType.current);
+      handleScroll(activeItem.current);
     }
   }
 
@@ -596,7 +614,7 @@ export function useSpringCarousel({
     {
       enabled:
         (init && !disableGestures && !freeScroll) ||
-        (freeScroll && !!enableFreeScrollDrag),
+        (!!freeScroll && !!enableFreeScrollDrag),
       axis: carouselSlideAxis,
       from: () => {
         if (freeScroll && mainCarouselWrapperRef.current) {
@@ -665,7 +683,7 @@ export function useSpringCarousel({
   function getScrollHandlers() {
     if (freeScroll) {
       return {
-        onWheel(e: React.WheelEvent<HTMLDivElement>) {
+        onWheel() {
           spring.val.stop();
           setStartEndItemReachedOnFreeScroll();
         },
@@ -676,14 +694,8 @@ export function useSpringCarousel({
   function findItemIndex(id: string) {
     return items.findIndex((item) => item.id === id);
   }
-  function internalSlideToItem(id: string | number) {
-    if (!init) return;
-
-    firstItemReached.current = false;
-    lastItemReached.current = false;
-
+  function findItemIndexById(id: string | number, error: string) {
     let itemIndex = 0;
-
     if (typeof id === "string") {
       itemIndex = items.findIndex((_item) => _item.id === id);
     } else {
@@ -691,10 +703,21 @@ export function useSpringCarousel({
     }
 
     if (itemIndex < 0 || itemIndex >= items.length) {
-      throw new Error(
-        "The item you want to slide to doesn't exist; please check che item id or the index you're passing to."
-      );
+      throw new Error(error);
     }
+
+    return itemIndex;
+  }
+  function internalSlideToItem(id: string | number) {
+    if (!init) return;
+
+    firstItemReached.current = false;
+    lastItemReached.current = false;
+
+    const itemIndex = findItemIndexById(
+      id,
+      "The item you want to slide to doesn't exist; please check che item id or the index you're passing to."
+    );
 
     if (itemIndex === activeItem.current) {
       return;
@@ -708,6 +731,22 @@ export function useSpringCarousel({
     } else {
       slideToPrevItem("click", newActiveItem);
     }
+  }
+  function getIsNextItem(id: string) {
+    const itemIndex = findItemIndex(id);
+    const _activeItem = activeItem.current;
+    if (withLoop && _activeItem === items.length - 1) {
+      return itemIndex === 0;
+    }
+    return itemIndex === _activeItem + 1;
+  }
+  function getIsPrevItem(id: string) {
+    const itemIndex = findItemIndex(id);
+    const _activeItem = activeItem.current;
+    if (withLoop && _activeItem === 0) {
+      return itemIndex === items.length - 1;
+    }
+    return itemIndex === _activeItem - 1;
   }
 
   const carouselFragment = (
@@ -762,6 +801,14 @@ export function useSpringCarousel({
     getIsFullscreen,
     thumbsFragment,
     slideToItem: internalSlideToItem,
+    getIsNextItem,
+    getIsPrevItem,
+    getIsActiveItem(id: string | number) {
+      return (
+        findItemIndexById(id, "The item you want to check doesn't exist") ===
+        activeItem.current
+      );
+    },
     slideToPrevItem() {
       slideToPrevItem();
     },

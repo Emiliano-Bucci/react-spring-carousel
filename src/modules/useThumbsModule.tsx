@@ -1,14 +1,9 @@
 import { useSpring } from "@react-spring/web";
-import React, { useRef } from "react";
+import { useRef } from "react";
 import {
   SpringCarouselWithThumbs,
   PrepareThumbsData,
 } from "../types/useSpringCarousel";
-import { SlideActionType } from "../types/common";
-
-type OffsetDimension = "offsetWidth" | "offsetHeight";
-type OffsetDirection = "offsetLeft" | "offsetTop";
-type ScrollDirection = "scrollLeft" | "scrollTop";
 
 type Props = {
   withThumbs?: boolean;
@@ -52,7 +47,7 @@ export function useThumbsModule({
     );
   }
 
-  function handleScroll(activeItem: number, slideActionType: SlideActionType) {
+  function handleScroll(activeItem: number) {
     function getThumbNode() {
       if (wrapperRef.current) {
         return wrapperRef.current.querySelector(

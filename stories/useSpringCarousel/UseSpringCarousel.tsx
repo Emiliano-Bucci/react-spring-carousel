@@ -8,16 +8,14 @@ export function UseSpringCarousel() {
     slideToPrevItem,
     slideToNextItem,
     thumbsFragment,
-    slideToItem,
     useListenToCustomEvent,
   } = useSpringCarousel({
+    gutter: 24,
+    slideType: "fluid",
     items: mockedItems.map((i) => ({
       ...i,
       renderThumb: <div>Thumb</div>,
     })),
-    withThumbs: true,
-    gutter: 24,
-    slideType: "fluid",
   });
 
   useListenToCustomEvent((event) => {
@@ -38,7 +36,7 @@ export function UseSpringCarousel() {
           flex: "1",
         }}
       >
-        <button onClick={() => slideToItem(1)}>PREV</button>
+        <button onClick={slideToPrevItem}>PREV</button>
         <div
           className="carousel-wrapper"
           style={{
@@ -47,7 +45,7 @@ export function UseSpringCarousel() {
         >
           {carouselFragment}
         </div>
-        <button onClick={() => slideToItem(4)}>NEXT</button>
+        <button onClick={slideToNextItem}>NEXT</button>
       </div>
       <div
         style={{
