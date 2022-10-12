@@ -3,7 +3,7 @@ import { useRef } from "react";
 import {
   SpringCarouselWithThumbs,
   PrepareThumbsData,
-} from "../types/useSpringCarousel";
+} from "src/types/internals";
 
 type Props = {
   withThumbs?: boolean;

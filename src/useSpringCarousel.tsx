@@ -1,6 +1,6 @@
 import { config, useSpring } from "@react-spring/web";
 import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
-import { SpringCarouselWithThumbs } from "./types/useSpringCarousel";
+
 import { SlideActionType, SlideMode } from "./types/common";
 import { useEventsModule } from "./modules/useEventsModule";
 import { useDrag } from "@use-gesture/react";
@@ -13,6 +13,7 @@ import {
   UseSpringCarouselWithNoThumbs,
   UseSpringCarouselWithFixedItems,
   UseSpringCarouselWithNoFixedItems,
+  SpringCarouselWithThumbs,
 } from "./types/internals";
 
 export function useSpringCarousel(
