@@ -1,5 +1,12 @@
 import { config, useSpring } from "@react-spring/web";
-import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from "react";
 
 import { SlideActionType, SlideMode } from "./types/common";
 import { useEventsModule } from "./modules/useEventsModule";
@@ -16,20 +23,20 @@ import {
   SpringCarouselWithThumbs,
 } from "./types/internals";
 
-export function useSpringCarousel(
+function useSpringCarousel(
   props: UseSpringCarouselWithThumbs
 ): UseSpringReturnType;
-export function useSpringCarousel(
+function useSpringCarousel(
   props: UseSpringCarouselWithNoThumbs
 ): UseSpringReturnType;
-export function useSpringCarousel(
+function useSpringCarousel(
   props: UseSpringCarouselWithFixedItems
 ): UseSpringReturnType;
-export function useSpringCarousel(
+function useSpringCarousel(
   props: UseSpringCarouselWithNoFixedItems
 ): UseSpringReturnType;
 
-export function useSpringCarousel({
+function useSpringCarousel({
   items,
   init = true,
   withThumbs,
@@ -804,17 +811,30 @@ export function useSpringCarousel({
     slideToItem: internalSlideToItem,
     getIsNextItem,
     getIsPrevItem,
-    getIsActiveItem(id: string | number) {
+    slideToPrevItem: () => slideToPrevItem(),
+    slideToNextItem: () => slideToNextItem(),
+    getIsActiveItem: (id: string | number) => {
       return (
         findItemIndexById(id, "The item you want to check doesn't exist") ===
         activeItem.current
       );
     },
-    slideToPrevItem() {
-      slideToPrevItem();
-    },
-    slideToNextItem() {
-      slideToNextItem();
-    },
   };
 }
+
+const Context =
+  createContext<
+    Omit<UseSpringReturnType, "carouselFragment" | "thumbsFragment"> | undefined
+  >(undefined);
+
+function useSpringCarouselContext() {
+  const context = useContext(Context);
+  if (!context) {
+    throw new Error(
+      "useSpringCarouselContext must be used within the carousel."
+    );
+  }
+  return context;
+}
+
+export { useSpringCarousel, useSpringCarouselContext };
