@@ -292,7 +292,7 @@ export function useSpringCarousel({
     }
     return spring.val.get();
   }
-  function getToValue(type: "next" | "prev") {
+  function getToValue(type: "next" | "prev", index?: number) {
     if (freeScroll && type === "next") {
       const next = prevSlidedValue.current + getSlideValue();
       if (next > getTotalScrollValue()) {
@@ -310,21 +310,31 @@ export function useSpringCarousel({
     }
 
     if (type === "next") {
+      if (index) {
+        return -(index * getSlideValue());
+      }
       return prevSlidedValue.current - getSlideValue();
     }
 
+    if (index) {
+      return -(index * getSlideValue());
+    }
     return prevSlidedValue.current + getSlideValue();
   }
-  function slideToPrevItem(type: Exclude<SlideMode, "initial"> = "click") {
+  function slideToPrevItem(
+    type: Exclude<SlideMode, "initial"> = "click",
+    index?: number
+  ) {
     if (!init || (firstItemReached.current && !withLoop)) return;
 
     slideActionType.current = "prev";
     lastItemReached.current = false;
 
-    const nextItem = activeItem.current - 1;
+    const nextItem = index || activeItem.current - 1;
 
     if (!withLoop) {
-      const nextItemWillExceed = getToValue("prev") + getSlideValue() / 3 > 0;
+      const nextItemWillExceed =
+        getToValue("prev", index) + getSlideValue() / 3 > 0;
 
       if (firstItemReached.current) return;
       if (nextItemWillExceed) {
@@ -360,21 +370,24 @@ export function useSpringCarousel({
     slideToItem({
       slideMode: type,
       from: getFromValue(),
-      to: getToValue("prev"),
+      to: getToValue("prev", index),
       nextActiveItem: nextItem,
     });
   }
-  function slideToNextItem(type: Exclude<SlideMode, "initial"> = "click") {
+  function slideToNextItem(
+    type: Exclude<SlideMode, "initial"> = "click",
+    index?: number
+  ) {
     if (!init || (lastItemReached.current && !withLoop)) return;
 
     slideActionType.current = "next";
     firstItemReached.current = false;
 
-    const nextItem = activeItem.current + 1;
+    const nextItem = index || activeItem.current + 1;
 
     if (!withLoop) {
       const nextItemWillExceed =
-        Math.abs(getToValue("next")) >
+        Math.abs(getToValue("next", index)) >
         getTotalScrollValue() - getSlideValue() / 3;
 
       if (lastItemReached.current) return;
@@ -411,7 +424,7 @@ export function useSpringCarousel({
     slideToItem({
       slideMode: type,
       from: getFromValue(),
-      to: getToValue("next"),
+      to: getToValue("next", index),
       nextActiveItem: nextItem,
     });
   }
@@ -660,6 +673,42 @@ export function useSpringCarousel({
     }
     return {};
   }
+  function findItemIndex(id: string) {
+    return items.findIndex((item) => item.id === id);
+  }
+  function internalSlideToItem(id: string | number) {
+    if (!init) return;
+
+    firstItemReached.current = false;
+    lastItemReached.current = false;
+
+    let itemIndex = 0;
+
+    if (typeof id === "string") {
+      itemIndex = items.findIndex((_item) => _item.id === id);
+    } else {
+      itemIndex = id;
+    }
+
+    if (itemIndex < 0 || itemIndex >= items.length) {
+      throw new Error(
+        "The item you want to slide to doesn't exist; please check che item id or the index you're passing to."
+      );
+    }
+
+    if (itemIndex === activeItem.current) {
+      return;
+    }
+
+    const currentItem = findItemIndex(items[activeItem.current].id);
+    const newActiveItem = findItemIndex(items[itemIndex].id);
+
+    if (newActiveItem > currentItem) {
+      slideToNextItem("click", newActiveItem);
+    } else {
+      slideToPrevItem("click", newActiveItem);
+    }
+  }
 
   const carouselFragment = (
     <div
@@ -712,6 +761,7 @@ export function useSpringCarousel({
     exitFullscreen,
     getIsFullscreen,
     thumbsFragment,
+    slideToItem: internalSlideToItem,
     slideToPrevItem() {
       slideToPrevItem();
     },

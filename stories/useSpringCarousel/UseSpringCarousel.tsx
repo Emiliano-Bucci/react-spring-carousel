@@ -3,16 +3,26 @@ import { useSpringCarousel } from "../../src/useSpringCarousel";
 import { mockedItems } from "../../src/mockedItems";
 
 export function UseSpringCarousel() {
-  const { carouselFragment, slideToPrevItem, slideToNextItem, thumbsFragment } =
-    useSpringCarousel({
-      items: mockedItems.map((i) => ({
-        ...i,
-        renderThumb: <div>Thumb</div>,
-      })),
-      withThumbs: true,
-      gutter: 24,
-      slideType: "fluid",
-    });
+  const {
+    carouselFragment,
+    slideToPrevItem,
+    slideToNextItem,
+    thumbsFragment,
+    slideToItem,
+    useListenToCustomEvent,
+  } = useSpringCarousel({
+    items: mockedItems.map((i) => ({
+      ...i,
+      renderThumb: <div>Thumb</div>,
+    })),
+    withThumbs: true,
+    gutter: 24,
+    slideType: "fluid",
+  });
+
+  useListenToCustomEvent((event) => {
+    console.log(event);
+  });
 
   return (
     <div
@@ -28,7 +38,7 @@ export function UseSpringCarousel() {
           flex: "1",
         }}
       >
-        <button onClick={slideToPrevItem}>PREV</button>
+        <button onClick={() => slideToItem(1)}>PREV</button>
         <div
           className="carousel-wrapper"
           style={{
@@ -37,7 +47,7 @@ export function UseSpringCarousel() {
         >
           {carouselFragment}
         </div>
-        <button onClick={slideToNextItem}>NEXT</button>
+        <button onClick={() => slideToItem(4)}>NEXT</button>
       </div>
       <div
         style={{
