@@ -15,20 +15,36 @@ import { useFullscreenModule } from './modules/useFullscreenModule'
 import { useThumbsModule } from './modules/useThumbsModule'
 import {
   UseSpringReturnType,
-  UseSpringCarouselWithThumbs,
   UseSpringCarouselComplete,
-  UseSpringCarouselWithNoThumbs,
-  UseSpringCarouselWithFixedItems,
-  UseSpringCarouselWithNoFixedItems,
   SpringCarouselWithThumbs,
   UseSpringCarouselWithFreeScroll,
+  UseSpringFreeScrollReturnType,
+  UseSpringCarouselWithThumbs,
+  UseSpringCarouselWithNoThumbs,
+  UseSpringCarouselWithNoFixedItems,
+  UseSpringCarouselWithFixedItems,
 } from './types/internals'
 
-function useSpringCarousel(props: UseSpringCarouselWithThumbs): UseSpringReturnType
-function useSpringCarousel(props: UseSpringCarouselWithNoThumbs): UseSpringReturnType
-function useSpringCarousel(props: UseSpringCarouselWithFixedItems): UseSpringReturnType
-function useSpringCarousel(props: UseSpringCarouselWithNoFixedItems): UseSpringReturnType
-function useSpringCarousel(props: UseSpringCarouselWithFreeScroll): UseSpringReturnType
+type ReturnType<T> = T extends true ? UseSpringFreeScrollReturnType : UseSpringReturnType
+
+/**
+ * No free scroll
+ */
+function useSpringCarousel(props: UseSpringCarouselWithThumbs<false>): ReturnType<false>
+function useSpringCarousel(props: UseSpringCarouselWithNoThumbs<false>): ReturnType<false>
+function useSpringCarousel(
+  props: UseSpringCarouselWithFixedItems<false>,
+): ReturnType<false>
+function useSpringCarousel(
+  props: UseSpringCarouselWithNoFixedItems<false>,
+): ReturnType<false>
+
+/**
+ * With free scroll
+ */
+function useSpringCarousel(props: UseSpringCarouselWithThumbs<true>): ReturnType<true>
+function useSpringCarousel(props: UseSpringCarouselWithNoThumbs<true>): ReturnType<true>
+function useSpringCarousel(props: UseSpringCarouselWithFreeScroll): ReturnType<true>
 
 function useSpringCarousel({
   items,
@@ -49,7 +65,7 @@ function useSpringCarousel({
   initialStartingPosition,
   prepareThumbsData,
   initialActiveItem = 0,
-}: UseSpringCarouselComplete): UseSpringReturnType {
+}: UseSpringCarouselComplete): ReturnType<typeof freeScroll> {
   const prevWindowWidth = useRef(0)
   const draggingSlideTreshold = useRef(_draggingSlideTreshold ?? 0)
   const slideActionType = useRef<SlideActionType>('initial')
@@ -820,6 +836,19 @@ function useSpringCarousel({
     </div>
   )
 
+  if (freeScroll) {
+    return {
+      useListenToCustomEvent,
+      carouselFragment,
+      enterFullscreen,
+      exitFullscreen,
+      getIsFullscreen,
+      thumbsFragment,
+      slideToPrevItem: () => slideToPrevItem(),
+      slideToNextItem: () => slideToNextItem(),
+    }
+  }
+
   return {
     useListenToCustomEvent,
     carouselFragment,
@@ -827,11 +856,11 @@ function useSpringCarousel({
     exitFullscreen,
     getIsFullscreen,
     thumbsFragment,
+    slideToPrevItem: () => slideToPrevItem(),
+    slideToNextItem: () => slideToNextItem(),
     slideToItem: internalSlideToItem,
     getIsNextItem,
     getIsPrevItem,
-    slideToPrevItem: () => slideToPrevItem(),
-    slideToNextItem: () => slideToNextItem(),
     getIsActiveItem: (id: string | number) => {
       return (
         findItemIndex(

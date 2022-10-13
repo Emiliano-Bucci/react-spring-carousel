@@ -16,6 +16,16 @@ export type UseSpringReturnType = {
   getIsNextItem(id: string | number): boolean
   getIsPrevItem(id: string | number): boolean
 }
+export type UseSpringFreeScrollReturnType = {
+  carouselFragment: ReactNode
+  thumbsFragment: ReactNode
+  useListenToCustomEvent: UseListenToCustomEvent['useListenToCustomEvent']
+  getIsFullscreen(): boolean
+  enterFullscreen(ref?: HTMLElement): void
+  exitFullscreen(): void
+  slideToNextItem(): void
+  slideToPrevItem(): void
+}
 
 export type PrepareThumbsData = (
   items: Omit<ItemWithThumb, 'renderItem'>[],
@@ -42,10 +52,10 @@ export type SpringCarouselWithFixedItems = {
 }
 export type SpringCarouselWithNoFixedItems = {
   slideType?: 'fluid'
+  itemsPerSlide?: never
   startEndGutter?: never
   initialStartingPosition?: never
   initialActiveItem?: never
-  itemsPerSlide?: never
 }
 export type SpringCarouselWithLoop = {
   withLoop?: true
@@ -58,13 +68,16 @@ export type SpringCarouselFreeScroll = {
   withLoop?: never
   slideType?: never
   enableFreeScrollDrag?: true
+  initialActiveItem?: never
   itemsPerSlide?: never
 }
 export type SpringCarouselNoFreeScroll = {
-  freeScroll?: never
+  freeScroll?: never | false | undefined
   withLoop?: boolean
   slideType?: 'fixed' | 'fluid'
   enableFreeScrollDrag?: never
+  initialActiveItem?: number
+  itemsPerSlide?: number
 }
 export type BaseProps = {
   init?: boolean
@@ -73,43 +86,75 @@ export type BaseProps = {
   draggingSlideTreshold?: number
   slideWhenThresholdIsReached?: boolean
   disableGestures?: boolean
+  startEndGutter?: number
 }
 
-export type UseSpringCarouselWithThumbs = BaseProps &
+type ScrollType<T> = T extends true
+  ? SpringCarouselFreeScroll
+  : SpringCarouselNoFreeScroll
+
+export type UseSpringCarouselWithThumbs<T> = BaseProps &
   SpringCarouselWithThumbs &
+  ScrollType<T> &
   (SpringCarouselWithFixedItems | SpringCarouselWithNoFixedItems) &
-  (SpringCarouselWithLoop | SpringCarouselWithNoLoop) &
-  (SpringCarouselFreeScroll | SpringCarouselNoFreeScroll)
-export type UseSpringCarouselWithNoThumbs = BaseProps &
+  (SpringCarouselWithLoop | SpringCarouselWithNoLoop)
+export type UseSpringCarouselWithNoThumbs<T> = BaseProps &
   SpringCarouselWithNoThumbs &
+  ScrollType<T> &
   (SpringCarouselWithFixedItems | SpringCarouselWithNoFixedItems) &
-  (SpringCarouselWithLoop | SpringCarouselWithNoLoop) &
-  (SpringCarouselFreeScroll | SpringCarouselNoFreeScroll)
+  (SpringCarouselWithLoop | SpringCarouselWithNoLoop)
 
-export type UseSpringCarouselWithFixedItems = BaseProps &
-  (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs) &
+export type UseSpringCarouselWithFixedItems<T> = BaseProps &
   SpringCarouselWithFixedItems &
-  (SpringCarouselWithLoop | SpringCarouselWithNoLoop) &
-  (SpringCarouselFreeScroll | SpringCarouselNoFreeScroll)
-
-export type UseSpringCarouselWithNoFixedItems = BaseProps &
+  ScrollType<T> &
   (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs) &
+  (SpringCarouselWithLoop | SpringCarouselWithNoLoop)
+
+export type UseSpringCarouselWithNoFixedItems<T> = BaseProps &
   SpringCarouselWithNoFixedItems &
-  (SpringCarouselWithLoop | SpringCarouselWithNoLoop) &
-  (SpringCarouselFreeScroll | SpringCarouselNoFreeScroll)
+  ScrollType<T> &
+  (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs) &
+  (SpringCarouselWithLoop | SpringCarouselWithNoLoop)
 
 export type UseSpringCarouselWithFreeScroll = BaseProps &
   SpringCarouselFreeScroll &
   (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs)
 
-export type UseSpringCarouselComplete = BaseProps & {
-  thumbsSlideAxis?: 'x' | 'y'
-  itemsPerSlide?: number
-  startEndGutter?: number
-  initialStartingPosition?: 'start' | 'center' | 'end'
-  prepareThumbsData?: PrepareThumbsData
-  initialActiveItem?: number
-} & (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs) &
+export type UseSpringCarouselComplete = BaseProps &
+  (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs) &
   (SpringCarouselWithFixedItems | SpringCarouselWithNoFixedItems) &
   (SpringCarouselWithLoop | SpringCarouselWithNoLoop) &
   (SpringCarouselFreeScroll | SpringCarouselNoFreeScroll)
+
+type A = {
+  id: true
+}
+
+type B = {
+  id: false
+}
+
+type RetA = {
+  val: number
+}
+type RetB = {
+  get(): void
+}
+
+type Res<T> = T extends true ? RetA : RetB
+function ex(props: A): RetA
+function ex(props: B): RetB
+function ex(props: A | B): Res<typeof props.id> {
+  if (typeof props.id === 'string') {
+    return {
+      val: 1,
+    }
+  }
+  return {
+    get: () => {},
+  }
+}
+
+const {} = ex({
+  id: true,
+})
