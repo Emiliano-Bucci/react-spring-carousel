@@ -50,7 +50,7 @@ function useSpringCarousel({
   init = true,
   withThumbs,
   thumbsSlideAxis = 'x',
-  itemsPerSlide = 1,
+  itemsPerSlide: _itemsPerSlide = 1,
   slideType = 'fixed',
   gutter = 0,
   withLoop = false,
@@ -65,6 +65,7 @@ function useSpringCarousel({
   prepareThumbsData,
   initialActiveItem = 0,
 }: UseSpringCarouselComplete): ReturnType<typeof freeScroll> {
+  const itemsPerSlide = _itemsPerSlide > items.length ? items.length : _itemsPerSlide
   const prevWindowWidth = useRef(0)
   const draggingSlideTreshold = useRef(_draggingSlideTreshold ?? 0)
   const slideActionType = useRef<SlideActionType>('initial')
@@ -465,12 +466,19 @@ function useSpringCarousel({
   }
 
   useEffect(() => {
-    if (initialActiveItem > items.length - 1) {
-      throw new Error(
-        `initialActiveItem (${initialActiveItem}) is greater than the total quantity available items (${items.length}).`,
-      )
+    if (init) {
+      if (initialActiveItem > items.length - 1) {
+        throw new Error(
+          `initialActiveItem (${initialActiveItem}) is greater than the total quantity available items (${items.length}).`,
+        )
+      }
+      if (itemsPerSlide > items.length) {
+        console.warn(
+          `itemsPerSlide (${itemsPerSlide}) is greater than the total quantity available items (${items.length}). Fallback to ${items.length})`,
+        )
+      }
     }
-  }, [initialActiveItem, items])
+  }, [initialActiveItem, items, itemsPerSlide, init])
   useEffect(() => {
     prevWindowWidth.current = window.innerWidth
   }, [])

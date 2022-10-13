@@ -9,8 +9,7 @@ const items = mockedItems as ItemWithThumb[]
 export function UseSpringCarousel() {
   const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
     items,
-    itemsPerSlide: 3,
-    initialActiveItem: 4,
+    itemsPerSlide: 100,
   })
 
   return (
