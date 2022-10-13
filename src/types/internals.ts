@@ -125,36 +125,3 @@ export type UseSpringCarouselComplete = BaseProps &
   (SpringCarouselWithFixedItems | SpringCarouselWithNoFixedItems) &
   (SpringCarouselWithLoop | SpringCarouselWithNoLoop) &
   (SpringCarouselFreeScroll | SpringCarouselNoFreeScroll)
-
-type A = {
-  id: true
-}
-
-type B = {
-  id: false
-}
-
-type RetA = {
-  val: number
-}
-type RetB = {
-  get(): void
-}
-
-type Res<T> = T extends true ? RetA : RetB
-function ex(props: A): RetA
-function ex(props: B): RetB
-function ex(props: A | B): Res<typeof props.id> {
-  if (typeof props.id === 'string') {
-    return {
-      val: 1,
-    }
-  }
-  return {
-    get: () => {},
-  }
-}
-
-const {} = ex({
-  id: true,
-})

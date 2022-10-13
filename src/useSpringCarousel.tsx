@@ -28,6 +28,12 @@ import {
 type ReturnType<T> = T extends true ? UseSpringFreeScrollReturnType : UseSpringReturnType
 
 /**
+ * With free scroll
+ */
+function useSpringCarousel(props: UseSpringCarouselWithThumbs<true>): ReturnType<true>
+function useSpringCarousel(props: UseSpringCarouselWithNoThumbs<true>): ReturnType<true>
+function useSpringCarousel(props: UseSpringCarouselWithFreeScroll): ReturnType<true>
+/**
  * No free scroll
  */
 function useSpringCarousel(props: UseSpringCarouselWithThumbs<false>): ReturnType<false>
@@ -38,13 +44,6 @@ function useSpringCarousel(
 function useSpringCarousel(
   props: UseSpringCarouselWithNoFixedItems<false>,
 ): ReturnType<false>
-
-/**
- * With free scroll
- */
-function useSpringCarousel(props: UseSpringCarouselWithThumbs<true>): ReturnType<true>
-function useSpringCarousel(props: UseSpringCarouselWithNoThumbs<true>): ReturnType<true>
-function useSpringCarousel(props: UseSpringCarouselWithFreeScroll): ReturnType<true>
 
 function useSpringCarousel({
   items,
