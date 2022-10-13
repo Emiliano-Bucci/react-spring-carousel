@@ -692,19 +692,23 @@ function useSpringCarousel({
     }
     return {}
   }
-  function findItemIndex(id: string) {
-    return items.findIndex(item => item.id === id)
-  }
-  function findItem(id: string | number, error: string) {
+
+  function findItemIndex(id: string | number, error?: string) {
     let itemIndex = 0
+
     if (typeof id === 'string') {
-      itemIndex = findItemIndex(id)
+      itemIndex = items.findIndex(item => item.id === id)
     } else {
       itemIndex = id
     }
-
     if (itemIndex < 0 || itemIndex >= items.length) {
-      throw new Error(error)
+      if (error) {
+        throw new Error(error)
+      }
+      console.error(
+        `The item doesn't exist; verify that the id provided - ${id} - is correct.`,
+      )
+      itemIndex = -1
     }
 
     return itemIndex
@@ -715,7 +719,7 @@ function useSpringCarousel({
     firstItemReached.current = false
     lastItemReached.current = false
 
-    const itemIndex = findItem(
+    const itemIndex = findItemIndex(
       id,
       "The item you want to slide to doesn't exist; verify the provided id.",
     )
@@ -734,7 +738,7 @@ function useSpringCarousel({
     }
   }
   function getIsNextItem(id: string | number) {
-    const itemIndex = findItem(
+    const itemIndex = findItemIndex(
       id,
       "The item doesn't exist; check if the provided id is correct.",
     )
@@ -745,7 +749,7 @@ function useSpringCarousel({
     return itemIndex === _activeItem + 1
   }
   function getIsPrevItem(id: string | number) {
-    const itemIndex = findItem(
+    const itemIndex = findItemIndex(
       id,
       "The item doesn't exist; check if the provided id is correct.",
     )
@@ -814,7 +818,8 @@ function useSpringCarousel({
     slideToNextItem: () => slideToNextItem(),
     getIsActiveItem: (id: string | number) => {
       return (
-        findItem(id, "The item you want to check doesn't exist") === activeItem.current
+        findItemIndex(id, "The item you want to check doesn't exist") ===
+        activeItem.current
       )
     },
   }
