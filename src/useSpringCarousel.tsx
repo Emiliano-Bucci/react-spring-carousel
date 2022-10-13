@@ -465,6 +465,13 @@ function useSpringCarousel({
   }
 
   useEffect(() => {
+    if (initialActiveItem > items.length - 1) {
+      throw new Error(
+        `initialActiveItem (${initialActiveItem}) is greater than the total quantity available items (${items.length}).`,
+      )
+    }
+  }, [initialActiveItem, items])
+  useEffect(() => {
     prevWindowWidth.current = window.innerWidth
   }, [])
   useEffect(() => {
