@@ -58,6 +58,7 @@ export type SpringCarouselFreeScroll = {
   withLoop?: never
   slideType?: never
   enableFreeScrollDrag?: true
+  itemsPerSlide?: never
 }
 export type SpringCarouselNoFreeScroll = {
   freeScroll?: never
@@ -96,6 +97,10 @@ export type UseSpringCarouselWithNoFixedItems = BaseProps &
   SpringCarouselWithNoFixedItems &
   (SpringCarouselWithLoop | SpringCarouselWithNoLoop) &
   (SpringCarouselFreeScroll | SpringCarouselNoFreeScroll)
+
+export type UseSpringCarouselWithFreeScroll = BaseProps &
+  SpringCarouselFreeScroll &
+  (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs)
 
 export type UseSpringCarouselComplete = BaseProps & {
   thumbsSlideAxis?: 'x' | 'y'

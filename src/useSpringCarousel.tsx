@@ -21,12 +21,14 @@ import {
   UseSpringCarouselWithFixedItems,
   UseSpringCarouselWithNoFixedItems,
   SpringCarouselWithThumbs,
+  UseSpringCarouselWithFreeScroll,
 } from './types/internals'
 
 function useSpringCarousel(props: UseSpringCarouselWithThumbs): UseSpringReturnType
 function useSpringCarousel(props: UseSpringCarouselWithNoThumbs): UseSpringReturnType
 function useSpringCarousel(props: UseSpringCarouselWithFixedItems): UseSpringReturnType
 function useSpringCarousel(props: UseSpringCarouselWithNoFixedItems): UseSpringReturnType
+function useSpringCarousel(props: UseSpringCarouselWithFreeScroll): UseSpringReturnType
 
 function useSpringCarousel({
   items,
@@ -58,12 +60,12 @@ function useSpringCarousel({
     pause: !init,
     onChange({ value }) {
       if (freeScroll && mainCarouselWrapperRef.current) {
-        setStartEndItemReachedOnFreeScroll()
         if (carouselSlideAxis === 'x') {
           mainCarouselWrapperRef.current.scrollLeft = Math.abs(value.val)
         } else {
           mainCarouselWrapperRef.current.scrollTop = Math.abs(value.val)
         }
+        setStartEndItemReachedOnFreeScroll()
       } else if (carouselTrackWrapperRef.current) {
         if (carouselSlideAxis === 'x') {
           carouselTrackWrapperRef.current.style.transform = `translate3d(${value.val}px, 0px,0px)`
@@ -110,17 +112,17 @@ function useSpringCarousel({
     handleResize: () => adjustCarouselWrapperPosition(),
   })
 
-  function getItemStyles() {
+  function getItemStyles(isLastItem: boolean) {
     if (slideType === 'fixed' && !freeScroll) {
       return {
-        marginRight: `${gutter}px`,
+        marginRight: `${isLastItem ? 0 : gutter}px`,
         flex: `1 0 calc(100% / ${itemsPerSlide} - ${
           (gutter * (itemsPerSlide - 1)) / itemsPerSlide
         }px)`,
       }
     }
     return {
-      ...{ marginRight: `${gutter}px` },
+      ...{ marginRight: `${isLastItem ? 0 : gutter}px` },
     }
   }
 
@@ -220,7 +222,8 @@ function useSpringCarousel({
       ) -
         carouselTrackWrapperRef.current!.getBoundingClientRect()[
           carouselSlideAxis === 'x' ? 'width' : 'height'
-        ],
+        ] -
+        startEndGutter * 2,
     )
   }
   function getAnimatedWrapperStyles() {
@@ -350,7 +353,9 @@ function useSpringCarousel({
     const nextItem = index || activeItem.current - 1
 
     if (!withLoop) {
-      const nextItemWillExceed = getToValue('prev', index) + getSlideValue() / 3 > 0
+      const nextItemWillExceed = freeScroll
+        ? getToValue('prev', index) - getSlideValue() / 3 < 0
+        : getToValue('prev', index) + getSlideValue() / 3 > 0
 
       if (firstItemReached.current) return
       if (nextItemWillExceed) {
@@ -413,7 +418,7 @@ function useSpringCarousel({
         slideToItem({
           slideMode: type,
           from: getFromValue(),
-          to: -getTotalScrollValue(),
+          to: freeScroll ? getTotalScrollValue() : -getTotalScrollValue(),
           nextActiveItem: nextItem,
         })
         return
@@ -671,6 +676,7 @@ function useSpringCarousel({
         firstItemReached.current = false
         lastItemReached.current = false
       }
+
       if (
         mainCarouselWrapperRef.current[
           carouselSlideAxis === 'x' ? 'scrollLeft' : 'scrollTop'
@@ -706,7 +712,7 @@ function useSpringCarousel({
         throw new Error(error)
       }
       console.error(
-        `The item doesn't exist; verify that the id provided - ${id} - is correct.`,
+        `The item doesn't exist; check that the id provided - ${id} - is correct.`,
       )
       itemIndex = -1
     }
@@ -721,7 +727,7 @@ function useSpringCarousel({
 
     const itemIndex = findItemIndex(
       id,
-      "The item you want to slide to doesn't exist; verify the provided id.",
+      "The item you want to slide to doesn't exist; check the provided id.",
     )
 
     if (itemIndex === activeItem.current) {
@@ -738,10 +744,7 @@ function useSpringCarousel({
     }
   }
   function getIsNextItem(id: string | number) {
-    const itemIndex = findItemIndex(
-      id,
-      "The item doesn't exist; check if the provided id is correct.",
-    )
+    const itemIndex = findItemIndex(id, "The item doesn't exist; check the provided id.")
     const _activeItem = activeItem.current
     if (withLoop && _activeItem === items.length - 1) {
       return itemIndex === 0
@@ -749,10 +752,7 @@ function useSpringCarousel({
     return itemIndex === _activeItem + 1
   }
   function getIsPrevItem(id: string | number) {
-    const itemIndex = findItemIndex(
-      id,
-      "The item doesn't exist; check if the provided id is correct.",
-    )
+    const itemIndex = findItemIndex(id, "The item doesn't exist; check the provided id.")
     const _activeItem = activeItem.current
     if (withLoop && _activeItem === 0) {
       return itemIndex === items.length - 1
@@ -783,6 +783,14 @@ function useSpringCarousel({
           ...getAnimatedWrapperStyles(),
         }}
       >
+        {freeScroll && startEndGutter ? (
+          <div
+            style={{
+              flexShrink: 0,
+              width: startEndGutter,
+            }}
+          />
+        ) : null}
         {internalItems.map((item, index) => {
           return (
             <div
@@ -793,13 +801,21 @@ function useSpringCarousel({
                 display: 'flex',
                 position: 'relative',
                 flex: '1',
-                ...getItemStyles(),
+                ...getItemStyles(!!freeScroll && index === items.length - 1),
               }}
             >
               {item.renderItem}
             </div>
           )
         })}
+        {freeScroll && startEndGutter ? (
+          <div
+            style={{
+              flexShrink: 0,
+              width: startEndGutter,
+            }}
+          />
+        ) : null}
       </div>
     </div>
   )
@@ -818,8 +834,10 @@ function useSpringCarousel({
     slideToNextItem: () => slideToNextItem(),
     getIsActiveItem: (id: string | number) => {
       return (
-        findItemIndex(id, "The item you want to check doesn't exist") ===
-        activeItem.current
+        findItemIndex(
+          id,
+          "The item you want to check doesn't exist; check the provided id.",
+        ) === activeItem.current
       )
     },
   }

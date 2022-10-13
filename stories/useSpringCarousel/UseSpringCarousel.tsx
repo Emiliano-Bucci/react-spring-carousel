@@ -8,8 +8,10 @@ const items: ItemWithNoThumb[] = mockedItems
 
 export function UseSpringCarousel() {
   const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
-    gutter: 24,
     items,
+    enableFreeScrollDrag: true,
+    freeScroll: true,
+    // startEndGutter: 20,
   })
 
   return (
