@@ -1,17 +1,16 @@
 import React from 'react'
 
 import { mockedItems } from '../../src/mockedItems'
-import { useSpringCarousel, ItemWithThumb } from 'react-spring-carousel'
+import { ItemWithNoThumb } from '../../src/types'
+import { useSpringCarousel } from '../../src/useSpringCarousel'
 
-const items = mockedItems as ItemWithThumb[]
+const items: ItemWithNoThumb[] = mockedItems
 
 export function UseSpringCarousel() {
-  const { carouselFragment, slideToPrevItem, slideToNextItem, thumbsFragment } =
-    useSpringCarousel({
-      gutter: 24,
-      withThumbs: false,
-      items,
-    })
+  const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
+    gutter: 24,
+    items,
+  })
 
   return (
     <div
@@ -37,14 +36,6 @@ export function UseSpringCarousel() {
           {carouselFragment}
         </div>
         <button onClick={slideToNextItem}>NEXT</button>
-      </div>
-      <div
-        style={{
-          border: '4px solid brown',
-          height: '80px',
-        }}
-      >
-        {thumbsFragment}
       </div>
     </div>
   )

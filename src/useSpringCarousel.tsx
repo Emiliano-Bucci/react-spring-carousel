@@ -47,7 +47,7 @@ function useSpringCarousel({
   initialStartingPosition,
   prepareThumbsData,
   initialActiveItem = 0,
-}: UseSpringCarouselComplete) {
+}: UseSpringCarouselComplete): UseSpringReturnType {
   const prevWindowWidth = useRef(0)
   const draggingSlideTreshold = useRef(_draggingSlideTreshold ?? 0)
   const slideActionType = useRef<SlideActionType>('initial')
@@ -449,6 +449,7 @@ function useSpringCarousel({
   }, [])
   useEffect(() => {
     adjustCarouselWrapperPosition()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     initialStartingPosition,
     itemsPerSlide,
@@ -474,6 +475,7 @@ function useSpringCarousel({
     } else {
       draggingSlideTreshold.current = Math.floor(getSlideValue() / 2 / 2)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_draggingSlideTreshold])
   useEffect(() => {
     function handleResize() {
@@ -485,6 +487,7 @@ function useSpringCarousel({
     return () => {
       window.removeEventListener('resize', handleResize)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const bindDrag = useDrag(
@@ -692,10 +695,10 @@ function useSpringCarousel({
   function findItemIndex(id: string) {
     return items.findIndex(item => item.id === id)
   }
-  function findItemIndexById(id: string | number, error: string) {
+  function findItem(id: string | number, error: string) {
     let itemIndex = 0
     if (typeof id === 'string') {
-      itemIndex = items.findIndex(_item => _item.id === id)
+      itemIndex = findItemIndex(id)
     } else {
       itemIndex = id
     }
@@ -712,9 +715,9 @@ function useSpringCarousel({
     firstItemReached.current = false
     lastItemReached.current = false
 
-    const itemIndex = findItemIndexById(
+    const itemIndex = findItem(
       id,
-      "The item you want to slide to doesn't exist; please check che item id or the index you're passing to.",
+      "The item you want to slide to doesn't exist; verify the provided id.",
     )
 
     if (itemIndex === activeItem.current) {
@@ -730,16 +733,22 @@ function useSpringCarousel({
       slideToPrevItem('click', newActiveItem)
     }
   }
-  function getIsNextItem(id: string) {
-    const itemIndex = findItemIndex(id)
+  function getIsNextItem(id: string | number) {
+    const itemIndex = findItem(
+      id,
+      "The item doesn't exist; check if the provided id is correct.",
+    )
     const _activeItem = activeItem.current
     if (withLoop && _activeItem === items.length - 1) {
       return itemIndex === 0
     }
     return itemIndex === _activeItem + 1
   }
-  function getIsPrevItem(id: string) {
-    const itemIndex = findItemIndex(id)
+  function getIsPrevItem(id: string | number) {
+    const itemIndex = findItem(
+      id,
+      "The item doesn't exist; check if the provided id is correct.",
+    )
     const _activeItem = activeItem.current
     if (withLoop && _activeItem === 0) {
       return itemIndex === items.length - 1
@@ -805,8 +814,7 @@ function useSpringCarousel({
     slideToNextItem: () => slideToNextItem(),
     getIsActiveItem: (id: string | number) => {
       return (
-        findItemIndexById(id, "The item you want to check doesn't exist") ===
-        activeItem.current
+        findItem(id, "The item you want to check doesn't exist") === activeItem.current
       )
     },
   }

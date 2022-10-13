@@ -7,14 +7,14 @@ export type UseSpringReturnType = {
   thumbsFragment: ReactNode
   useListenToCustomEvent: UseListenToCustomEvent['useListenToCustomEvent']
   getIsFullscreen(): boolean
-  getIsPrevItem(id: string): boolean
-  getIsNextItem(id: string): boolean
   enterFullscreen(ref?: HTMLElement): void
   exitFullscreen(): void
   slideToNextItem(): void
   slideToPrevItem(): void
   slideToItem(item: string | number): void
   getIsActiveItem(id: string): boolean
+  getIsNextItem(id: string | number): boolean
+  getIsPrevItem(id: string | number): boolean
 }
 
 export type PrepareThumbsData = (
