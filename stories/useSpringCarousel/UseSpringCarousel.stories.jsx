@@ -1,10 +1,10 @@
-import React from "react";
+import React from 'react'
 
-import { UseSpringCarousel } from "./UseSpringCarousel";
+import { UseSpringCarousel } from './UseSpringCarousel'
 
 export default {
-  title: "UseSpringCarousel",
+  title: 'UseSpringCarousel',
   component: UseSpringCarousel,
-};
+}
 
-export const Development = () => <UseSpringCarousel />;
+export const Development = () => <UseSpringCarousel />
