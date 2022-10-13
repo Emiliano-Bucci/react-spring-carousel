@@ -64,7 +64,7 @@ export type SpringCarouselWithNoLoop = {
   withLoop?: false
 }
 export type SpringCarouselFreeScroll = {
-  freeScroll?: true
+  freeScroll: true
   withLoop?: never
   slideType?: never
   enableFreeScrollDrag?: true

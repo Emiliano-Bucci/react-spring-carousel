@@ -30,9 +30,9 @@ type ReturnType<T> = T extends true ? UseSpringFreeScrollReturnType : UseSpringR
 /**
  * With free scroll
  */
+function useSpringCarousel(props: UseSpringCarouselWithFreeScroll): ReturnType<true>
 function useSpringCarousel(props: UseSpringCarouselWithThumbs<true>): ReturnType<true>
 function useSpringCarousel(props: UseSpringCarouselWithNoThumbs<true>): ReturnType<true>
-function useSpringCarousel(props: UseSpringCarouselWithFreeScroll): ReturnType<true>
 /**
  * No free scroll
  */
