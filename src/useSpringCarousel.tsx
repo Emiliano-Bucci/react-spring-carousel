@@ -301,6 +301,15 @@ function useSpringCarousel({
       return
     }
 
+    if (!freeScroll && slideType === 'fixed') {
+      const val = -(getSlideValue() * activeItem.current)
+      prevSlidedValue.current = val
+      setSpring.start({
+        immediate: true,
+        val,
+      })
+    }
+
     if (initialStartingPosition === 'center') {
       setPosition(
         getCarouselItemWidth() * items.length -
@@ -313,15 +322,6 @@ function useSpringCarousel({
       )
     } else {
       setPosition(getCarouselItemWidth() * items.length)
-    }
-
-    if (!freeScroll && slideType === 'fixed') {
-      const val = -(getSlideValue() * activeItem.current)
-      prevSlidedValue.current = val
-      setSpring.start({
-        immediate: true,
-        val,
-      })
     }
   }
 
@@ -528,7 +528,16 @@ function useSpringCarousel({
       window.removeEventListener('resize', handleResize)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [
+    initialStartingPosition,
+    itemsPerSlide,
+    withLoop,
+    startEndGutter,
+    gutter,
+    freeScroll,
+    slideType,
+    init,
+  ])
 
   const bindDrag = useDrag(
     state => {
