@@ -1,6 +1,6 @@
 import { a, config, useTransition } from '@react-spring/web'
 import { useEffect, useRef, useState } from 'react'
-import { SlideActionType, SlideMode } from './types/common'
+import { SlideActionType, TransitionSlideMode } from './types/common'
 import { UseTransitionCarouselProps } from './types/useTransitionCarousel.types'
 import { useEventsModule } from './modules/useEventsModule'
 import { useDrag } from '@use-gesture/react'
@@ -38,7 +38,7 @@ export function useTransitionCarousel({
   draggingSlideTreshold = 50,
 }: UseTransitionCarouselProps) {
   const slideActionType = useRef<SlideActionType>('next')
-  const slideModeType = useRef<SlideMode>('initial')
+  const slideModeType = useRef<TransitionSlideMode>('initial')
   const mainCarouselWrapperRef = useRef<HTMLDivElement | null>(null)
   const [activeItem, setActiveItem] = useState(externalActiveItem ?? 0)
   const { emitEvent, useListenToCustomEvent } = useEventsModule<'use-transition'>()
@@ -99,7 +99,11 @@ export function useTransitionCarousel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [externalActiveItem])
 
-  type SlideToItem = { to: number; slideType: SlideActionType; slideMode: SlideMode }
+  type SlideToItem = {
+    to: number
+    slideType: SlideActionType
+    slideMode: TransitionSlideMode
+  }
 
   function slideToItem({ to, slideType, slideMode }: SlideToItem) {
     slideActionType.current = slideType
@@ -118,7 +122,7 @@ export function useTransitionCarousel({
     setActiveItem(to)
   }
 
-  function slideToPrevItem() {
+  function slideToPrevItem(slideMode: TransitionSlideMode) {
     if (!init) return
     const isFirstItem = activeItem === 0
 
@@ -128,17 +132,17 @@ export function useTransitionCarousel({
       slideToItem({
         to: items.length - 1,
         slideType: 'prev',
-        slideMode: 'click',
+        slideMode,
       })
     } else {
       slideToItem({
         to: activeItem - 1,
         slideType: 'prev',
-        slideMode: 'click',
+        slideMode,
       })
     }
   }
-  function slideToNextItem() {
+  function slideToNextItem(slideMode: TransitionSlideMode) {
     if (!init) return
     const isLastItem = activeItem === items.length - 1
 
@@ -148,13 +152,13 @@ export function useTransitionCarousel({
       slideToItem({
         to: 0,
         slideType: 'next',
-        slideMode: 'click',
+        slideMode,
       })
     } else {
       slideToItem({
         to: activeItem + 1,
         slideType: 'next',
-        slideMode: 'click',
+        slideMode,
       })
     }
   }
@@ -193,14 +197,14 @@ export function useTransitionCarousel({
         if (nextItemTreshold) {
           if (!withLoop && isLastItem) return
 
-          slideToNextItem()
+          slideToNextItem('swipe')
           emitEvent({
             eventName: 'onLeftSwipe',
           })
         } else if (prevItemTreshold) {
           if (!withLoop && isFirstItem) return
 
-          slideToPrevItem()
+          slideToPrevItem('swipe')
           emitEvent({
             eventName: 'onRightSwipe',
           })
@@ -247,7 +251,7 @@ export function useTransitionCarousel({
   return {
     useListenToCustomEvent,
     carouselFragment,
-    slideToPrevItem,
-    slideToNextItem,
+    slideToPrevItem: () => slideToPrevItem('click'),
+    slideToNextItem: () => slideToNextItem('click'),
   }
 }

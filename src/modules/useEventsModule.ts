@@ -1,13 +1,13 @@
 import { FullGestureState } from '@use-gesture/react'
 import { useEffect, useRef } from 'react'
-import { SlideActionType, SlideMode } from '../types/common'
+import { SlideActionType, SlideMode, TransitionSlideMode } from '../types/common'
 
 const eventLabel = 'RSC::Event'
 
-type OnSlideStartChange = {
+type OnSlideStartChange<T> = {
   eventName: 'onSlideStartChange'
   slideActionType: SlideActionType
-  slideMode: SlideMode
+  slideMode: T extends 'use-spring' ? SlideMode : TransitionSlideMode
   nextItem: {
     index: number
     id: string
@@ -15,10 +15,10 @@ type OnSlideStartChange = {
     endReached: boolean
   }
 }
-type OnSlideChange = {
+type OnSlideChange<T> = {
   eventName: 'onSlideChange'
   slideActionType: SlideActionType
-  slideMode: SlideMode
+  slideMode: T extends 'use-spring' ? SlideMode : TransitionSlideMode
   currentItem: {
     index: number
     id: string
@@ -43,20 +43,22 @@ type OnRightSwipe = {
   eventName: 'onRightSwipe'
 }
 
-type SpringCarouselEvents =
-  | OnSlideStartChange
-  | OnSlideChange
+type SpringCarouselEvents<T> =
+  | OnSlideStartChange<T>
+  | OnSlideChange<T>
   | OnDrag
   | OnFullscreenChange
 
-type TransitionCarouselEvents =
-  | OnSlideStartChange
-  | OnSlideChange
+type TransitionCarouselEvents<T> =
+  | OnSlideStartChange<T>
+  | OnSlideChange<T>
   | OnFullscreenChange
   | OnLeftSwipe
   | OnRightSwipe
 
-type Events<T> = T extends 'use-spring' ? SpringCarouselEvents : TransitionCarouselEvents
+type Events<T> = T extends 'use-spring'
+  ? SpringCarouselEvents<'use-spring'>
+  : TransitionCarouselEvents<'use-transition'>
 
 type EventHandler<T> = (props: Events<T>) => void
 

@@ -43,6 +43,7 @@ export function UseTransitionCarousel() {
       },
     },
   })
+
   return (
     <div
       className="wrapper"
