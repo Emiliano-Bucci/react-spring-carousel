@@ -2,7 +2,7 @@ import babel from 'rollup-plugin-babel'
 import resolve from '@rollup/plugin-node-resolve'
 import external from 'rollup-plugin-peer-deps-external'
 import rollupTS from 'rollup-plugin-typescript2'
-// import { terser } from 'rollup-plugin-terser'
+import { terser } from 'rollup-plugin-terser'
 import commonjs from '@rollup/plugin-commonjs'
 import pkg from './package.json' assert { type: 'json' }
 import size from 'rollup-plugin-filesize'
@@ -34,14 +34,19 @@ const props = {
     external(),
     resolve(),
     commonjs(),
-    // terser(),
+    terser(),
     size(),
   ],
 }
 
 export default [
   {
-    input: ['src/index.tsx', 'src/modules/index.tsx', 'src/useSpringCarousel.tsx'],
+    input: [
+      'src/index.tsx',
+      'src/modules/index.tsx',
+      'src/useSpringCarousel.tsx',
+      'src/useTransitionCarousel.tsx',
+    ],
     output: {
       dir: pkg.module,
       format: 'esm',
