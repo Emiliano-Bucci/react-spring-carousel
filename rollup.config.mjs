@@ -1,10 +1,13 @@
+import { readFileSync } from 'node:fs'
+// Use import.meta.url to make the path relative to the current source file instead of process.cwd()
+// For more info: https://nodejs.org/docs/latest-v16.x/api/esm.html#importmetaurl
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url)))
 import babel from 'rollup-plugin-babel'
 import resolve from '@rollup/plugin-node-resolve'
 import external from 'rollup-plugin-peer-deps-external'
 import rollupTS from 'rollup-plugin-typescript2'
 import { terser } from 'rollup-plugin-terser'
 import commonjs from '@rollup/plugin-commonjs'
-import pkg from './package.json' assert { type: 'json' }
 import size from 'rollup-plugin-filesize'
 import excludeDependenciesFromBundle from 'rollup-plugin-exclude-dependencies-from-bundle'
 

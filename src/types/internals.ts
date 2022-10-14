@@ -5,7 +5,7 @@ import { UseListenToCustomEvent } from '../modules/useEventsModule'
 export type UseSpringReturnType = {
   carouselFragment: ReactNode
   thumbsFragment: ReactNode
-  useListenToCustomEvent: UseListenToCustomEvent['useListenToCustomEvent']
+  useListenToCustomEvent: UseListenToCustomEvent<'use-spring'>['useListenToCustomEvent']
   getIsFullscreen(): boolean
   enterFullscreen(ref?: HTMLElement): void
   exitFullscreen(): void
@@ -19,7 +19,7 @@ export type UseSpringReturnType = {
 export type UseSpringFreeScrollReturnType = {
   carouselFragment: ReactNode
   thumbsFragment: ReactNode
-  useListenToCustomEvent: UseListenToCustomEvent['useListenToCustomEvent']
+  useListenToCustomEvent: UseListenToCustomEvent<'use-spring'>['useListenToCustomEvent']
   getIsFullscreen(): boolean
   enterFullscreen(ref?: HTMLElement): void
   exitFullscreen(): void
