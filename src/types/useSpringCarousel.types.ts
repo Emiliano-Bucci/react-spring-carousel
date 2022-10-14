@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
-import { ItemWithThumb, ItemWithNoThumb } from './'
 import { UseListenToCustomEvent } from '../modules/useEventsModule'
+import { ItemWithThumb, ItemWithNoThumb, PrepareThumbsData } from '../types'
 
 export type UseSpringReturnType = {
   carouselFragment: ReactNode
@@ -26,12 +26,6 @@ export type UseSpringFreeScrollReturnType = {
   slideToNextItem(): void
   slideToPrevItem(): void
 }
-
-export type Items = ItemWithNoThumb[] | ItemWithThumb[]
-
-export type PrepareThumbsData = (
-  items: Omit<ItemWithThumb, 'renderItem'>[],
-) => Omit<ItemWithThumb, 'renderItem'>[]
 
 export type SpringCarouselWithThumbs = {
   withThumbs: true

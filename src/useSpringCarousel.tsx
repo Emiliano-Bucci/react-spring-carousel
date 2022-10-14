@@ -14,16 +14,18 @@ import { useDrag } from '@use-gesture/react'
 import { useFullscreenModule } from './modules/useFullscreenModule'
 import { useThumbsModule } from './modules/useThumbsModule'
 import {
-  UseSpringReturnType,
   UseSpringCarouselComplete,
   SpringCarouselWithThumbs,
   UseSpringCarouselWithFreeScroll,
-  UseSpringFreeScrollReturnType,
   UseSpringCarouselWithThumbs,
   UseSpringCarouselWithNoThumbs,
   UseSpringCarouselWithNoFixedItems,
   UseSpringCarouselWithFixedItems,
-} from './types/internals'
+} from './types'
+import {
+  UseSpringFreeScrollReturnType,
+  UseSpringReturnType,
+} from './types/useSpringCarousel.types'
 
 type ReturnType<T> = T extends true ? UseSpringFreeScrollReturnType : UseSpringReturnType
 

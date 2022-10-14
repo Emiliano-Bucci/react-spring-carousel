@@ -1,6 +1,10 @@
 import { SpringConfig, TransitionFrom, TransitionTo } from '@react-spring/web'
-import { SpringCarouselWithThumbs, SpringCarouselWithNoThumbs } from './internals'
-import { ItemWithNoThumb, ItemWithThumb } from '../types'
+import {
+  ItemWithNoThumb,
+  ItemWithThumb,
+  SpringCarouselWithNoThumbs,
+  SpringCarouselWithThumbs,
+} from '../types'
 import { ReactNode } from 'react'
 import { UseListenToCustomEvent } from 'src/modules'
 
@@ -22,9 +26,9 @@ type BaseProps = {
   exitBeforeEnter?: boolean
   trail?: number
   withLoop?: boolean
-  activeItem?: number
   draggingSlideTreshold?: number
   thumbsSlideAxis?: 'x' | 'y'
+  activeItem?: number
 }
 
 export type UseTransitionCarouselProps = BaseProps &
