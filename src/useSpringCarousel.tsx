@@ -903,15 +903,15 @@ function useSpringCarousel({
   return { ...res, carouselFragment, thumbsFragment: _thumbsFragment }
 }
 
-type ContextProps<T extends 'free-scroll' | undefined> = Omit<
+type ContextProps<T = undefined> = Omit<
   ReturnType<T extends 'free-scroll' ? true : false>,
   'carouselFragment' | 'thumbsFragment'
 >
 
 const Context =
-  createContext<ContextProps<'free-scroll' | undefined> | undefined>(undefined)
+  createContext<ContextProps | ContextProps<'free-scroll'> | undefined>(undefined)
 
-function useSpringCarouselContext<T extends 'free-scroll'>() {
+function useSpringCarouselContext<T>() {
   const context = useContext(Context)
   if (!context) {
     throw new Error('useSpringCarouselContext must be used within the carousel.')
