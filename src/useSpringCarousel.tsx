@@ -830,6 +830,7 @@ function useSpringCarousel({
   const carouselFragment = (
     <Context.Provider value={res}>
       <div
+        className="use-spring-carousel-main-wrapper"
         ref={mainCarouselWrapperRef}
         {...getScrollHandlers()}
         style={{
@@ -841,6 +842,7 @@ function useSpringCarousel({
         }}
       >
         <div
+          className="use-spring-carousel-track-wrapper"
           ref={carouselTrackWrapperRef}
           {...bindDrag()}
           style={{
