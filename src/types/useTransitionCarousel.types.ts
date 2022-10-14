@@ -14,11 +14,13 @@ export type SpringAnimationProps = {
 type BaseProps = {
   init?: boolean
   disableGestures?: boolean
-  initialActiveItem?: number
   springConfig?: Omit<SpringConfig, 'velocity'>
-  animationProps?: SpringAnimationProps
+  toPrevItemSpringProps?: SpringAnimationProps
+  toNextItemSpringProps?: SpringAnimationProps
   exitBeforeEnter?: boolean
   trail?: number
+  withLoop?: boolean
+  activeItem?: number
 }
 
 export type UseTransitionCarouselProps = BaseProps &

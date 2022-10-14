@@ -79,7 +79,6 @@
   },
   "dependencies": {
     "@use-gesture/react": "^10.2.20",
-    "react-spring-carousel": "^3.0.0-beta010",
     "screenfull": "^5.2.0"
   }
 }

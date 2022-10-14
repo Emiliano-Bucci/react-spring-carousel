@@ -1,94 +1,220 @@
-import { config, useTransition } from '@react-spring/web'
-import { useRef, useState } from 'react'
-import { SlideActionType } from './types/common'
+import { a, config, useTransition } from '@react-spring/web'
+import { useEffect, useRef, useState } from 'react'
+import { SlideActionType, SlideMode } from './types/common'
 import { UseTransitionCarouselProps } from './types/useTransitionCarousel.types'
+import { useEventsModule } from './modules/useEventsModule'
+
+const defaultAnimationProps = {
+  initial: {
+    opacity: 1,
+    position: 'relative',
+  },
+  from: {
+    opacity: 0,
+    position: 'relative',
+  },
+  enter: {
+    position: 'relative',
+    opacity: 1,
+  },
+  leave: {
+    opacity: 1,
+    position: 'absolute',
+  },
+}
 
 export function useTransitionCarousel({
   init = true,
-  disableGestures = false,
+  // disableGestures = false,
   items,
-  initialActiveItem = 0,
   springConfig = config.default,
   exitBeforeEnter = false,
   trail,
-  animationProps = {
-    initial: {
-      opacity: 1,
-      position: 'absolute',
-    },
-    from: {
-      opacity: 0,
-      position: 'absolute',
-    },
-    enter: {
-      opacity: 1,
-      position: 'absolute',
-    },
-    leave: {
-      opacity: 0,
-      position: 'absolute',
-    },
-  },
+  withLoop = false,
+  activeItem: externalActiveItem,
+  toPrevItemSpringProps = defaultAnimationProps,
+  toNextItemSpringProps = defaultAnimationProps,
 }: UseTransitionCarouselProps) {
-  const [activeItem, setActiveItem] = useState(initialActiveItem)
-  const slideActionType = useRef<SlideActionType>('initial')
+  const slideActionType = useRef<SlideActionType>('next')
+  const slideModeType = useRef<SlideMode>('initial')
+  const mainCarouselWrapperRef = useRef<HTMLDivElement | null>(null)
+  const [activeItem, setActiveItem] = useState(externalActiveItem ?? 0)
+  const { emitEvent, useListenToCustomEvent } = useEventsModule()
 
   function getConfig() {
     if (slideActionType.current === 'prev') {
       return {
         initial: {
-          ...animationProps.initial,
+          ...toPrevItemSpringProps.initial,
         },
         from: {
-          ...animationProps.from,
+          ...toPrevItemSpringProps.from,
         },
         enter: {
-          ...animationProps.enter,
+          ...toPrevItemSpringProps.enter,
         },
         leave: {
-          ...animationProps.leave,
+          ...toPrevItemSpringProps.leave,
         },
       }
     }
     if (slideActionType.current === 'next') {
       return {
         initial: {
-          ...animationProps.initial,
+          ...toNextItemSpringProps.initial,
         },
         from: {
-          ...animationProps.from,
+          ...toNextItemSpringProps.from,
         },
         enter: {
-          ...animationProps.enter,
+          ...toNextItemSpringProps.enter,
         },
         leave: {
-          ...animationProps.leave,
+          ...toNextItemSpringProps.leave,
         },
       }
     }
     return {
       initial: {
-        ...animationProps.initial,
+        ...defaultAnimationProps.initial,
       },
       from: {
-        ...animationProps.from,
+        ...defaultAnimationProps.from,
       },
       enter: {
-        ...animationProps.enter,
+        ...defaultAnimationProps.enter,
       },
       leave: {
-        ...animationProps.leave,
+        ...defaultAnimationProps.leave,
       },
+    }
+  }
+
+  useEffect(() => {
+    if (typeof externalActiveItem === 'number' && externalActiveItem !== activeItem) {
+      setActiveItem(externalActiveItem)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalActiveItem])
+
+  type SlideToItem = { to: number; slideType: SlideActionType; slideMode: SlideMode }
+
+  function slideToItem({ to, slideType, slideMode }: SlideToItem) {
+    slideActionType.current = slideType
+    slideModeType.current = slideMode
+    emitEvent({
+      eventName: 'onSlideStartChange',
+      slideActionType: slideActionType.current,
+      slideMode: slideModeType.current,
+      nextItem: {
+        index: to,
+        id: items[to].id,
+        startReached: to === 0,
+        endReached: to === items.length - 1,
+      },
+    })
+    setActiveItem(to)
+  }
+
+  function slideToPrevItem() {
+    if (!init) return
+    const isFirstItem = activeItem === 0
+
+    if (!withLoop && isFirstItem) return
+
+    if (withLoop && isFirstItem) {
+      slideToItem({
+        to: items.length - 1,
+        slideType: 'prev',
+        slideMode: 'click',
+      })
+    } else {
+      slideToItem({
+        to: activeItem - 1,
+        slideType: 'prev',
+        slideMode: 'click',
+      })
+    }
+  }
+  function slideToNextItem() {
+    if (!init) return
+    const isLastItem = activeItem === items.length - 1
+
+    if (!withLoop && isLastItem) return
+
+    if (withLoop && isLastItem) {
+      slideToItem({
+        to: 0,
+        slideType: 'next',
+        slideMode: 'click',
+      })
+    } else {
+      slideToItem({
+        to: activeItem + 1,
+        slideType: 'next',
+        slideMode: 'click',
+      })
     }
   }
 
   const transitions = useTransition(activeItem, {
     config: springConfig,
-    key: items[activeItem].id,
+    key: null,
     trail,
     exitBeforeEnter,
     ...getConfig(),
+    onRest(value) {
+      if (value.finished) {
+        emitEvent({
+          eventName: 'onSlideChange',
+          slideActionType: slideActionType.current,
+          slideMode: slideModeType.current,
+          currentItem: {
+            index: activeItem,
+            id: items[activeItem].id,
+            startReached: activeItem === 0,
+            endReached: activeItem === items.length - 1,
+          },
+        })
+      }
+    },
   })
+  const itemsFragment = transitions((styles, item, _, indx) => {
+    return (
+      <a.div
+        id={`use-transition-carousel-item-${indx}`}
+        className="use-transition-carousel-item"
+        style={{
+          ...styles,
+          flex: '1 0 100%',
+          width: '100%',
+          height: '100%',
+        }}
+      >
+        {items[item].renderItem}
+      </a.div>
+    )
+  })
+  const carouselFragment = (
+    <div
+      ref={mainCarouselWrapperRef}
+      // {...bindSwipe()}
+      style={{
+        display: 'flex',
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+      }}
+    >
+      {itemsFragment}
+    </div>
+  )
 
-  return {}
+  return {
+    useListenToCustomEvent,
+    carouselFragment,
+    slideToPrevItem,
+    slideToNextItem,
+  }
 }
