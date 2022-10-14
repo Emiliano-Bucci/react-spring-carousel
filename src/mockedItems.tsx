@@ -1,6 +1,6 @@
 export const mockedItems = [
   {
-    id: '1',
+    id: 'item-1',
     renderItem: (
       <div
         style={{
@@ -13,7 +13,7 @@ export const mockedItems = [
     ),
   },
   {
-    id: '2',
+    id: 'item-2',
     renderItem: (
       <div
         style={{
@@ -26,7 +26,7 @@ export const mockedItems = [
     ),
   },
   {
-    id: '3',
+    id: 'item-3',
     renderItem: (
       <div
         style={{
@@ -39,7 +39,7 @@ export const mockedItems = [
     ),
   },
   {
-    id: '4',
+    id: 'item-4',
     renderItem: (
       <div
         style={{
@@ -52,7 +52,7 @@ export const mockedItems = [
     ),
   },
   {
-    id: '5',
+    id: 'item-5',
     renderItem: (
       <div
         style={{

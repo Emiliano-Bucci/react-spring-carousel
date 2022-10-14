@@ -903,11 +903,15 @@ function useSpringCarousel({
   return { ...res, carouselFragment, thumbsFragment: _thumbsFragment }
 }
 
-type ContextProps<T> = Omit<ReturnType<T>, 'carouselFragment' | 'thumbsFragment'>
+type ContextProps<T> = Omit<
+  ReturnType<T extends 'use-spring' ? true : false>,
+  'carouselFragment' | 'thumbsFragment'
+>
 
-const Context = createContext<ContextProps<true | false> | undefined>(undefined)
+const Context =
+  createContext<ContextProps<'use-spring' | 'use-transition'> | undefined>(undefined)
 
-function useSpringCarouselContext<T extends boolean>() {
+function useSpringCarouselContext<T extends 'use-spring' | 'use-transition'>() {
   const context = useContext(Context)
   if (!context) {
     throw new Error('useSpringCarouselContext must be used within the carousel.')

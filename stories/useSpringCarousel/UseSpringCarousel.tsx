@@ -7,12 +7,11 @@ import { useSpringCarousel } from '../../src/useSpringCarousel'
 const items = mockedItems as ItemWithThumb[]
 
 export function UseSpringCarousel() {
-  const { carouselFragment, slideToPrevItem, slideToNextItem, getIsNextItem } =
-    useSpringCarousel({
-      withLoop: true,
-      items,
-      itemsPerSlide: 3,
-    })
+  const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
+    withLoop: true,
+    items,
+    itemsPerSlide: 3,
+  })
 
   return (
     <div
@@ -37,14 +36,7 @@ export function UseSpringCarousel() {
         >
           {carouselFragment}
         </div>
-        <button
-          onClick={() => {
-            slideToNextItem()
-            console.log(getIsNextItem('3'))
-          }}
-        >
-          NEXT
-        </button>
+        <button onClick={slideToNextItem}>NEXT</button>
       </div>
     </div>
   )
