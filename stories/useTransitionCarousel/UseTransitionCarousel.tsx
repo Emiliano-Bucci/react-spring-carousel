@@ -20,7 +20,7 @@ export function UseTransitionCarousel() {
         position: 'absolute',
       },
       leave: {
-        transform: 'translateX(100%)',
+        transform: 'translateX(50%)',
         position: 'absolute',
       },
     },
@@ -38,7 +38,7 @@ export function UseTransitionCarousel() {
         position: 'relative',
       },
       leave: {
-        transform: 'translateX(-100%)',
+        transform: 'translateX(-50%)',
         position: 'absolute',
       },
     },

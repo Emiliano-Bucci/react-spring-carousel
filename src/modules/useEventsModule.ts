@@ -35,26 +35,46 @@ type OnDrag = Omit<FullGestureState<'drag'>, 'event'> & {
   slideActionType: SlideActionType
 }
 
-type Events = OnSlideStartChange | OnSlideChange | OnDrag | OnFullscreenChange
-
-type EventHandler = (props: Events) => void
-
-export type EmitEvent = (event: Events) => void
-export type UseListenToCustomEvent = {
-  useListenToCustomEvent: (eventHandler: EventHandler) => void
-  emitEvent: (event: Events) => void
+type OnLeftSwipe = {
+  eventName: 'onLeftSwipe'
 }
 
-export function useEventsModule() {
+type OnRightSwipe = {
+  eventName: 'onRightSwipe'
+}
+
+type SpringCarouselEvents =
+  | OnSlideStartChange
+  | OnSlideChange
+  | OnDrag
+  | OnFullscreenChange
+
+type TransitionCarouselEvents =
+  | OnSlideStartChange
+  | OnSlideChange
+  | OnFullscreenChange
+  | OnLeftSwipe
+  | OnRightSwipe
+
+type Events<T> = T extends 'use-spring' ? SpringCarouselEvents : TransitionCarouselEvents
+
+type EventHandler<T> = (props: Events<T>) => void
+
+export type UseListenToCustomEvent<T> = {
+  useListenToCustomEvent: (eventHandler: EventHandler<T>) => void
+  emitEvent: (event: Events<T>) => void
+}
+
+export function useEventsModule<T extends 'use-spring' | 'use-transition'>() {
   const targetEvent = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     targetEvent.current = document.createElement('div')
   }, [])
 
-  function useListenToCustomEvent(eventHandler: EventHandler) {
+  function useListenToCustomEvent(eventHandler: EventHandler<T>) {
     useEffect(() => {
-      function handleEvent(event: CustomEvent<Events>) {
+      function handleEvent(event: CustomEvent<Events<T>>) {
         eventHandler(event.detail)
       }
 
@@ -66,9 +86,10 @@ export function useEventsModule() {
           targetEvent.current?.removeEventListener(eventLabel, handleEvent, false)
         }
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
   }
-  function emitEvent(event: Events) {
+  function emitEvent(event: Events<T>) {
     if (targetEvent.current) {
       const newEvent = new CustomEvent(eventLabel, {
         detail: event,

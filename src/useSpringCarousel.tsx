@@ -115,7 +115,7 @@ function useSpringCarousel({
   }, [items, withLoop])
   const internalItems = getItems()
 
-  const { emitEvent, useListenToCustomEvent } = useEventsModule()
+  const { emitEvent, useListenToCustomEvent } = useEventsModule<'use-spring'>()
   const { thumbsFragment, handleScroll } = useThumbsModule({
     withThumbs: !!withThumbs,
     thumbsSlideAxis,
@@ -124,8 +124,13 @@ function useSpringCarousel({
   })
   const { enterFullscreen, exitFullscreen, getIsFullscreen } = useFullscreenModule({
     mainCarouselWrapperRef,
-    emitEvent,
     handleResize: () => adjustCarouselWrapperPosition(),
+    onFullScreenChange: val => {
+      emitEvent({
+        eventName: 'onFullscreenChange',
+        isFullscreen: val,
+      })
+    },
   })
 
   function getItemStyles(isLastItem: boolean) {

@@ -21,6 +21,7 @@ type BaseProps = {
   trail?: number
   withLoop?: boolean
   activeItem?: number
+  draggingSlideTreshold?: number
 }
 
 export type UseTransitionCarouselProps = BaseProps &

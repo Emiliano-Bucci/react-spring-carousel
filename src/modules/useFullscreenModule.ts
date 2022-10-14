@@ -1,16 +1,15 @@
 import { useRef, MutableRefObject, useEffect } from 'react'
 import screenfull from 'screenfull'
-import { EmitEvent } from './useEventsModule'
 
 type FullscreenModule = {
   mainCarouselWrapperRef: MutableRefObject<HTMLDivElement | null>
-  emitEvent: EmitEvent
   handleResize?(): void
+  onFullScreenChange(isFullscreen: boolean): void
 }
 
 export function useFullscreenModule({
   mainCarouselWrapperRef,
-  emitEvent,
+  onFullScreenChange,
   handleResize,
 }: FullscreenModule) {
   const isFullscreen = useRef(false)
@@ -19,20 +18,13 @@ export function useFullscreenModule({
     function handleFullscreenChange() {
       if (document.fullscreenElement) {
         setIsFullscreen(true)
-        emitEvent({
-          eventName: 'onFullscreenChange',
-          isFullscreen: true,
-        })
-
+        onFullScreenChange(true)
         handleResize && handleResize()
       }
 
       if (!document.fullscreenElement) {
         setIsFullscreen(false)
-        emitEvent({
-          eventName: 'onFullscreenChange',
-          isFullscreen: false,
-        })
+        onFullScreenChange(false)
         handleResize && handleResize()
       }
     }
@@ -45,6 +37,7 @@ export function useFullscreenModule({
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function setIsFullscreen(_isFullscreen: boolean) {

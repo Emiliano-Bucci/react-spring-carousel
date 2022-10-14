@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { SlideActionType, SlideMode } from './types/common'
 import { UseTransitionCarouselProps } from './types/useTransitionCarousel.types'
 import { useEventsModule } from './modules/useEventsModule'
+import { useDrag } from '@use-gesture/react'
 
 const defaultAnimationProps = {
   initial: {
@@ -25,7 +26,7 @@ const defaultAnimationProps = {
 
 export function useTransitionCarousel({
   init = true,
-  // disableGestures = false,
+  disableGestures = false,
   items,
   springConfig = config.default,
   exitBeforeEnter = false,
@@ -34,12 +35,13 @@ export function useTransitionCarousel({
   activeItem: externalActiveItem,
   toPrevItemSpringProps = defaultAnimationProps,
   toNextItemSpringProps = defaultAnimationProps,
+  draggingSlideTreshold = 50,
 }: UseTransitionCarouselProps) {
   const slideActionType = useRef<SlideActionType>('next')
   const slideModeType = useRef<SlideMode>('initial')
   const mainCarouselWrapperRef = useRef<HTMLDivElement | null>(null)
   const [activeItem, setActiveItem] = useState(externalActiveItem ?? 0)
-  const { emitEvent, useListenToCustomEvent } = useEventsModule()
+  const { emitEvent, useListenToCustomEvent } = useEventsModule<'use-transition'>()
 
   function getConfig() {
     if (slideActionType.current === 'prev') {
@@ -179,6 +181,37 @@ export function useTransitionCarousel({
       }
     },
   })
+
+  const bindSwipe = useDrag(
+    ({ last, movement: [mx] }) => {
+      if (last) {
+        const prevItemTreshold = mx > draggingSlideTreshold
+        const nextItemTreshold = mx < -draggingSlideTreshold
+        const isFirstItem = activeItem === 0
+        const isLastItem = activeItem === items.length - 1
+
+        if (nextItemTreshold) {
+          if (!withLoop && isLastItem) return
+
+          slideToNextItem()
+          emitEvent({
+            eventName: 'onLeftSwipe',
+          })
+        } else if (prevItemTreshold) {
+          if (!withLoop && isFirstItem) return
+
+          slideToPrevItem()
+          emitEvent({
+            eventName: 'onRightSwipe',
+          })
+        }
+      }
+    },
+    {
+      enabled: !disableGestures,
+    },
+  )
+
   const itemsFragment = transitions((styles, item, _, indx) => {
     return (
       <a.div
@@ -198,7 +231,7 @@ export function useTransitionCarousel({
   const carouselFragment = (
     <div
       ref={mainCarouselWrapperRef}
-      // {...bindSwipe()}
+      {...bindSwipe()}
       style={{
         display: 'flex',
         position: 'relative',
