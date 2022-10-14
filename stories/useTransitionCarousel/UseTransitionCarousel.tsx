@@ -1,5 +1,5 @@
 import React from 'react'
-import { useTransitionCarousel } from '../../src/useTransitionCarousel'
+import { useTransitionCarousel } from 'react-spring-carousel'
 import { mockedItems } from '../../src/mockedItems'
 
 export function UseTransitionCarousel() {
