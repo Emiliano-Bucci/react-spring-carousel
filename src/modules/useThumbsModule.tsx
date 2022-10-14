@@ -1,7 +1,7 @@
 import { useSpring } from '@react-spring/web'
 import { useRef } from 'react'
-import { SpringCarouselWithThumbs, PrepareThumbsData } from 'src/types/internals'
-import { ItemWithThumb } from '../types'
+
+import { ItemWithThumb, PrepareThumbsData, SpringCarouselWithThumbs } from '../types'
 
 type Props = {
   withThumbs?: boolean
