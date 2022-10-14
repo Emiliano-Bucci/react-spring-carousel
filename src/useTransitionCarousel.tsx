@@ -169,8 +169,8 @@ export function useTransitionCarousel({
     trail,
     exitBeforeEnter,
     ...getConfig(),
-    onRest(value) {
-      if (value.finished) {
+    onRest(value, _, index) {
+      if (value.finished && index === activeItem) {
         emitEvent({
           eventName: 'onSlideChange',
           slideActionType: slideActionType.current,
@@ -197,17 +197,17 @@ export function useTransitionCarousel({
         if (nextItemTreshold) {
           if (!withLoop && isLastItem) return
 
-          slideToNextItem('swipe')
           emitEvent({
             eventName: 'onLeftSwipe',
           })
+          slideToNextItem('swipe')
         } else if (prevItemTreshold) {
           if (!withLoop && isFirstItem) return
 
-          slideToPrevItem('swipe')
           emitEvent({
             eventName: 'onRightSwipe',
           })
+          slideToPrevItem('swipe')
         }
       }
     },
