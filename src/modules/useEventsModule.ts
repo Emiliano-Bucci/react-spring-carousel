@@ -70,12 +70,12 @@ export type UseListenToCustomEvent<T> = {
 export function useEventsModule<T extends 'use-spring' | 'use-transition'>() {
   const targetEvent = useRef<HTMLDivElement | null>(null)
 
-  useEffect(() => {
-    targetEvent.current = document.createElement('div')
-  }, [])
-
   function useListenToCustomEvent(eventHandler: EventHandler<T>) {
     useEffect(() => {
+      if (!targetEvent.current) {
+        targetEvent.current = document.createElement('div')
+      }
+
       function handleEvent(event: CustomEvent<Events<T>>) {
         eventHandler(event.detail)
       }
