@@ -125,7 +125,10 @@ function useSpringCarousel({
   })
   const { enterFullscreen, exitFullscreen, getIsFullscreen } = useFullscreenModule({
     mainCarouselWrapperRef,
-    handleResize: () => adjustCarouselWrapperPosition(),
+    handleResize: () => {
+      console.log('resize')
+      adjustCarouselWrapperPosition()
+    },
     onFullScreenChange: val => {
       emitEvent({
         eventName: 'onFullscreenChange',
@@ -288,10 +291,14 @@ function useSpringCarousel({
 
     const currentFromValue = Math.abs(getFromValue())
 
-    if (currentFromValue < getTotalScrollValue() && lastItemReached.current) {
+    if (
+      currentFromValue < getTotalScrollValue() &&
+      lastItemReached.current &&
+      !withLoop
+    ) {
       lastItemReached.current = false
     }
-    if (currentFromValue > getTotalScrollValue()) {
+    if (currentFromValue > getTotalScrollValue() && !withLoop) {
       const val = -getTotalScrollValue()
       lastItemReached.current = true
       prevSlidedValue.current = val
@@ -300,15 +307,6 @@ function useSpringCarousel({
         val,
       })
       return
-    }
-
-    if (!freeScroll && slideType === 'fixed') {
-      const val = -(getSlideValue() * activeItem.current)
-      prevSlidedValue.current = val
-      setSpring.start({
-        immediate: true,
-        val,
-      })
     }
 
     if (initialStartingPosition === 'center') {
@@ -323,6 +321,15 @@ function useSpringCarousel({
       )
     } else {
       setPosition(getCarouselItemWidth() * items.length)
+    }
+
+    if (!freeScroll && slideType === 'fixed') {
+      const val = -(getSlideValue() * activeItem.current)
+      prevSlidedValue.current = val
+      setSpring.start({
+        immediate: true,
+        val,
+      })
     }
   }
 
@@ -427,6 +434,7 @@ function useSpringCarousel({
     firstItemReached.current = false
 
     const nextItem = index || activeItem.current + 1
+    console.log({ nextItem })
 
     if (!withLoop) {
       const nextItemWillExceed =
