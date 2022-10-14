@@ -903,7 +903,7 @@ function useSpringCarousel({
   return { ...res, carouselFragment, thumbsFragment: _thumbsFragment }
 }
 
-type ContextProps<T> = Omit<
+type ContextProps<T extends 'use-spring' | 'use-transition'> = Omit<
   ReturnType<T extends 'use-spring' ? true : false>,
   'carouselFragment' | 'thumbsFragment'
 >
