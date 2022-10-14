@@ -88,8 +88,7 @@ export function useEventsModule<T extends 'use-spring' | 'use-transition'>() {
           targetEvent.current?.removeEventListener(eventLabel, handleEvent, false)
         }
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [eventHandler])
   }
   function emitEvent(event: Events<T>) {
     if (targetEvent.current) {

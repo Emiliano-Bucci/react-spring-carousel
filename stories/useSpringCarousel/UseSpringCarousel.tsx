@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
 import { mockedItems } from '../../src/mockedItems'
 import { ItemWithThumb } from '../../src/types'
@@ -7,29 +7,12 @@ import { useSpringCarousel } from '../../src/useSpringCarousel'
 const items = mockedItems as ItemWithThumb[]
 
 export function UseSpringCarousel() {
-  const [i, set] = useState(3)
-  const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
-    withLoop: true,
-    items,
-    itemsPerSlide: i,
-    initialStartingPosition: 'center',
-  })
-
-  useEffect(() => {
-    const media = window.matchMedia('(max-width: 700px)')
-    if (media.matches) {
-      set(3)
-    } else {
-      set(5)
-    }
-    media.addEventListener('change', e => {
-      if (e.matches) {
-        set(3)
-      } else {
-        set(5)
-      }
+  const { carouselFragment, slideToPrevItem, slideToNextItem, getIsNextItem } =
+    useSpringCarousel({
+      withLoop: true,
+      items,
+      itemsPerSlide: 3,
     })
-  }, [])
 
   return (
     <div
@@ -54,7 +37,14 @@ export function UseSpringCarousel() {
         >
           {carouselFragment}
         </div>
-        <button onClick={slideToNextItem}>NEXT</button>
+        <button
+          onClick={() => {
+            slideToNextItem()
+            console.log(getIsNextItem('3'))
+          }}
+        >
+          NEXT
+        </button>
       </div>
     </div>
   )
