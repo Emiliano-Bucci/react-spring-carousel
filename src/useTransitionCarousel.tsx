@@ -1,14 +1,15 @@
 import { a, config, useTransition } from '@react-spring/web'
 import { useEffect, useRef, useState, createContext, useContext } from 'react'
-import { SlideActionType, TransitionSlideMode } from './types/common'
-import {
-  UseTransitionCarouselProps,
-  UseTransitionCarouselReturnProps,
-} from './types/useTransitionCarousel.types'
 import { useEventsModule } from './modules/useEventsModule'
 import { useDrag } from '@use-gesture/react'
 import { useThumbsModule } from './modules'
-import { ItemWithThumb } from './types'
+import {
+  ItemWithThumb,
+  UseTransitionCarouselProps,
+  UseTransitionCarouselReturnProps,
+  SlideActionType,
+  TransitionSlideMode,
+} from './types'
 
 const defaultAnimationProps = {
   initial: {

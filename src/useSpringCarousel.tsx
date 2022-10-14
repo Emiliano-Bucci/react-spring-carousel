@@ -8,12 +8,13 @@ import React, {
   useRef,
 } from 'react'
 
-import { SlideActionType, SlideMode } from './types/common'
 import { useEventsModule } from './modules/useEventsModule'
 import { useDrag } from '@use-gesture/react'
 import { useFullscreenModule } from './modules/useFullscreenModule'
 import { useThumbsModule } from './modules/useThumbsModule'
 import {
+  SlideActionType,
+  SlideMode,
   UseSpringCarouselComplete,
   SpringCarouselWithThumbs,
   UseSpringCarouselWithFreeScroll,
@@ -21,11 +22,9 @@ import {
   UseSpringCarouselWithNoThumbs,
   UseSpringCarouselWithNoFixedItems,
   UseSpringCarouselWithFixedItems,
-} from './types'
-import {
   UseSpringFreeScrollReturnType,
   UseSpringReturnType,
-} from './types/useSpringCarousel.types'
+} from './types'
 
 type ReturnType<T> = T extends true ? UseSpringFreeScrollReturnType : UseSpringReturnType
 
