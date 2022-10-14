@@ -1,12 +1,13 @@
 import { useSpring } from '@react-spring/web'
 import { useRef } from 'react'
 import { SpringCarouselWithThumbs, PrepareThumbsData } from 'src/types/internals'
+import { ItemWithThumb } from '../types'
 
 type Props = {
   withThumbs?: boolean
   thumbsSlideAxis: SpringCarouselWithThumbs['thumbsSlideAxis']
   prepareThumbsData?: PrepareThumbsData
-  items: SpringCarouselWithThumbs['items']
+  items: ItemWithThumb[]
 }
 
 function isInViewport(el: HTMLElement) {

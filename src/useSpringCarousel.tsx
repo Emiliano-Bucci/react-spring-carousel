@@ -795,113 +795,113 @@ function useSpringCarousel({
     return itemIndex === _activeItem - 1
   }
 
+  const res = freeScroll
+    ? {
+        useListenToCustomEvent,
+        enterFullscreen,
+        exitFullscreen,
+        getIsFullscreen,
+        slideToPrevItem: () => slideToPrevItem(),
+        slideToNextItem: () => slideToNextItem(),
+      }
+    : {
+        useListenToCustomEvent,
+        enterFullscreen,
+        exitFullscreen,
+        getIsFullscreen,
+        slideToPrevItem: () => slideToPrevItem(),
+        slideToNextItem: () => slideToNextItem(),
+        slideToItem: internalSlideToItem,
+        getIsNextItem,
+        getIsPrevItem,
+        getIsActiveItem: (id: string | number) => {
+          return (
+            findItemIndex(
+              id,
+              "The item you want to check doesn't exist; check the provided id.",
+            ) === activeItem.current
+          )
+        },
+      }
+
+  const _thumbsFragment = (
+    <Context.Provider value={res}>{thumbsFragment}</Context.Provider>
+  )
   const carouselFragment = (
-    <div
-      ref={mainCarouselWrapperRef}
-      {...getScrollHandlers()}
-      style={{
-        display: 'flex',
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        ...(getWrapperOverflowStyles() as React.CSSProperties),
-      }}
-    >
+    <Context.Provider value={res}>
       <div
-        ref={carouselTrackWrapperRef}
-        {...bindDrag()}
+        ref={mainCarouselWrapperRef}
+        {...getScrollHandlers()}
         style={{
-          position: 'relative',
           display: 'flex',
-          flexDirection: carouselSlideAxis === 'x' ? 'row' : 'column',
-          touchAction: 'none',
-          ...getAnimatedWrapperStyles(),
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          ...(getWrapperOverflowStyles() as React.CSSProperties),
         }}
       >
-        {freeScroll && startEndGutter ? (
-          <div
-            style={{
-              flexShrink: 0,
-              width: startEndGutter,
-            }}
-          />
-        ) : null}
-        {internalItems.map((item, index) => {
-          return (
+        <div
+          ref={carouselTrackWrapperRef}
+          {...bindDrag()}
+          style={{
+            position: 'relative',
+            display: 'flex',
+            flexDirection: carouselSlideAxis === 'x' ? 'row' : 'column',
+            touchAction: 'none',
+            ...getAnimatedWrapperStyles(),
+          }}
+        >
+          {freeScroll && startEndGutter ? (
             <div
-              key={`${item.id}-${index}`}
-              className="use-spring-carousel-item"
-              data-testid="use-spring-carousel-item-wrapper"
               style={{
-                display: 'flex',
-                position: 'relative',
-                flex: '1',
-                ...getItemStyles(!!freeScroll && index === items.length - 1),
+                flexShrink: 0,
+                width: startEndGutter,
               }}
-            >
-              {item.renderItem}
-            </div>
-          )
-        })}
-        {freeScroll && startEndGutter ? (
-          <div
-            style={{
-              flexShrink: 0,
-              width: startEndGutter,
-            }}
-          />
-        ) : null}
+            />
+          ) : null}
+          {internalItems.map((item, index) => {
+            return (
+              <div
+                key={`${item.id}-${index}`}
+                className="use-spring-carousel-item"
+                data-testid="use-spring-carousel-item-wrapper"
+                style={{
+                  display: 'flex',
+                  position: 'relative',
+                  flex: '1',
+                  ...getItemStyles(!!freeScroll && index === items.length - 1),
+                }}
+              >
+                {item.renderItem}
+              </div>
+            )
+          })}
+          {freeScroll && startEndGutter ? (
+            <div
+              style={{
+                flexShrink: 0,
+                width: startEndGutter,
+              }}
+            />
+          ) : null}
+        </div>
       </div>
-    </div>
+    </Context.Provider>
   )
 
-  if (freeScroll) {
-    return {
-      useListenToCustomEvent,
-      carouselFragment,
-      enterFullscreen,
-      exitFullscreen,
-      getIsFullscreen,
-      thumbsFragment,
-      slideToPrevItem: () => slideToPrevItem(),
-      slideToNextItem: () => slideToNextItem(),
-    }
-  }
-
-  return {
-    useListenToCustomEvent,
-    carouselFragment,
-    enterFullscreen,
-    exitFullscreen,
-    getIsFullscreen,
-    thumbsFragment,
-    slideToPrevItem: () => slideToPrevItem(),
-    slideToNextItem: () => slideToNextItem(),
-    slideToItem: internalSlideToItem,
-    getIsNextItem,
-    getIsPrevItem,
-    getIsActiveItem: (id: string | number) => {
-      return (
-        findItemIndex(
-          id,
-          "The item you want to check doesn't exist; check the provided id.",
-        ) === activeItem.current
-      )
-    },
-  }
+  return { ...res, carouselFragment, thumbsFragment: _thumbsFragment }
 }
 
-const Context =
-  createContext<
-    Omit<UseSpringReturnType, 'carouselFragment' | 'thumbsFragment'> | undefined
-  >(undefined)
+type ContextProps<T> = Omit<ReturnType<T>, 'carouselFragment' | 'thumbsFragment'>
 
-function useSpringCarouselContext() {
+const Context = createContext<ContextProps<true | false> | undefined>(undefined)
+
+function useSpringCarouselContext<T extends boolean>() {
   const context = useContext(Context)
   if (!context) {
     throw new Error('useSpringCarouselContext must be used within the carousel.')
   }
-  return context
+  return context as ContextProps<T>
 }
 
 export { useSpringCarousel, useSpringCarouselContext }

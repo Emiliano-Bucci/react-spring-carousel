@@ -27,6 +27,8 @@ export type UseSpringFreeScrollReturnType = {
   slideToPrevItem(): void
 }
 
+export type Items = ItemWithNoThumb[] | ItemWithThumb[]
+
 export type PrepareThumbsData = (
   items: Omit<ItemWithThumb, 'renderItem'>[],
 ) => Omit<ItemWithThumb, 'renderItem'>[]

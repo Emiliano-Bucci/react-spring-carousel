@@ -1,9 +1,14 @@
 import { a, config, useTransition } from '@react-spring/web'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, createContext, useContext } from 'react'
 import { SlideActionType, TransitionSlideMode } from './types/common'
-import { UseTransitionCarouselProps } from './types/useTransitionCarousel.types'
+import {
+  UseTransitionCarouselProps,
+  UseTransitionCarouselReturnProps,
+} from './types/useTransitionCarousel.types'
 import { useEventsModule } from './modules/useEventsModule'
 import { useDrag } from '@use-gesture/react'
+import { useThumbsModule } from './modules'
+import { ItemWithThumb } from './types'
 
 const defaultAnimationProps = {
   initial: {
@@ -24,7 +29,7 @@ const defaultAnimationProps = {
   },
 }
 
-export function useTransitionCarousel({
+function useTransitionCarousel({
   init = true,
   disableGestures = false,
   items,
@@ -36,12 +41,17 @@ export function useTransitionCarousel({
   toPrevItemSpringProps = defaultAnimationProps,
   toNextItemSpringProps = defaultAnimationProps,
   draggingSlideTreshold = 50,
-}: UseTransitionCarouselProps) {
+  thumbsSlideAxis = 'x',
+}: UseTransitionCarouselProps): UseTransitionCarouselReturnProps {
   const slideActionType = useRef<SlideActionType>('next')
   const slideModeType = useRef<TransitionSlideMode>('initial')
   const mainCarouselWrapperRef = useRef<HTMLDivElement | null>(null)
   const [activeItem, setActiveItem] = useState(externalActiveItem ?? 0)
   const { emitEvent, useListenToCustomEvent } = useEventsModule<'use-transition'>()
+  const { handleScroll, thumbsFragment } = useThumbsModule({
+    thumbsSlideAxis,
+    items: items as ItemWithThumb[],
+  })
 
   function getConfig() {
     if (slideActionType.current === 'prev') {
@@ -120,6 +130,7 @@ export function useTransitionCarousel({
       },
     })
     setActiveItem(to)
+    handleScroll(activeItem)
   }
 
   function slideToPrevItem(slideMode: TransitionSlideMode) {
@@ -232,26 +243,54 @@ export function useTransitionCarousel({
       </a.div>
     )
   })
-  const carouselFragment = (
-    <div
-      ref={mainCarouselWrapperRef}
-      {...bindSwipe()}
-      style={{
-        display: 'flex',
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        overflow: 'hidden',
-      }}
-    >
-      {itemsFragment}
-    </div>
-  )
 
-  return {
+  const res = {
     useListenToCustomEvent,
-    carouselFragment,
     slideToPrevItem: () => slideToPrevItem('click'),
     slideToNextItem: () => slideToNextItem('click'),
   }
+
+  const _thumbsFragment = (
+    <Context.Provider value={res}>{thumbsFragment}</Context.Provider>
+  )
+  const carouselFragment = (
+    <Context.Provider value={res}>
+      <div
+        ref={mainCarouselWrapperRef}
+        {...bindSwipe()}
+        style={{
+          display: 'flex',
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          overflow: 'hidden',
+        }}
+      >
+        {itemsFragment}
+      </div>
+    </Context.Provider>
+  )
+
+  return {
+    ...res,
+    carouselFragment,
+    thumbsFragment: _thumbsFragment,
+  }
 }
+
+type ContextProps = Omit<
+  UseTransitionCarouselReturnProps,
+  'carouselFragment' | 'thumbsFragment'
+>
+
+const Context = createContext<ContextProps | undefined>(undefined)
+
+function useTransitionCarouselContext() {
+  const context = useContext(Context)
+  if (!context) {
+    throw new Error('useTransitionCarouselContext must be used within the carousel.')
+  }
+  return context
+}
+
+export { useTransitionCarousel, useTransitionCarouselContext }
