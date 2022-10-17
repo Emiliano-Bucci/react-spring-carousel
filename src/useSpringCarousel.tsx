@@ -532,12 +532,24 @@ function useSpringCarousel({
       prevWindowWidth.current = window.innerWidth
       adjustCarouselWrapperPosition()
     }
-    window.addEventListener('resize', handleResize)
-    return () => {
-      window.removeEventListener('resize', handleResize)
+    if ('ResizeObserver' in window && mainCarouselWrapperRef.current) {
+      const observer = new ResizeObserver(() => {
+        prevWindowWidth.current = window.innerWidth
+        adjustCarouselWrapperPosition()
+      })
+      observer.observe(mainCarouselWrapperRef.current)
+      return () => {
+        observer.disconnect()
+      }
+    } else {
+      window.addEventListener('resize', handleResize)
+      return () => {
+        window.removeEventListener('resize', handleResize)
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    carouselSlideAxis,
     initialStartingPosition,
     itemsPerSlide,
     withLoop,
@@ -812,6 +824,14 @@ function useSpringCarousel({
     }
     return itemIndex === _activeItem - 1
   }
+  function getIsActiveItem(id: string | number) {
+    return (
+      findItemIndex(
+        id,
+        "The item you want to check doesn't exist; check the provided id.",
+      ) === activeItem.current
+    )
+  }
 
   const res = freeScroll
     ? {
@@ -832,14 +852,7 @@ function useSpringCarousel({
         slideToItem: internalSlideToItem,
         getIsNextItem,
         getIsPrevItem,
-        getIsActiveItem: (id: string | number) => {
-          return (
-            findItemIndex(
-              id,
-              "The item you want to check doesn't exist; check the provided id.",
-            ) === activeItem.current
-          )
-        },
+        getIsActiveItem,
       }
 
   const _thumbsFragment = (

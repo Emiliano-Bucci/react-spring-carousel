@@ -7,18 +7,17 @@ import { useSpringCarousel } from '../../src/useSpringCarousel'
 const items = mockedItems as ItemWithThumb[]
 
 export function UseSpringCarousel() {
-  const { carouselFragment, slideToPrevItem, slideToNextItem, enterFullscreen } =
-    useSpringCarousel({
-      withLoop: true,
-      items,
-    })
+  const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
+    withLoop: true,
+    items,
+  })
 
   return (
     <div
       className="wrapper"
       style={{
         display: 'flex',
-        flexDirection: 'column',
+        // flexDirection: 'column',
       }}
     >
       <div
@@ -27,7 +26,13 @@ export function UseSpringCarousel() {
           flex: '1',
         }}
       >
-        <button onClick={slideToPrevItem}>PREV</button>
+        <button
+          onClick={() => {
+            slideToPrevItem()
+          }}
+        >
+          PREV
+        </button>
         <div
           className="carousel-wrapper"
           style={{
@@ -38,7 +43,7 @@ export function UseSpringCarousel() {
         </div>
         <button
           onClick={() => {
-            enterFullscreen()
+            slideToNextItem()
           }}
         >
           NEXT
