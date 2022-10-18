@@ -10,14 +10,13 @@ type Props = {
   withLoop: boolean
   itemsPerSlide: number
   slideType: SlideType
+  initialActiveItem: number
 }
 
-export function UseSpringCarousel({ withLoop, itemsPerSlide, slideType }: Props) {
+export function UseSpringCarousel(props: Props) {
   const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
     items,
-    withLoop,
-    itemsPerSlide,
-    slideType,
+    ...props,
   })
 
   return (

@@ -27,6 +27,18 @@ export default {
         options: ['fixed', 'fluid'],
       },
     },
+    initialActiveItem: {
+      defaultValue: 0,
+      control: {
+        type: 'number',
+      },
+    },
+    animateWhenActiveItemChange: {
+      defaultValue: true,
+      control: {
+        type: 'boolean',
+      },
+    },
   },
 }
 

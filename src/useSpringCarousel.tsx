@@ -65,6 +65,7 @@ function useSpringCarousel({
   initialStartingPosition,
   prepareThumbsData,
   initialActiveItem = 0,
+  animateWhenActiveItemChange = true,
 }: UseSpringCarouselComplete): ReturnType<typeof freeScroll> {
   const itemsPerSlide = _itemsPerSlide > items.length ? items.length : _itemsPerSlide
   const prevWindowWidth = useRef(0)
@@ -371,6 +372,7 @@ function useSpringCarousel({
   function slideToPrevItem(
     type: Exclude<SlideMode, 'initial'> = 'click',
     index?: number,
+    immediate?: boolean,
   ) {
     if (!init || (firstItemReached.current && !withLoop)) return
 
@@ -394,6 +396,7 @@ function useSpringCarousel({
           from: getFromValue(),
           to: 0,
           nextActiveItem: 0,
+          immediate,
         })
         return
       }
@@ -406,6 +409,7 @@ function useSpringCarousel({
         from: getFromValue() - getSlideValue() * items.length,
         to: -(getSlideValue() * items.length) + getSlideValue(),
         nextActiveItem: items.length - 1,
+        immediate,
       })
       return
     }
@@ -420,11 +424,13 @@ function useSpringCarousel({
       from: getFromValue(),
       to: getToValue('prev', index),
       nextActiveItem: nextItem,
+      immediate,
     })
   }
   function slideToNextItem(
     type: Exclude<SlideMode, 'initial'> = 'click',
     index?: number,
+    immediate?: boolean,
   ) {
     if (!init || (lastItemReached.current && !withLoop)) return
 
@@ -447,6 +453,7 @@ function useSpringCarousel({
           from: getFromValue(),
           to: freeScroll ? getTotalScrollValue() : -getTotalScrollValue(),
           nextActiveItem: nextItem,
+          immediate,
         })
         return
       }
@@ -459,6 +466,7 @@ function useSpringCarousel({
         from: getFromValue() + getSlideValue() * items.length,
         to: 0,
         nextActiveItem: 0,
+        immediate,
       })
       return
     }
@@ -473,9 +481,13 @@ function useSpringCarousel({
       from: getFromValue(),
       to: getToValue('next', index),
       nextActiveItem: nextItem,
+      immediate,
     })
   }
 
+  useEffect(() => {
+    internalSlideToItem(initialActiveItem, !animateWhenActiveItemChange)
+  }, [initialActiveItem, animateWhenActiveItemChange])
   useEffect(() => {
     if (init) {
       if (initialActiveItem > items.length - 1) {
@@ -781,7 +793,7 @@ function useSpringCarousel({
 
     return itemIndex
   }
-  function internalSlideToItem(id: string | number) {
+  function internalSlideToItem(id: string | number, immediate = false) {
     if (!init) return
 
     firstItemReached.current = false
@@ -800,9 +812,9 @@ function useSpringCarousel({
     const newActiveItem = findItemIndex(items[itemIndex].id)
 
     if (newActiveItem > currentItem) {
-      slideToNextItem('click', newActiveItem)
+      slideToNextItem('click', newActiveItem, immediate)
     } else {
-      slideToPrevItem('click', newActiveItem)
+      slideToPrevItem('click', newActiveItem, immediate)
     }
   }
   function getIsNextItem(id: string | number) {
