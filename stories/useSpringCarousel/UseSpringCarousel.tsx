@@ -1,15 +1,23 @@
 import React from 'react'
 
 import { mockedItems } from '../../src/mockedItems'
-import { ItemWithThumb } from '../../src/types'
+import { ItemWithThumb, SlideType } from '../../src/types'
 import { useSpringCarousel } from '../../src/useSpringCarousel'
 
 const items = mockedItems as ItemWithThumb[]
 
-export function UseSpringCarousel() {
+type Props = {
+  withLoop: boolean
+  itemsPerSlide: number
+  slideType: SlideType
+}
+
+export function UseSpringCarousel({ withLoop, itemsPerSlide, slideType }: Props) {
   const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
-    withLoop: true,
     items,
+    withLoop,
+    itemsPerSlide,
+    slideType,
   })
 
   return (
@@ -26,13 +34,7 @@ export function UseSpringCarousel() {
           flex: '1',
         }}
       >
-        <button
-          onClick={() => {
-            slideToPrevItem()
-          }}
-        >
-          PREV
-        </button>
+        <button onClick={slideToPrevItem}>PREV</button>
         <div
           className="carousel-wrapper"
           style={{
@@ -41,13 +43,7 @@ export function UseSpringCarousel() {
         >
           {carouselFragment}
         </div>
-        <button
-          onClick={() => {
-            slideToNextItem()
-          }}
-        >
-          NEXT
-        </button>
+        <button onClick={slideToNextItem}>NEXT</button>
       </div>
     </div>
   )

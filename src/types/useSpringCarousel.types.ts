@@ -27,6 +27,8 @@ export type UseSpringFreeScrollReturnType = {
   slideToPrevItem(): void
 }
 
+export type SlideType = 'fixed' | 'fluid'
+
 export type SpringCarouselWithThumbs = {
   withThumbs: true
   thumbsSlideAxis?: 'x' | 'y'
@@ -40,14 +42,14 @@ export type SpringCarouselWithNoThumbs = {
   prepareThumbsData?: never
 }
 export type SpringCarouselWithFixedItems = {
-  slideType?: 'fixed'
+  slideType?: SlideType[0]
   itemsPerSlide?: number
   startEndGutter?: number
   initialStartingPosition?: 'start' | 'center' | 'end'
   initialActiveItem?: number
 }
 export type SpringCarouselWithNoFixedItems = {
-  slideType?: 'fluid'
+  slideType?: SlideType[1]
   itemsPerSlide?: never
   startEndGutter?: never
   initialStartingPosition?: never
@@ -70,7 +72,7 @@ export type SpringCarouselFreeScroll = {
 export type SpringCarouselNoFreeScroll = {
   freeScroll?: never | false | undefined
   withLoop?: boolean
-  slideType?: 'fixed' | 'fluid'
+  slideType?: SlideType
   enableFreeScrollDrag?: never
   initialActiveItem?: number
   itemsPerSlide?: number
