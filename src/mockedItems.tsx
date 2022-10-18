@@ -1,4 +1,5 @@
-export const mockedItems = [
+import { ItemWithNoThumb } from './types/common'
+export const mockedItems: ItemWithNoThumb[] = [
   {
     id: 'item-1',
     renderItem: (
@@ -14,16 +15,18 @@ export const mockedItems = [
   },
   {
     id: 'item-2',
-    renderItem: (
-      <div
-        style={{
-          flex: '1',
-          background: '#E74C3C',
-        }}
-      >
-        div 2
-      </div>
-    ),
+    renderItem: () => {
+      return (
+        <div
+          style={{
+            flex: '1',
+            background: '#E74C3C',
+          }}
+        >
+          div 2
+        </div>
+      )
+    },
   },
   {
     id: 'item-3',

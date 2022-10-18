@@ -6,11 +6,13 @@ import { useSpringCarousel } from '../../src/useSpringCarousel'
 
 const items = mockedItems as ItemWithThumb[]
 
-type Props = {
+export type Props = {
   withLoop: boolean
   itemsPerSlide: number
   slideType: SlideType
   initialActiveItem: number
+  gutter: number
+  startEndGutter: number
 }
 
 export function UseSpringCarousel(props: Props) {

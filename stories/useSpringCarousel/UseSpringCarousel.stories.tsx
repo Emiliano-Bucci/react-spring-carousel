@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { UseSpringCarousel } from './UseSpringCarousel'
+import { Props, UseSpringCarousel } from './UseSpringCarousel'
 
 export default {
   title: 'UseSpringCarousel',
@@ -39,9 +39,32 @@ export default {
         type: 'boolean',
       },
     },
+    gutter: {
+      defaultValue: 0,
+      control: {
+        type: 'number',
+      },
+    },
+    startEndGutter: {
+      defaultValue: 0,
+      control: {
+        type: 'number',
+      },
+    },
+    initialStartingPosition: {
+      defaultValue: 'start',
+      if: {
+        arg: 'slideType',
+        eq: 'fixed',
+      },
+      control: {
+        type: 'radio',
+        options: ['start', 'center', 'end'],
+      },
+    },
   },
 }
 
-export const Development = props => {
+export const Development = (props: Props) => {
   return <UseSpringCarousel {...props} />
 }

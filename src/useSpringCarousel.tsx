@@ -232,7 +232,6 @@ function useSpringCarousel({
       handleScroll(activeItem.current)
     }
   }
-
   function getTotalScrollValue() {
     if (withLoop) {
       return getSlideValue() * items.length
@@ -246,7 +245,7 @@ function useSpringCarousel({
         carouselTrackWrapperRef.current!.getBoundingClientRect()[
           carouselSlideAxis === 'x' ? 'width' : 'height'
         ] -
-        startEndGutter * 2,
+        startEndGutter,
     )
   }
   function getAnimatedWrapperStyles() {
@@ -894,7 +893,7 @@ function useSpringCarousel({
             ...getAnimatedWrapperStyles(),
           }}
         >
-          {freeScroll && startEndGutter ? (
+          {(freeScroll || !withLoop) && startEndGutter ? (
             <div
               style={{
                 flexShrink: 0,
@@ -915,7 +914,14 @@ function useSpringCarousel({
                   ...getItemStyles(!!freeScroll && index === items.length - 1),
                 }}
               >
-                {item.renderItem}
+                {typeof item.renderItem === 'function'
+                  ? item.renderItem({
+                      getIsActiveItem,
+                      getIsNextItem,
+                      getIsPrevItem,
+                      useListenToCustomEvent,
+                    })
+                  : item.renderItem}
               </div>
             )
           })}
