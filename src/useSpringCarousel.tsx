@@ -358,13 +358,13 @@ function useSpringCarousel({
     }
 
     if (type === 'next') {
-      if (index) {
+      if (typeof index === 'number') {
         return -(index * getSlideValue())
       }
       return prevSlidedValue.current - getSlideValue()
     }
 
-    if (index) {
+    if (typeof index === 'number') {
       return -(index * getSlideValue())
     }
     return prevSlidedValue.current + getSlideValue()
@@ -379,7 +379,7 @@ function useSpringCarousel({
     slideActionType.current = 'prev'
     lastItemReached.current = false
 
-    const nextItem = index || activeItem.current - 1
+    const nextItem = typeof index === 'number' ? index : activeItem.current - 1
 
     if (!withLoop) {
       const nextItemWillExceed = freeScroll
@@ -487,6 +487,7 @@ function useSpringCarousel({
 
   useEffect(() => {
     internalSlideToItem(initialActiveItem, !animateWhenActiveItemChange)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialActiveItem, animateWhenActiveItemChange])
   useEffect(() => {
     if (init) {
