@@ -379,6 +379,7 @@ function useSpringCarousel({
     lastItemReached.current = false
 
     const nextItem = typeof index === 'number' ? index : activeItem.current - 1
+    console.log({ nextItem: firstItemReached.current })
 
     if (!withLoop) {
       const nextItemWillExceed = freeScroll
@@ -410,6 +411,7 @@ function useSpringCarousel({
         nextActiveItem: items.length - 1,
         immediate,
       })
+      console.log('here')
       return
     }
     if (nextItem === 0) {
@@ -485,7 +487,9 @@ function useSpringCarousel({
   }
 
   useEffect(() => {
-    internalSlideToItem(initialActiveItem, !animateWhenActiveItemChange)
+    if (activeItem.current !== initialActiveItem) {
+      internalSlideToItem(initialActiveItem, !animateWhenActiveItemChange)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialActiveItem, animateWhenActiveItemChange])
   useEffect(() => {

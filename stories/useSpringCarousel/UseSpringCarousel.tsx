@@ -21,6 +21,7 @@ export function UseSpringCarousel(props: Props) {
   const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
     items,
     ...props,
+    withLoop: true,
   })
 
   return (
