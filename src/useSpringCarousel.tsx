@@ -280,6 +280,9 @@ function useSpringCarousel({
         ref.style.top = '0px'
         ref.style.left = '0px'
         ref.style[positionProperty] = `-${v - startEndGutter}px`
+
+        firstItemReached.current = false
+        lastItemReached.current = false
       } else {
         ref.style.left = '0px'
         ref.style.top = '0px'
@@ -287,6 +290,20 @@ function useSpringCarousel({
     }
 
     const currentFromValue = Math.abs(getFromValue())
+
+    if (initialStartingPosition === 'center') {
+      setPosition(
+        getCarouselItemWidth() * items.length -
+          getSlideValue() * Math.round((itemsPerSlide - 1) / 2),
+      )
+    } else if (initialStartingPosition === 'end') {
+      setPosition(
+        getCarouselItemWidth() * items.length -
+          getSlideValue() * Math.round(itemsPerSlide - 1),
+      )
+    } else {
+      setPosition(getCarouselItemWidth() * items.length)
+    }
 
     if (
       currentFromValue < getTotalScrollValue() &&
@@ -302,23 +319,9 @@ function useSpringCarousel({
       prevSlidedValue.current = val
       setSpring.start({
         immediate: true,
-        val,
+        val: prevSlidedValue.current,
       })
       return
-    }
-
-    if (initialStartingPosition === 'center') {
-      setPosition(
-        getCarouselItemWidth() * items.length -
-          getSlideValue() * Math.round((itemsPerSlide - 1) / 2),
-      )
-    } else if (initialStartingPosition === 'end') {
-      setPosition(
-        getCarouselItemWidth() * items.length -
-          getSlideValue() * Math.round(itemsPerSlide - 1),
-      )
-    } else {
-      setPosition(getCarouselItemWidth() * items.length)
     }
 
     if (!freeScroll && slideType === 'fixed') {
@@ -379,7 +382,6 @@ function useSpringCarousel({
     lastItemReached.current = false
 
     const nextItem = typeof index === 'number' ? index : activeItem.current - 1
-    console.log({ nextItem: firstItemReached.current })
 
     if (!withLoop) {
       const nextItemWillExceed = freeScroll
@@ -401,7 +403,7 @@ function useSpringCarousel({
         return
       }
     }
-    if (withLoop && firstItemReached.current) {
+    if (withLoop && (firstItemReached.current || nextItem < 0)) {
       firstItemReached.current = false
       lastItemReached.current = true
       slideToItem({
@@ -411,7 +413,6 @@ function useSpringCarousel({
         nextActiveItem: items.length - 1,
         immediate,
       })
-      console.log('here')
       return
     }
     if (nextItem === 0) {
@@ -459,7 +460,7 @@ function useSpringCarousel({
         return
       }
     }
-    if (withLoop && lastItemReached.current) {
+    if (withLoop && (lastItemReached.current || nextItem > items.length - 1)) {
       lastItemReached.current = false
       firstItemReached.current = true
       slideToItem({
@@ -548,7 +549,7 @@ function useSpringCarousel({
     if ('ResizeObserver' in window && mainCarouselWrapperRef.current) {
       const observer = new ResizeObserver(() => {
         prevWindowWidth.current = window.innerWidth
-        adjustCarouselWrapperPosition()
+        // adjustCarouselWrapperPosition()
       })
       observer.observe(mainCarouselWrapperRef.current)
       return () => {
