@@ -67,6 +67,7 @@ function useSpringCarousel({
   initialActiveItem = 0,
   animateWhenActiveItemChange = true,
 }: UseSpringCarouselComplete): ReturnType<typeof freeScroll> {
+  const resizeByPropChange = useRef(false)
   const itemsPerSlide = _itemsPerSlide > items.length ? items.length : _itemsPerSlide
   const prevWindowWidth = useRef(0)
   const draggingSlideTreshold = useRef(_draggingSlideTreshold ?? 0)
@@ -321,6 +322,9 @@ function useSpringCarousel({
         immediate: true,
         val: prevSlidedValue.current,
       })
+      setTimeout(() => {
+        resizeByPropChange.current = false
+      }, 0)
       return
     }
 
@@ -332,6 +336,9 @@ function useSpringCarousel({
         val,
       })
     }
+    setTimeout(() => {
+      resizeByPropChange.current = false
+    }, 0)
   }
 
   function getFromValue() {
@@ -511,7 +518,9 @@ function useSpringCarousel({
     prevWindowWidth.current = window.innerWidth
   }, [])
   useEffect(() => {
+    resizeByPropChange.current = true
     adjustCarouselWrapperPosition()
+    debugger
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     initialStartingPosition,
@@ -548,8 +557,11 @@ function useSpringCarousel({
     }
     if ('ResizeObserver' in window && mainCarouselWrapperRef.current) {
       const observer = new ResizeObserver(() => {
-        prevWindowWidth.current = window.innerWidth
-        // adjustCarouselWrapperPosition()
+        if (!resizeByPropChange.current) {
+          prevWindowWidth.current = window.innerWidth
+          adjustCarouselWrapperPosition()
+          debugger
+        }
       })
       observer.observe(mainCarouselWrapperRef.current)
       return () => {
