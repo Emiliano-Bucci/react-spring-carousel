@@ -62,6 +62,18 @@ export default {
         options: ['start', 'center', 'end'],
       },
     },
+    disableGestures: {
+      defaultValue: false,
+      control: {
+        type: 'boolean',
+      },
+    },
+    slideWhenThresholdIsReached: {
+      defaultValue: false,
+      control: {
+        type: 'boolean',
+      },
+    },
   },
 }
 

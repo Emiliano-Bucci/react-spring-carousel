@@ -13,6 +13,8 @@ export type Props = {
   initialActiveItem: number
   gutter: number
   startEndGutter: number
+  disableGestures?: boolean
+  slideWhenThresholdIsReached?: boolean
 }
 
 export function UseSpringCarousel(props: Props) {

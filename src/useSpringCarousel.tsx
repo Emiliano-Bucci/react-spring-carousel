@@ -690,6 +690,15 @@ function useSpringCarousel({
           })
         }
       }
+      if (state.last && state.canceled) {
+        setSpring.start({
+          val: prevSlidedValue.current,
+          config: {
+            ...config.default,
+            velocity: state.velocity,
+          },
+        })
+      }
     },
     {
       enabled:
