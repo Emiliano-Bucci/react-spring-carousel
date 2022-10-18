@@ -125,10 +125,7 @@ function useSpringCarousel({
   })
   const { enterFullscreen, exitFullscreen, getIsFullscreen } = useFullscreenModule({
     mainCarouselWrapperRef,
-    handleResize: () => {
-      console.log('resize')
-      adjustCarouselWrapperPosition()
-    },
+    handleResize: () => adjustCarouselWrapperPosition(),
     onFullScreenChange: val => {
       emitEvent({
         eventName: 'onFullscreenChange',
@@ -293,6 +290,7 @@ function useSpringCarousel({
 
     if (
       currentFromValue < getTotalScrollValue() &&
+      slideType === 'fluid' &&
       lastItemReached.current &&
       !withLoop
     ) {
@@ -434,7 +432,6 @@ function useSpringCarousel({
     firstItemReached.current = false
 
     const nextItem = index || activeItem.current + 1
-    console.log({ nextItem })
 
     if (!withLoop) {
       const nextItemWillExceed =

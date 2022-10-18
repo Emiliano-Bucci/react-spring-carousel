@@ -17,7 +17,7 @@ export function UseSpringCarousel() {
       className="wrapper"
       style={{
         display: 'flex',
-        // flexDirection: 'column',
+        flexDirection: 'column',
       }}
     >
       <div
