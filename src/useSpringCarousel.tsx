@@ -100,6 +100,8 @@ function useSpringCarousel({
   const mainCarouselWrapperRef = useRef<HTMLDivElement | null>(null)
   const carouselTrackWrapperRef = useRef<HTMLDivElement | null>(null)
 
+  const prevWithLoop = useRef(withLoop)
+
   const getItems = useCallback(() => {
     if (withLoop) {
       return [
@@ -325,7 +327,6 @@ function useSpringCarousel({
       setTimeout(() => {
         resizeByPropChange.current = false
       }, 0)
-      return
     }
 
     if (!freeScroll && slideType === 'fixed') {
@@ -336,6 +337,7 @@ function useSpringCarousel({
         val,
       })
     }
+
     setTimeout(() => {
       resizeByPropChange.current = false
     }, 0)
@@ -520,18 +522,24 @@ function useSpringCarousel({
   useEffect(() => {
     resizeByPropChange.current = true
     adjustCarouselWrapperPosition()
-    debugger
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     initialStartingPosition,
     itemsPerSlide,
-    withLoop,
     startEndGutter,
     gutter,
     freeScroll,
     slideType,
     init,
   ])
+  useEffect(() => {
+    if (withLoop !== prevWithLoop.current) {
+      prevWithLoop.current = withLoop
+      adjustCarouselWrapperPosition()
+      internalSlideToItem(0, true, true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [withLoop])
   useLayoutEffect(() => {
     /**
      * Set initial track position
@@ -560,7 +568,6 @@ function useSpringCarousel({
         if (!resizeByPropChange.current) {
           prevWindowWidth.current = window.innerWidth
           adjustCarouselWrapperPosition()
-          debugger
         }
       })
       observer.observe(mainCarouselWrapperRef.current)
@@ -819,7 +826,11 @@ function useSpringCarousel({
 
     return itemIndex
   }
-  function internalSlideToItem(id: string | number, immediate = false) {
+  function internalSlideToItem(
+    id: string | number,
+    immediate = false,
+    shouldReset = false,
+  ) {
     if (!init) return
 
     firstItemReached.current = false
@@ -830,7 +841,7 @@ function useSpringCarousel({
       "The item you want to slide to doesn't exist; check the provided id.",
     )
 
-    if (itemIndex === activeItem.current) {
+    if (itemIndex === activeItem.current && !shouldReset) {
       return
     }
 
@@ -884,7 +895,7 @@ function useSpringCarousel({
         getIsFullscreen,
         slideToPrevItem: () => slideToPrevItem(),
         slideToNextItem: () => slideToNextItem(),
-        slideToItem: internalSlideToItem,
+        slideToItem: (id: string | number) => internalSlideToItem(id),
         getIsNextItem,
         getIsPrevItem,
         getIsActiveItem,
