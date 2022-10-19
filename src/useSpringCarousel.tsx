@@ -491,6 +491,14 @@ function useSpringCarousel({
       immediate,
     })
   }
+  function getDraggingSliderTreshold() {
+    if (_draggingSlideTreshold) {
+      draggingSlideTreshold.current = _draggingSlideTreshold
+    } else {
+      draggingSlideTreshold.current = Math.floor(getSlideValue() / 2 / 2)
+    }
+    return draggingSlideTreshold.current
+  }
 
   useEffect(() => {
     if (activeItem.current !== initialActiveItem) {
@@ -552,11 +560,7 @@ function useSpringCarousel({
      * since it's default value is based on the calculation of the
      * width of a single item
      */
-    if (_draggingSlideTreshold) {
-      draggingSlideTreshold.current = _draggingSlideTreshold
-    } else {
-      draggingSlideTreshold.current = Math.floor(getSlideValue() / 2 / 2)
-    }
+    getDraggingSliderTreshold()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_draggingSlideTreshold, itemsPerSlide, slideType])
   useEffect(() => {
@@ -602,8 +606,8 @@ function useSpringCarousel({
       const currentMovement = state.movement[carouselSlideAxis === 'x' ? 0 : 1]
       const direction = state.direction[carouselSlideAxis === 'x' ? 0 : 1]
 
-      const prevItemTreshold = currentMovement > draggingSlideTreshold.current
-      const nextItemTreshold = currentMovement < -draggingSlideTreshold.current
+      const prevItemTreshold = currentMovement > getDraggingSliderTreshold()
+      const nextItemTreshold = currentMovement < -getDraggingSliderTreshold()
 
       if (isDragging) {
         if (direction > 0) {
