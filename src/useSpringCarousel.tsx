@@ -685,6 +685,33 @@ function useSpringCarousel({
         }
       }
 
+      const tot = getTotalScrollValue()
+
+      if (
+        state.last &&
+        !state.canceled &&
+        !freeScroll &&
+        Math.abs(movement) > tot &&
+        slideActionType.current === 'prev'
+      ) {
+        internalSlideToItem({
+          id: 0,
+        })
+        return
+      }
+      if (
+        state.last &&
+        !state.canceled &&
+        !freeScroll &&
+        Math.abs(movement) > tot &&
+        slideActionType.current === 'next'
+      ) {
+        internalSlideToItem({
+          id: items.length - 1,
+        })
+        return
+      }
+
       if (state.last && !state.canceled && !freeScroll) {
         if (nextItemTreshold) {
           if (!withLoop && lastItemReached.current) {
