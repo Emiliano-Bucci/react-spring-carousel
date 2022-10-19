@@ -292,8 +292,6 @@ function useSpringCarousel({
       }
     }
 
-    const currentFromValue = Math.abs(getFromValue())
-
     if (initialStartingPosition === 'center') {
       setPosition(
         getCarouselItemWidth() * items.length -
@@ -308,6 +306,7 @@ function useSpringCarousel({
       setPosition(getCarouselItemWidth() * items.length)
     }
 
+    const currentFromValue = Math.abs(getFromValue())
     if (
       currentFromValue < getTotalScrollValue() &&
       slideType === 'fluid' &&
@@ -316,29 +315,29 @@ function useSpringCarousel({
     ) {
       lastItemReached.current = false
     }
-    if (currentFromValue > getTotalScrollValue() && !withLoop) {
-      const val = -getTotalScrollValue()
-      lastItemReached.current = true
-      prevSlidedValue.current = val
-      setSpring.start({
-        immediate: true,
-        val: prevSlidedValue.current,
-      })
+
+    if (!freeScroll && slideType === 'fixed') {
+      const nextValue = -(getSlideValue() * activeItem.current)
+
+      if (Math.abs(nextValue) > getTotalScrollValue() && !withLoop) {
+        const val = -getTotalScrollValue()
+        lastItemReached.current = true
+        prevSlidedValue.current = val
+        setSpring.start({
+          immediate: true,
+          val: prevSlidedValue.current,
+        })
+      } else {
+        prevSlidedValue.current = nextValue
+        setSpring.start({
+          immediate: true,
+          val: nextValue,
+        })
+      }
       setTimeout(() => {
         resizeByPropChange.current = false
       }, 0)
-    } else if (!freeScroll && slideType === 'fixed') {
-      const val = -(getSlideValue() * activeItem.current)
-      prevSlidedValue.current = val
-      setSpring.start({
-        immediate: true,
-        val,
-      })
     }
-
-    setTimeout(() => {
-      resizeByPropChange.current = false
-    }, 0)
   }
 
   function getFromValue() {
@@ -605,8 +604,6 @@ function useSpringCarousel({
 
       const prevItemTreshold = currentMovement > draggingSlideTreshold.current
       const nextItemTreshold = currentMovement < -draggingSlideTreshold.current
-
-      console.log(currentMovement, draggingSlideTreshold.current)
 
       if (isDragging) {
         if (direction > 0) {

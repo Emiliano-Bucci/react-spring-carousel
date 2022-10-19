@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import { mockedItems } from '../../src/mockedItems'
 import { ItemWithThumb, SlideType } from '../../src/types'
@@ -18,7 +18,6 @@ export type Props = {
 }
 
 export function UseSpringCarousel(props: Props) {
-  const [i, set] = useState(1)
   const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
     items,
     ...props,
