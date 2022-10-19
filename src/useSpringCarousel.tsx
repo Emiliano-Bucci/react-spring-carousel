@@ -327,9 +327,7 @@ function useSpringCarousel({
       setTimeout(() => {
         resizeByPropChange.current = false
       }, 0)
-    }
-
-    if (!freeScroll && slideType === 'fixed') {
+    } else if (!freeScroll && slideType === 'fixed') {
       const val = -(getSlideValue() * activeItem.current)
       prevSlidedValue.current = val
       setSpring.start({
@@ -550,13 +548,18 @@ function useSpringCarousel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   useEffect(() => {
+    /**
+     * When itemsPerSlide change we need to update the draggingSlideTreshold.current,
+     * since it's default value is based on the calculation of the
+     * width of a single item
+     */
     if (_draggingSlideTreshold) {
       draggingSlideTreshold.current = _draggingSlideTreshold
     } else {
       draggingSlideTreshold.current = Math.floor(getSlideValue() / 2 / 2)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [_draggingSlideTreshold])
+  }, [_draggingSlideTreshold, itemsPerSlide])
   useEffect(() => {
     function handleResize() {
       if (window.innerWidth === prevWindowWidth.current) return
@@ -602,6 +605,8 @@ function useSpringCarousel({
 
       const prevItemTreshold = currentMovement > draggingSlideTreshold.current
       const nextItemTreshold = currentMovement < -draggingSlideTreshold.current
+
+      console.log(currentMovement, draggingSlideTreshold.current)
 
       if (isDragging) {
         if (direction > 0) {
