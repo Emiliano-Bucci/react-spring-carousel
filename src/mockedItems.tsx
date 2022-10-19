@@ -6,7 +6,7 @@ export const mockedItems: ItemWithNoThumb[] = [
       <div
         style={{
           flex: '1',
-          background: '#34495E',
+          background: '#1ABC9C',
         }}
       >
         div 1
@@ -15,18 +15,16 @@ export const mockedItems: ItemWithNoThumb[] = [
   },
   {
     id: 'item-2',
-    renderItem: () => {
-      return (
-        <div
-          style={{
-            flex: '1',
-            background: '#E74C3C',
-          }}
-        >
-          div 2
-        </div>
-      )
-    },
+    renderItem: (
+      <div
+        style={{
+          flex: '1',
+          background: '#F1C40F',
+        }}
+      >
+        div 2
+      </div>
+    ),
   },
   {
     id: 'item-3',
@@ -47,7 +45,7 @@ export const mockedItems: ItemWithNoThumb[] = [
       <div
         style={{
           flex: '1',
-          background: '#F39C12',
+          background: '#E67E22',
         }}
       >
         div 4
@@ -60,7 +58,20 @@ export const mockedItems: ItemWithNoThumb[] = [
       <div
         style={{
           flex: '5',
-          background: '#16A085',
+          background: '#3498DB',
+        }}
+      >
+        div 5
+      </div>
+    ),
+  },
+  {
+    id: 'item-5',
+    renderItem: (
+      <div
+        style={{
+          flex: '5',
+          background: '#3498DB',
         }}
       >
         div 5

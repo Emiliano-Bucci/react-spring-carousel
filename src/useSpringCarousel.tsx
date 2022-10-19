@@ -101,6 +101,7 @@ function useSpringCarousel({
   const carouselTrackWrapperRef = useRef<HTMLDivElement | null>(null)
 
   const prevWithLoop = useRef(withLoop)
+  const prevSlideType = useRef(slideType)
 
   const getItems = useCallback(() => {
     if (withLoop) {
@@ -521,22 +522,21 @@ function useSpringCarousel({
     resizeByPropChange.current = true
     adjustCarouselWrapperPosition()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    initialStartingPosition,
-    itemsPerSlide,
-    startEndGutter,
-    gutter,
-    freeScroll,
-    slideType,
-    init,
-  ])
+  }, [initialStartingPosition, itemsPerSlide, startEndGutter, gutter, freeScroll, init])
   useEffect(() => {
+    /**
+     * When these props change we reset the carousel
+     */
     if (withLoop !== prevWithLoop.current) {
       prevWithLoop.current = withLoop
       internalSlideToItem({ id: 0, immediate: true, shouldReset: true })
     }
+    if (slideType !== prevSlideType.current) {
+      prevSlideType.current = slideType
+      internalSlideToItem({ id: 0, immediate: true, shouldReset: true })
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [withLoop])
+  }, [withLoop, slideType])
   useLayoutEffect(() => {
     /**
      * Set initial track position
