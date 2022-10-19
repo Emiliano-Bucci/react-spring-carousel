@@ -254,7 +254,7 @@ function useSpringCarousel({
         carouselTrackWrapperRef.current!.getBoundingClientRect()[
           carouselSlideAxis === 'x' ? 'width' : 'height'
         ] -
-        startEndGutter,
+        startEndGutter * 2,
     )
   }
   function getAnimatedWrapperStyles() {

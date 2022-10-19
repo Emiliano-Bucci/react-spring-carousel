@@ -78,6 +78,7 @@ export function UseSpringCarousel(props: Props) {
         </div>
       ),
     })),
+    ...props,
     freeScroll: state,
     enableFreeScrollDrag: state,
   })
