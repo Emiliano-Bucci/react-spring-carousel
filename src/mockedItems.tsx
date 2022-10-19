@@ -66,15 +66,15 @@ export const mockedItems: ItemWithNoThumb[] = [
     ),
   },
   {
-    id: 'item-5',
+    id: 'item-6',
     renderItem: (
       <div
         style={{
-          flex: '5',
-          background: '#3498DB',
+          flex: '6',
+          background: 'red',
         }}
       >
-        div 5
+        div 6
       </div>
     ),
   },

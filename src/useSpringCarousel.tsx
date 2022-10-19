@@ -24,6 +24,7 @@ import {
   UseSpringCarouselWithFixedItems,
   UseSpringFreeScrollReturnType,
   UseSpringReturnType,
+  SlideType,
 } from './types'
 
 type ReturnType<T> = T extends true ? UseSpringFreeScrollReturnType : UseSpringReturnType
@@ -691,23 +692,15 @@ function useSpringCarousel({
         state.last &&
         !state.canceled &&
         !freeScroll &&
-        Math.abs(movement) > tot &&
-        slideActionType.current === 'prev'
+        ((Math.abs(movement) > tot && slideActionType.current === 'next') ||
+          (Math.abs(movement) > tot && slideActionType.current === 'prev'))
       ) {
-        internalSlideToItem({
-          id: 0,
-        })
-        return
-      }
-      if (
-        state.last &&
-        !state.canceled &&
-        !freeScroll &&
-        Math.abs(movement) > tot &&
-        slideActionType.current === 'next'
-      ) {
-        internalSlideToItem({
-          id: items.length - 1,
+        setSpring.start({
+          val: prevSlidedValue.current,
+          config: {
+            ...config.default,
+            velocity: state.velocity,
+          },
         })
         return
       }
@@ -863,8 +856,14 @@ function useSpringCarousel({
     id: string | number
     immediate?: boolean
     shouldReset?: boolean
+    type?: SlideType
   }
-  function internalSlideToItem({ id, immediate, shouldReset }: InternalSlideToItem) {
+  function internalSlideToItem({
+    id,
+    immediate,
+    shouldReset,
+    type,
+  }: InternalSlideToItem) {
     if (!init) return
 
     firstItemReached.current = false
@@ -884,13 +883,13 @@ function useSpringCarousel({
 
     if (newActiveItem > currentItem) {
       slideToNextItem({
-        type: shouldReset ? 'initial' : 'click',
+        type: type || shouldReset ? 'initial' : 'click',
         index: newActiveItem,
         immediate,
       })
     } else {
       slideToPrevItem({
-        type: shouldReset ? 'initial' : 'click',
+        type: type || shouldReset ? 'initial' : 'click',
         index: newActiveItem,
         immediate,
       })
