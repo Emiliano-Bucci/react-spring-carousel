@@ -35,7 +35,7 @@
     "build-storybook": "build-storybook",
     "clean": "rimraf dist",
     "build:lib": "npm run clean && rollup -c",
-    "release:beta": "npm run build:lib && npm publish --tag beta"
+    "release:beta": "gpsh && npm run build:lib && npm publish --tag beta"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",
