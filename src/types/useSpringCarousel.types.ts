@@ -69,6 +69,7 @@ export type SpringCarouselFreeScroll = {
   initialActiveItem?: never
   itemsPerSlide?: never
   animateWhenActiveItemChange?: never
+  slideWhenThresholdIsReached?: never
 }
 export type SpringCarouselNoFreeScroll = {
   freeScroll?: never | false | undefined
@@ -78,13 +79,13 @@ export type SpringCarouselNoFreeScroll = {
   initialActiveItem?: number
   itemsPerSlide?: number
   animateWhenActiveItemChange?: boolean
+  slideWhenThresholdIsReached?: boolean
 }
 export type BaseProps = {
   init?: boolean
   gutter?: number
   carouselSlideAxis?: 'x' | 'y'
   draggingSlideTreshold?: number
-  slideWhenThresholdIsReached?: boolean
   disableGestures?: boolean
   startEndGutter?: number
 }

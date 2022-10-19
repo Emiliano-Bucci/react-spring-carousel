@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { SlideType } from '../../src/types'
 
 // import { mockedItems } from '../../src/mockedItems'
@@ -62,7 +62,6 @@ export type Props = {
 }
 
 export function UseSpringCarousel(props: Props) {
-  const [state, set] = useState(false)
   // @ts-ignore
   const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
     items: mockedItems.map(i => ({
@@ -79,8 +78,6 @@ export function UseSpringCarousel(props: Props) {
       ),
     })),
     ...props,
-    freeScroll: state,
-    enableFreeScrollDrag: state,
   })
 
   return (
