@@ -45,7 +45,6 @@ export type SpringCarouselWithFixedItems = {
   slideType?: SlideType[0]
   itemsPerSlide?: number
   startEndGutter?: number
-  initialStartingPosition?: 'start' | 'center' | 'end'
   initialActiveItem?: number
   animateWhenActiveItemChange?: boolean
 }
@@ -53,15 +52,16 @@ export type SpringCarouselWithNoFixedItems = {
   slideType?: SlideType[1]
   itemsPerSlide?: never
   startEndGutter?: never
-  initialStartingPosition?: never
   initialActiveItem?: never
   animateWhenActiveItemChange?: never
 }
 export type SpringCarouselWithLoop = {
-  withLoop?: true
+  withLoop: true
+  initialStartingPosition: 'start' | 'center' | 'end'
 }
 export type SpringCarouselWithNoLoop = {
-  withLoop?: false
+  withLoop?: false | undefined
+  initialStartingPosition?: never
 }
 export type SpringCarouselFreeScroll = {
   freeScroll: true
