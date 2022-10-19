@@ -558,7 +558,7 @@ function useSpringCarousel({
       draggingSlideTreshold.current = Math.floor(getSlideValue() / 2 / 2)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [_draggingSlideTreshold, itemsPerSlide])
+  }, [_draggingSlideTreshold, itemsPerSlide, slideType])
   useEffect(() => {
     function handleResize() {
       if (window.innerWidth === prevWindowWidth.current) return
