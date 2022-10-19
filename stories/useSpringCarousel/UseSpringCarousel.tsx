@@ -103,14 +103,7 @@ export function UseSpringCarousel(props: Props) {
         >
           {carouselFragment}
         </div>
-        <button
-          onClick={() => {
-            slideToNextItem()
-            set(true)
-          }}
-        >
-          NEXT
-        </button>
+        <button onClick={slideToNextItem}>NEXT</button>
       </div>
     </div>
   )
