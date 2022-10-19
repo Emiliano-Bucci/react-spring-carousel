@@ -46,14 +46,12 @@ export type SpringCarouselWithFixedItems = {
   itemsPerSlide?: number
   startEndGutter?: number
   initialActiveItem?: number
-  animateWhenActiveItemChange?: boolean
 }
 export type SpringCarouselWithNoFixedItems = {
   slideType?: SlideType[1]
   itemsPerSlide?: never
   startEndGutter?: never
   initialActiveItem?: never
-  animateWhenActiveItemChange?: never
 }
 export type SpringCarouselWithLoop = {
   withLoop: true
@@ -70,6 +68,7 @@ export type SpringCarouselFreeScroll = {
   enableFreeScrollDrag?: true
   initialActiveItem?: never
   itemsPerSlide?: never
+  animateWhenActiveItemChange?: never
 }
 export type SpringCarouselNoFreeScroll = {
   freeScroll?: never | false | undefined
@@ -78,6 +77,7 @@ export type SpringCarouselNoFreeScroll = {
   enableFreeScrollDrag?: never
   initialActiveItem?: number
   itemsPerSlide?: number
+  animateWhenActiveItemChange?: boolean
 }
 export type BaseProps = {
   init?: boolean

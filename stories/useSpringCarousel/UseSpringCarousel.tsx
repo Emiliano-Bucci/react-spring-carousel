@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { SlideType } from '../../src/types'
 
 // import { mockedItems } from '../../src/mockedItems'
 // import { ItemWithThumb, SlideType } from '../../src/types'
@@ -61,14 +62,14 @@ export type Props = {
 }
 
 export function UseSpringCarousel(props: Props) {
-  const [ii, set] = useState('120px')
+  // @ts-ignore
   const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
     items: mockedItems.map(i => ({
       id: i.id,
       renderItem: (
         <div
           style={{
-            width: props.slideType === 'fluid' ? ii : '100%',
+            width: '100%',
             backgroundColor: i.color,
           }}
         >
@@ -93,13 +94,7 @@ export function UseSpringCarousel(props: Props) {
           flex: '1',
         }}
       >
-        <button
-          onClick={() => {
-            set('120px')
-          }}
-        >
-          PREV
-        </button>
+        <button onClick={slideToPrevItem}>PREV</button>
         <div
           className="carousel-wrapper"
           style={{
@@ -108,13 +103,7 @@ export function UseSpringCarousel(props: Props) {
         >
           {carouselFragment}
         </div>
-        <button
-          onClick={() => {
-            set('320px')
-          }}
-        >
-          NEXT
-        </button>
+        <button onClick={slideToNextItem}>NEXT</button>
       </div>
     </div>
   )
