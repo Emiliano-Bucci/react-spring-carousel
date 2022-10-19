@@ -103,6 +103,7 @@ function useSpringCarousel({
 
   const prevWithLoop = useRef(withLoop)
   const prevSlideType = useRef(slideType)
+  const prevFreeScroll = useRef(freeScroll)
 
   const getItems = useCallback(() => {
     if (withLoop) {
@@ -509,7 +510,7 @@ function useSpringCarousel({
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialActiveItem, animateWhenActiveItemChange])
+  }, [initialActiveItem])
   useEffect(() => {
     if (init) {
       if (initialActiveItem > items.length - 1) {
@@ -531,21 +532,23 @@ function useSpringCarousel({
     resizeByPropChange.current = true
     adjustCarouselWrapperPosition()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialStartingPosition, itemsPerSlide, startEndGutter, gutter, freeScroll, init])
+  }, [initialStartingPosition, itemsPerSlide, startEndGutter, gutter, init])
   useEffect(() => {
     /**
      * When these props change we reset the carousel
      */
-    if (withLoop !== prevWithLoop.current) {
+    if (
+      withLoop !== prevWithLoop.current ||
+      slideType !== prevSlideType.current ||
+      freeScroll !== prevFreeScroll.current
+    ) {
       prevWithLoop.current = withLoop
-      internalSlideToItem({ id: 0, immediate: true, shouldReset: true })
-    }
-    if (slideType !== prevSlideType.current) {
       prevSlideType.current = slideType
+      prevFreeScroll.current = freeScroll
       internalSlideToItem({ id: 0, immediate: true, shouldReset: true })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [withLoop, slideType])
+  }, [withLoop, slideType, freeScroll])
   useLayoutEffect(() => {
     /**
      * Set initial track position
