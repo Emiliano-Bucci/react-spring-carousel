@@ -609,6 +609,7 @@ function useSpringCarousel({
 
       const prevItemTreshold = currentMovement > getDraggingSliderTreshold()
       const nextItemTreshold = currentMovement < -getDraggingSliderTreshold()
+      const tot = getTotalScrollValue()
 
       if (isDragging) {
         if (direction > 0) {
@@ -674,6 +675,13 @@ function useSpringCarousel({
           slideToPrevItem({ type: 'drag' })
           state.cancel()
         }
+
+        const res = tot - Math.abs(movement)
+
+        if (res < -(getSlideValue() * 2)) {
+          state.cancel()
+        }
+
         return
       }
 
@@ -684,25 +692,6 @@ function useSpringCarousel({
         if (slideActionType.current === 'next') {
           slideToNextItem({ type: 'drag' })
         }
-      }
-
-      const tot = getTotalScrollValue()
-
-      if (
-        state.last &&
-        !state.canceled &&
-        !freeScroll &&
-        ((Math.abs(movement) > tot && slideActionType.current === 'next') ||
-          (Math.abs(movement) > tot && slideActionType.current === 'prev'))
-      ) {
-        setSpring.start({
-          val: prevSlidedValue.current,
-          config: {
-            ...config.default,
-            velocity: state.velocity,
-          },
-        })
-        return
       }
 
       if (state.last && !state.canceled && !freeScroll) {
