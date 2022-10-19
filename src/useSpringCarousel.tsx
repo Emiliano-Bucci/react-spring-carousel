@@ -75,26 +75,29 @@ function useSpringCarousel({
   const slideActionType = useRef<SlideActionType>('initial')
   const slideModeType = useRef<SlideMode>('initial')
   const prevSlidedValue = useRef(0)
-  const [spring, setSpring] = useSpring(() => ({
-    val: 0,
-    pause: !init,
-    onChange({ value }) {
-      if (freeScroll && mainCarouselWrapperRef.current) {
-        if (carouselSlideAxis === 'x') {
-          mainCarouselWrapperRef.current.scrollLeft = Math.abs(value.val)
-        } else {
-          mainCarouselWrapperRef.current.scrollTop = Math.abs(value.val)
+  const [spring, setSpring] = useSpring(
+    () => ({
+      val: 0,
+      pause: !init,
+      onChange: ({ value }) => {
+        if (freeScroll && mainCarouselWrapperRef.current) {
+          if (carouselSlideAxis === 'x') {
+            mainCarouselWrapperRef.current.scrollLeft = Math.abs(value.val)
+          } else {
+            mainCarouselWrapperRef.current.scrollTop = Math.abs(value.val)
+          }
+          setStartEndItemReachedOnFreeScroll()
+        } else if (carouselTrackWrapperRef.current) {
+          if (carouselSlideAxis === 'x') {
+            carouselTrackWrapperRef.current.style.transform = `translate3d(${value.val}px, 0px,0px)`
+          } else {
+            carouselTrackWrapperRef.current.style.transform = `translate3d(0px,${value.val}px,0px)`
+          }
         }
-        setStartEndItemReachedOnFreeScroll()
-      } else if (carouselTrackWrapperRef.current) {
-        if (carouselSlideAxis === 'x') {
-          carouselTrackWrapperRef.current.style.transform = `translate3d(${value.val}px, 0px,0px)`
-        } else {
-          carouselTrackWrapperRef.current.style.transform = `translate3d(0px,${value.val}px,0px)`
-        }
-      }
-    },
-  }))
+      },
+    }),
+    [freeScroll],
+  )
   const activeItem = useRef(initialActiveItem)
   const firstItemReached = useRef(initialActiveItem === 0)
   const lastItemReached = useRef(false)
@@ -545,6 +548,15 @@ function useSpringCarousel({
       prevWithLoop.current = withLoop
       prevSlideType.current = slideType
       prevFreeScroll.current = freeScroll
+
+      if (carouselTrackWrapperRef.current) {
+        carouselTrackWrapperRef.current.style.transform = `translate3d(0px, 0px,0px)`
+        setSpring.start({
+          val: 0,
+          immediate: true,
+        })
+      }
+
       internalSlideToItem({ id: 0, immediate: true, shouldReset: true })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
