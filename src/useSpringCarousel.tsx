@@ -640,8 +640,7 @@ function useSpringCarousel({
         })
 
         if (freeScroll) {
-          if (slideActionType.current === 'prev' && movement > 0) {
-            state.cancel()
+          if (movement > 0) {
             setSpring.start({
               from: {
                 val: getFromValue(),
@@ -655,6 +654,7 @@ function useSpringCarousel({
                 tension: 1000,
               },
             })
+            state.cancel()
             return
           }
 
@@ -700,6 +700,22 @@ function useSpringCarousel({
         return
       }
 
+      if (state.last && freeScroll && movement > 0) {
+        setSpring.start({
+          from: {
+            val: getFromValue(),
+          },
+          to: {
+            val: 0,
+          },
+          config: {
+            velocity: state.velocity,
+            friction: 50,
+            tension: 1000,
+          },
+        })
+        return
+      }
       if (state.last && !state.canceled && freeScroll) {
         if (slideActionType.current === 'prev') {
           slideToPrevItem({ type: 'drag' })
