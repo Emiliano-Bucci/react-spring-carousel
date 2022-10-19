@@ -173,7 +173,7 @@ function useSpringCarousel({
     to: number
     nextActiveItem?: number
     immediate?: boolean
-    slideMode: 'click' | 'drag'
+    slideMode: SlideMode
   }
 
   function slideToItem({
@@ -380,11 +380,13 @@ function useSpringCarousel({
     }
     return prevSlidedValue.current + getSlideValue()
   }
-  function slideToPrevItem(
-    type: Exclude<SlideMode, 'initial'> = 'click',
-    index?: number,
-    immediate?: boolean,
-  ) {
+
+  type SlideToPrevNextItem = {
+    type: SlideMode
+    index?: number
+    immediate?: boolean
+  }
+  function slideToPrevItem({ type, index, immediate }: SlideToPrevNextItem) {
     if (!init || (firstItemReached.current && !withLoop)) return
 
     slideActionType.current = 'prev'
@@ -438,11 +440,7 @@ function useSpringCarousel({
       immediate,
     })
   }
-  function slideToNextItem(
-    type: Exclude<SlideMode, 'initial'> = 'click',
-    index?: number,
-    immediate?: boolean,
-  ) {
+  function slideToNextItem({ type, index, immediate }: SlideToPrevNextItem) {
     if (!init || (lastItemReached.current && !withLoop)) return
 
     slideActionType.current = 'next'
@@ -498,7 +496,10 @@ function useSpringCarousel({
 
   useEffect(() => {
     if (activeItem.current !== initialActiveItem) {
-      internalSlideToItem(initialActiveItem, !animateWhenActiveItemChange)
+      internalSlideToItem({
+        id: initialActiveItem,
+        immediate: !animateWhenActiveItemChange,
+      })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialActiveItem, animateWhenActiveItemChange])
@@ -535,7 +536,7 @@ function useSpringCarousel({
   useEffect(() => {
     if (withLoop !== prevWithLoop.current) {
       prevWithLoop.current = withLoop
-      internalSlideToItem(0, true, true)
+      internalSlideToItem({ id: 0, immediate: true, shouldReset: true })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [withLoop])
@@ -660,10 +661,10 @@ function useSpringCarousel({
         })
 
         if (slideWhenThresholdIsReached && nextItemTreshold) {
-          slideToNextItem('drag')
+          slideToNextItem({ type: 'drag' })
           state.cancel()
         } else if (slideWhenThresholdIsReached && prevItemTreshold) {
-          slideToPrevItem('drag')
+          slideToPrevItem({ type: 'drag' })
           state.cancel()
         }
         return
@@ -671,10 +672,10 @@ function useSpringCarousel({
 
       if (state.last && !state.canceled && freeScroll) {
         if (slideActionType.current === 'prev') {
-          slideToPrevItem('drag')
+          slideToPrevItem({ type: 'drag' })
         }
         if (slideActionType.current === 'next') {
-          slideToNextItem('drag')
+          slideToNextItem({ type: 'drag' })
         }
       }
 
@@ -689,7 +690,7 @@ function useSpringCarousel({
               },
             })
           } else {
-            slideToNextItem('drag')
+            slideToNextItem({ type: 'drag' })
           }
         } else if (prevItemTreshold) {
           if (!withLoop && firstItemReached.current) {
@@ -701,7 +702,7 @@ function useSpringCarousel({
               },
             })
           } else {
-            slideToPrevItem('drag')
+            slideToPrevItem({ type: 'drag' })
           }
         } else {
           setSpring.start({
@@ -825,11 +826,12 @@ function useSpringCarousel({
 
     return itemIndex
   }
-  function internalSlideToItem(
-    id: string | number,
-    immediate = false,
-    shouldReset = false,
-  ) {
+  type InternalSlideToItem = {
+    id: string | number
+    immediate?: boolean
+    shouldReset?: boolean
+  }
+  function internalSlideToItem({ id, immediate, shouldReset }: InternalSlideToItem) {
     if (!init) return
 
     firstItemReached.current = false
@@ -848,9 +850,17 @@ function useSpringCarousel({
     const newActiveItem = findItemIndex(items[itemIndex].id)
 
     if (newActiveItem > currentItem) {
-      slideToNextItem('click', newActiveItem, immediate)
+      slideToNextItem({
+        type: shouldReset ? 'initial' : 'click',
+        index: newActiveItem,
+        immediate,
+      })
     } else {
-      slideToPrevItem('click', newActiveItem, immediate)
+      slideToPrevItem({
+        type: shouldReset ? 'initial' : 'click',
+        index: newActiveItem,
+        immediate,
+      })
     }
   }
   function getIsNextItem(id: string | number) {
@@ -884,17 +894,33 @@ function useSpringCarousel({
         enterFullscreen,
         exitFullscreen,
         getIsFullscreen,
-        slideToPrevItem: () => slideToPrevItem(),
-        slideToNextItem: () => slideToNextItem(),
+        slideToPrevItem: () => {
+          slideToPrevItem({
+            type: 'click',
+          })
+        },
+        slideToNextItem: () => {
+          slideToNextItem({
+            type: 'click',
+          })
+        },
       }
     : {
         useListenToCustomEvent,
         enterFullscreen,
         exitFullscreen,
         getIsFullscreen,
-        slideToPrevItem: () => slideToPrevItem(),
-        slideToNextItem: () => slideToNextItem(),
-        slideToItem: (id: string | number) => internalSlideToItem(id),
+        slideToPrevItem: () => {
+          slideToPrevItem({
+            type: 'click',
+          })
+        },
+        slideToNextItem: () => {
+          slideToNextItem({
+            type: 'click',
+          })
+        },
+        slideToItem: (id: string | number) => internalSlideToItem({ id }),
         getIsNextItem,
         getIsPrevItem,
         getIsActiveItem,
