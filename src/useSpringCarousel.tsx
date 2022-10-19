@@ -535,7 +535,6 @@ function useSpringCarousel({
   useEffect(() => {
     if (withLoop !== prevWithLoop.current) {
       prevWithLoop.current = withLoop
-      adjustCarouselWrapperPosition()
       internalSlideToItem(0, true, true)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
