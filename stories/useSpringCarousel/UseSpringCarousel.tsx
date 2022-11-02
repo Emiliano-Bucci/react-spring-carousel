@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { SlideType } from '../../src/types'
 
 // import { mockedItems } from '../../src/mockedItems'
@@ -82,6 +82,12 @@ export function UseSpringCarousel(props: Props) {
     })),
     ...props,
   })
+
+  useEffect(() => {
+    setInterval(() => {
+      controllerRef.current?.slideToNextItem()
+    }, 1000)
+  }, [])
 
   return (
     <div

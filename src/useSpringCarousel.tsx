@@ -108,6 +108,7 @@ function useSpringCarousel({
   const prevWithLoop = useRef(withLoop)
   const prevSlideType = useRef(slideType)
   const prevFreeScroll = useRef(freeScroll)
+  const windowIsHidden = useRef(false)
 
   const getItems = useCallback(() => {
     if (withLoop) {
@@ -391,7 +392,7 @@ function useSpringCarousel({
     immediate?: boolean
   }
   function slideToPrevItem({ type, index, immediate }: SlideToPrevNextItem) {
-    if (!init || (firstItemReached.current && !withLoop)) return
+    if (!init || windowIsHidden.current || (firstItemReached.current && !withLoop)) return
 
     slideActionType.current = 'prev'
     lastItemReached.current = false
@@ -445,7 +446,7 @@ function useSpringCarousel({
     })
   }
   function slideToNextItem({ type, index, immediate }: SlideToPrevNextItem) {
-    if (!init || (lastItemReached.current && !withLoop)) return
+    if (!init || windowIsHidden.current || (lastItemReached.current && !withLoop)) return
 
     slideActionType.current = 'next'
     firstItemReached.current = false
@@ -582,12 +583,13 @@ function useSpringCarousel({
   }, [_draggingSlideTreshold, itemsPerSlide, slideType])
   useEffect(() => {
     function handleResize() {
-      if (window.innerWidth === prevWindowWidth.current) return
+      if (window.innerWidth === prevWindowWidth.current || windowIsHidden.current) return
       prevWindowWidth.current = window.innerWidth
       adjustCarouselWrapperPosition()
     }
     if ('ResizeObserver' in window && mainCarouselWrapperRef.current) {
       const observer = new ResizeObserver(() => {
+        if (windowIsHidden.current) return
         if (!resizeByPropChange.current) {
           prevWindowWidth.current = window.innerWidth
           adjustCarouselWrapperPosition()
@@ -615,6 +617,20 @@ function useSpringCarousel({
     slideType,
     init,
   ])
+  useEffect(() => {
+    if (!init) return
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        windowIsHidden.current = true
+      } else {
+        windowIsHidden.current = false
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [init])
 
   const bindDrag = useDrag(
     state => {
@@ -885,7 +901,7 @@ function useSpringCarousel({
     shouldReset,
     type,
   }: InternalSlideToItem) {
-    if (!init) return
+    if (!init || windowIsHidden.current) return
 
     firstItemReached.current = false
     lastItemReached.current = false
