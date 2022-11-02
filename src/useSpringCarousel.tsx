@@ -67,6 +67,7 @@ function useSpringCarousel({
   prepareThumbsData,
   initialActiveItem = 0,
   animateWhenActiveItemChange = true,
+  getControllerRef,
 }: UseSpringCarouselComplete): ReturnType<typeof freeScroll> {
   const resizeByPropChange = useRef(false)
   const itemsPerSlide = _itemsPerSlide > items.length ? items.length : _itemsPerSlide
@@ -946,14 +947,16 @@ function useSpringCarousel({
         enterFullscreen,
         exitFullscreen,
         getIsFullscreen,
-        slideToPrevItem: () => {
+        slideToPrevItem: (animate = true) => {
           slideToPrevItem({
             type: 'click',
+            immediate: !animate,
           })
         },
-        slideToNextItem: () => {
+        slideToNextItem: (animate = true) => {
           slideToNextItem({
             type: 'click',
+            immediate: !animate,
           })
         },
       }
@@ -962,21 +965,35 @@ function useSpringCarousel({
         enterFullscreen,
         exitFullscreen,
         getIsFullscreen,
-        slideToPrevItem: () => {
+        slideToPrevItem: (animate = true) => {
           slideToPrevItem({
             type: 'click',
+            immediate: !animate,
           })
         },
-        slideToNextItem: () => {
+        slideToNextItem: (animate = true) => {
           slideToNextItem({
             type: 'click',
+            immediate: !animate,
           })
         },
-        slideToItem: (id: string | number) => internalSlideToItem({ id }),
+        slideToItem: (id: string | number, animate = true) => {
+          internalSlideToItem({ id, immediate: !animate })
+        },
         getIsNextItem,
         getIsPrevItem,
         getIsActiveItem,
       }
+
+  useEffect(() => {
+    if (getControllerRef) {
+      getControllerRef({
+        slideToNextItem: res.slideToNextItem,
+        slideToPrevItem: res.slideToPrevItem,
+        slideToItem: res?.slideToItem,
+      })
+    }
+  }, [getControllerRef, res.slideToItem, res.slideToNextItem, res.slideToPrevItem])
 
   const _thumbsFragment = (
     <Context.Provider value={res}>{thumbsFragment}</Context.Provider>

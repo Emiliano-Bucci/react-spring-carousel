@@ -9,9 +9,9 @@ export type UseSpringReturnType = {
   getIsFullscreen(): boolean
   enterFullscreen(ref?: HTMLElement): void
   exitFullscreen(): void
-  slideToNextItem(): void
-  slideToPrevItem(): void
-  slideToItem(item: string | number): void
+  slideToNextItem(animate?: boolean): void
+  slideToPrevItem(animate?: boolean): void
+  slideToItem(item: string | number, animate?: boolean): void
   getIsActiveItem(id: string): boolean
   getIsNextItem(id: string | number): boolean
   getIsPrevItem(id: string | number): boolean
@@ -23,8 +23,8 @@ export type UseSpringFreeScrollReturnType = {
   getIsFullscreen(): boolean
   enterFullscreen(ref?: HTMLElement): void
   exitFullscreen(): void
-  slideToNextItem(): void
-  slideToPrevItem(): void
+  slideToNextItem(animate?: boolean): void
+  slideToPrevItem(animate?: boolean): void
 }
 
 export type SlideType = 'fixed' | 'fluid'
@@ -81,6 +81,13 @@ export type SpringCarouselNoFreeScroll = {
   animateWhenActiveItemChange?: boolean
   slideWhenThresholdIsReached?: boolean
 }
+
+export type ControllerRef = {
+  slideToNextItem: UseSpringReturnType['slideToNextItem']
+  slideToPrevItem: UseSpringReturnType['slideToPrevItem']
+  slideToItem?: UseSpringReturnType['slideToItem']
+}
+
 export type BaseProps = {
   init?: boolean
   gutter?: number
@@ -88,6 +95,7 @@ export type BaseProps = {
   draggingSlideTreshold?: number
   disableGestures?: boolean
   startEndGutter?: number
+  getControllerRef?(ref: ControllerRef): void
 }
 
 type ScrollType<T> = T extends true

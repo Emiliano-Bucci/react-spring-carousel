@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { SlideType } from '../../src/types'
 
 // import { mockedItems } from '../../src/mockedItems'
 // import { ItemWithThumb, SlideType } from '../../src/types'
 import { useSpringCarousel } from '../../src/useSpringCarousel'
+import { ControllerRef } from '../../src/types/useSpringCarousel.types'
 
 // const items = mockedItems as ItemWithThumb[]
 
@@ -62,14 +63,16 @@ export type Props = {
 }
 
 export function UseSpringCarousel(props: Props) {
+  const controllerRef = useRef<ControllerRef>()
   // @ts-ignore
-  const { carouselFragment, slideToPrevItem, slideToNextItem } = useSpringCarousel({
+  const { carouselFragment } = useSpringCarousel({
+    getControllerRef: ref => (controllerRef.current = ref),
     items: mockedItems.map(i => ({
       id: i.id,
       renderItem: (
         <div
           style={{
-            width: '320px',
+            width: '100%',
             backgroundColor: i.color,
           }}
         >
@@ -94,7 +97,13 @@ export function UseSpringCarousel(props: Props) {
           flex: '1',
         }}
       >
-        <button onClick={slideToPrevItem}>PREV</button>
+        <button
+          onClick={() => {
+            controllerRef.current?.slideToPrevItem()
+          }}
+        >
+          PREV
+        </button>
         <div
           className="carousel-wrapper"
           style={{
@@ -103,7 +112,7 @@ export function UseSpringCarousel(props: Props) {
         >
           {carouselFragment}
         </div>
-        <button onClick={slideToNextItem}>NEXT</button>
+        <button onClick={() => controllerRef.current?.slideToNextItem()}>NEXT</button>
       </div>
     </div>
   )
