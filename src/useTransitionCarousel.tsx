@@ -283,6 +283,10 @@ function useTransitionCarousel({
               useListenToCustomEvent,
               getIsNextItem,
               getIsPrevItem,
+              activeItem: {
+                index: activeItem,
+                id: items[activeItem].id,
+              },
             })
           : renderItem}
       </a.div>

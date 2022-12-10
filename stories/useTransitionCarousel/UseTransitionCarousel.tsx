@@ -4,7 +4,24 @@ import { mockedItems } from '../../src/mockedItems'
 
 export function UseTransitionCarousel() {
   const { carouselFragment, slideToPrevItem, slideToNextItem } = useTransitionCarousel({
-    items: mockedItems,
+    items: mockedItems.map(i => ({
+      id: i.id,
+      renderItem(props) {
+        const isActive = props.activeItem.id === i.id
+        return (
+          <div
+            style={{
+              transition: 'background 480ms ease',
+              background: isActive ? 'orange' : 'red',
+              flex: '1',
+              fontSize: '24px',
+            }}
+          >
+            {i.id}
+          </div>
+        )
+      },
+    })),
     withLoop: true,
     toPrevItemSpringProps: {
       initial: {

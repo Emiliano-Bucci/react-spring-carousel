@@ -16,6 +16,10 @@ type TransitionRenderItem = {
   getIsPrevItem: UseSpringReturnType['getIsPrevItem']
   getIsNextItem: UseSpringReturnType['getIsNextItem']
   useListenToCustomEvent: UseListenToCustomEvent<'use-transition'>['useListenToCustomEvent']
+  activeItem: {
+    index: number
+    id: string
+  }
 }
 
 export type RenderItemProps<T> = T extends 'use-spring'
