@@ -1,13 +1,19 @@
 import { useSpring } from '@react-spring/web'
 import { useRef } from 'react'
 
-import { ItemWithThumb, PrepareThumbsData, SpringCarouselWithThumbs } from '../types'
+import {
+  ItemWithThumb,
+  PrepareThumbsData,
+  RenderItemProps,
+  SpringCarouselWithThumbs,
+} from '../types'
 
-type Props = {
+type Props<T extends 'use-spring' | 'use-transition'> = {
   withThumbs?: boolean
   thumbsSlideAxis: SpringCarouselWithThumbs['thumbsSlideAxis']
-  prepareThumbsData?: PrepareThumbsData
-  items: ItemWithThumb[]
+  prepareThumbsData?: PrepareThumbsData<T>
+  items: ItemWithThumb<T>[]
+  renderThumbFnProps: RenderItemProps<T>
 }
 
 function isInViewport(el: HTMLElement) {
@@ -20,12 +26,13 @@ function isInViewport(el: HTMLElement) {
   )
 }
 
-export function useThumbsModule({
+export function useThumbsModule<T extends 'use-spring' | 'use-transition'>({
   thumbsSlideAxis = 'x',
   withThumbs = false,
   prepareThumbsData,
   items,
-}: Props) {
+  renderThumbFnProps,
+}: Props<T>) {
   const wrapperRef = useRef<HTMLDivElement | null>(null)
   const [spring, setSpring] = useSpring(() => ({
     val: 0,
@@ -81,8 +88,8 @@ export function useThumbsModule({
 
   function handlePrepareThumbsData() {
     function getPreparedItems(
-      _items: ReturnType<PrepareThumbsData>,
-    ): ReturnType<PrepareThumbsData> {
+      _items: ReturnType<PrepareThumbsData<T>>,
+    ): ReturnType<PrepareThumbsData<T>> {
       return _items.map(i => ({
         id: i.id,
         renderThumb: i.renderThumb,
@@ -119,7 +126,9 @@ export function useThumbsModule({
         const thumbId = `thumb-item-${id}`
         return (
           <div key={thumbId} id={thumbId} className="thumb-item">
-            {renderThumb}
+            {typeof renderThumb === 'function'
+              ? renderThumb(renderThumbFnProps)
+              : renderThumb}
           </div>
         )
       })}

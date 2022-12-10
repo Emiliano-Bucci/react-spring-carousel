@@ -49,9 +49,18 @@ function useTransitionCarousel({
   const mainCarouselWrapperRef = useRef<HTMLDivElement | null>(null)
   const [activeItem, setActiveItem] = useState(externalActiveItem ?? 0)
   const { emitEvent, useListenToCustomEvent } = useEventsModule<'use-transition'>()
-  const { handleScroll, thumbsFragment } = useThumbsModule({
+  const { handleScroll, thumbsFragment } = useThumbsModule<'use-transition'>({
     thumbsSlideAxis,
-    items: items as ItemWithThumb[],
+    items: items as ItemWithThumb<'use-transition'>[],
+    renderThumbFnProps: {
+      getIsNextItem,
+      getIsPrevItem,
+      useListenToCustomEvent,
+      activeItem: {
+        index: activeItem,
+        id: items[activeItem].id,
+      },
+    },
   })
 
   function getConfig() {

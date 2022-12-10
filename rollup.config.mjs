@@ -77,6 +77,7 @@ export default [
           'react/jsx-runtime': 'ReactJSXRuntime',
           '@react-spring/web': 'ReactSpring',
           '@use-gesture/react': 'UseGestureReact',
+          'resize-observer-polyfill': 'ResizeObserver',
         },
       },
     ],

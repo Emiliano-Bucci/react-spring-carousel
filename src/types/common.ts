@@ -28,16 +28,16 @@ export type RenderItemProps<T> = T extends 'use-spring'
 
 type RenderItemFn<T> = (props: RenderItemProps<T>) => JSX.Element
 
-export type ItemWithThumb<T = 'use-spring'> = {
+export type ItemWithThumb<T extends 'use-spring' | 'use-transition'> = {
   id: string
   renderItem: ReactNode | RenderItemFn<T>
   renderThumb: ReactNode | RenderItemFn<T>
 }
-export type ItemWithNoThumb<T = 'use-spring'> = {
+export type ItemWithNoThumb<T extends 'use-spring' | 'use-transition'> = {
   id: string
   renderItem: ReactNode | RenderItemFn<T>
 }
 
-export type PrepareThumbsData<T = 'use-spring'> = (
+export type PrepareThumbsData<T extends 'use-spring' | 'use-transition'> = (
   items: Omit<ItemWithThumb<T>, 'renderItem'>[],
 ) => Omit<ItemWithThumb<T>, 'renderItem'>[]

@@ -12,11 +12,12 @@ import { useEventsModule } from './modules/useEventsModule'
 import { useDrag } from '@use-gesture/react'
 import { useFullscreenModule } from './modules/useFullscreenModule'
 import { useThumbsModule } from './modules/useThumbsModule'
+import ResizeObserver from 'resize-observer-polyfill'
+
 import {
   SlideActionType,
   SlideMode,
   UseSpringCarouselComplete,
-  SpringCarouselWithThumbs,
   UseSpringCarouselWithFreeScroll,
   UseSpringCarouselWithThumbs,
   UseSpringCarouselWithNoThumbs,
@@ -25,6 +26,7 @@ import {
   UseSpringFreeScrollReturnType,
   UseSpringReturnType,
   SlideType,
+  ItemWithThumb,
 } from './types'
 
 type ReturnType<T> = T extends true ? UseSpringFreeScrollReturnType : UseSpringReturnType
@@ -135,11 +137,17 @@ function useSpringCarousel({
     [freeScroll],
   )
   const { emitEvent, useListenToCustomEvent } = useEventsModule<'use-spring'>()
-  const { thumbsFragment, handleScroll } = useThumbsModule({
+  const { thumbsFragment, handleScroll } = useThumbsModule<'use-spring'>({
     withThumbs: !!withThumbs,
     thumbsSlideAxis,
     prepareThumbsData,
-    items: items as SpringCarouselWithThumbs['items'],
+    items: items as ItemWithThumb<'use-spring'>[],
+    renderThumbFnProps: {
+      getIsActiveItem,
+      getIsPrevItem,
+      useListenToCustomEvent,
+      getIsNextItem,
+    },
   })
   const { enterFullscreen, exitFullscreen, getIsFullscreen } = useFullscreenModule({
     mainCarouselWrapperRef,
@@ -626,7 +634,7 @@ function useSpringCarousel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_draggingSlideTreshold, itemsPerSlide, slideType])
   useEffect(() => {
-    if ('ResizeObserver' in window && mainCarouselWrapperRef.current) {
+    if (mainCarouselWrapperRef.current) {
       const observer = new ResizeObserver(() => {
         if (isFirstMount.current) {
           isFirstMount.current = false
