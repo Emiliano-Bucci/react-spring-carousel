@@ -228,7 +228,45 @@ function useTransitionCarousel({
     },
   )
 
+  function findItemIndex(id: string | number, error?: string) {
+    let itemIndex = 0
+
+    if (typeof id === 'string') {
+      itemIndex = items.findIndex(item => item.id === id)
+    } else {
+      itemIndex = id
+    }
+    if (itemIndex < 0 || itemIndex >= items.length) {
+      if (error) {
+        throw new Error(error)
+      }
+      console.error(
+        `The item doesn't exist; check that the id provided - ${id} - is correct.`,
+      )
+      itemIndex = -1
+    }
+
+    return itemIndex
+  }
+  function getIsNextItem(id: string | number) {
+    const itemIndex = findItemIndex(id, "The item doesn't exist; check the provided id.")
+    const _activeItem = activeItem
+    if (withLoop && _activeItem === items.length - 1) {
+      return itemIndex === 0
+    }
+    return itemIndex === _activeItem + 1
+  }
+  function getIsPrevItem(id: string | number) {
+    const itemIndex = findItemIndex(id, "The item doesn't exist; check the provided id.")
+    const _activeItem = activeItem
+    if (withLoop && _activeItem === 0) {
+      return itemIndex === items.length - 1
+    }
+    return itemIndex === _activeItem - 1
+  }
+
   const itemsFragment = transitions((styles, item, _, indx) => {
+    const renderItem = items[item].renderItem
     return (
       <a.div
         id={`use-transition-carousel-item-${indx}`}
@@ -240,22 +278,28 @@ function useTransitionCarousel({
           height: '100%',
         }}
       >
-        {items[item].renderItem}
+        {typeof renderItem === 'function'
+          ? renderItem({
+              useListenToCustomEvent,
+              getIsNextItem,
+              getIsPrevItem,
+            })
+          : renderItem}
       </a.div>
     )
   })
 
-  const res = {
+  const result = {
     useListenToCustomEvent,
     slideToPrevItem: () => slideToPrevItem('click'),
     slideToNextItem: () => slideToNextItem('click'),
   }
 
   const _thumbsFragment = (
-    <Context.Provider value={res}>{thumbsFragment}</Context.Provider>
+    <Context.Provider value={result}>{thumbsFragment}</Context.Provider>
   )
   const carouselFragment = (
-    <Context.Provider value={res}>
+    <Context.Provider value={result}>
       <div
         ref={mainCarouselWrapperRef}
         {...bindSwipe()}
@@ -273,7 +317,7 @@ function useTransitionCarousel({
   )
 
   return {
-    ...res,
+    ...result,
     carouselFragment,
     thumbsFragment: _thumbsFragment,
   }

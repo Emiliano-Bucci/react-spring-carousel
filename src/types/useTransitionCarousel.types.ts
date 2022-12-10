@@ -8,7 +8,7 @@ import {
 import { ReactNode } from 'react'
 import { UseListenToCustomEvent } from 'src/modules'
 
-type Item = ItemWithThumb | ItemWithNoThumb
+type Item = ItemWithThumb<'use-transition'> | ItemWithNoThumb<'use-transition'>
 
 export type SpringAnimationProps = {
   initial: TransitionFrom<Item>
@@ -32,7 +32,10 @@ type BaseProps = {
 }
 
 export type UseTransitionCarouselProps = BaseProps &
-  (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs)
+  (
+    | SpringCarouselWithThumbs<'use-transition'>
+    | SpringCarouselWithNoThumbs<'use-transition'>
+  )
 
 export type UseTransitionCarouselReturnProps = {
   useListenToCustomEvent: UseListenToCustomEvent<'use-transition'>['useListenToCustomEvent']

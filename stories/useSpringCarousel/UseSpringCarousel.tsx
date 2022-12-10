@@ -1,12 +1,8 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useRef } from 'react'
 import { SlideType } from '../../src/types'
 
-// import { mockedItems } from '../../src/mockedItems'
-// import { ItemWithThumb, SlideType } from '../../src/types'
 import { useSpringCarousel } from '../../src/useSpringCarousel'
 import { ControllerRef } from '../../src/types/useSpringCarousel.types'
-
-// const items = mockedItems as ItemWithThumb[]
 
 const mockedItems = [
   {
@@ -72,7 +68,7 @@ export function UseSpringCarousel(props: Props) {
       renderItem: (
         <div
           style={{
-            width: '100%',
+            width: '350px',
             backgroundColor: i.color,
           }}
         >
@@ -82,12 +78,6 @@ export function UseSpringCarousel(props: Props) {
     })),
     ...props,
   })
-
-  useEffect(() => {
-    setInterval(() => {
-      controllerRef.current?.slideToNextItem()
-    }, 1000)
-  }, [])
 
   return (
     <div

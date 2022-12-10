@@ -6,25 +6,34 @@ export type SlideActionType = 'prev' | 'next' | 'initial'
 export type SlideMode = 'drag' | 'click' | 'initial'
 export type TransitionSlideMode = 'swipe' | 'click' | 'initial'
 
-export type RenderItemProps = {
+type SpringRenderItem = {
   useListenToCustomEvent: UseListenToCustomEvent<'use-spring'>['useListenToCustomEvent']
   getIsActiveItem: UseSpringReturnType['getIsActiveItem']
   getIsPrevItem: UseSpringReturnType['getIsPrevItem']
   getIsNextItem: UseSpringReturnType['getIsNextItem']
 }
-
-type RenderItemFn = (props: RenderItemProps) => JSX.Element
-
-export type ItemWithThumb = {
-  id: string
-  renderItem: ReactNode | RenderItemFn
-  renderThumb: ReactNode | RenderItemFn
-}
-export type ItemWithNoThumb = {
-  id: string
-  renderItem: ReactNode | RenderItemFn
+type TransitionRenderItem = {
+  getIsPrevItem: UseSpringReturnType['getIsPrevItem']
+  getIsNextItem: UseSpringReturnType['getIsNextItem']
+  useListenToCustomEvent: UseListenToCustomEvent<'use-transition'>['useListenToCustomEvent']
 }
 
-export type PrepareThumbsData = (
-  items: Omit<ItemWithThumb, 'renderItem'>[],
-) => Omit<ItemWithThumb, 'renderItem'>[]
+export type RenderItemProps<T> = T extends 'use-spring'
+  ? SpringRenderItem
+  : TransitionRenderItem
+
+type RenderItemFn<T> = (props: RenderItemProps<T>) => JSX.Element
+
+export type ItemWithThumb<T = 'use-spring'> = {
+  id: string
+  renderItem: ReactNode | RenderItemFn<T>
+  renderThumb: ReactNode | RenderItemFn<T>
+}
+export type ItemWithNoThumb<T = 'use-spring'> = {
+  id: string
+  renderItem: ReactNode | RenderItemFn<T>
+}
+
+export type PrepareThumbsData<T = 'use-spring'> = (
+  items: Omit<ItemWithThumb<T>, 'renderItem'>[],
+) => Omit<ItemWithThumb<T>, 'renderItem'>[]

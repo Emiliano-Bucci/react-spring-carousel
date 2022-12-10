@@ -29,16 +29,16 @@ export type UseSpringFreeScrollReturnType = {
 
 export type SlideType = 'fixed' | 'fluid'
 
-export type SpringCarouselWithThumbs = {
+export type SpringCarouselWithThumbs<T = 'use-spring'> = {
   withThumbs: true
   thumbsSlideAxis?: 'x' | 'y'
-  items: ItemWithThumb[]
-  prepareThumbsData?: PrepareThumbsData
+  items: ItemWithThumb<T>[]
+  prepareThumbsData?: PrepareThumbsData<T>
 }
-export type SpringCarouselWithNoThumbs = {
+export type SpringCarouselWithNoThumbs<T = 'use-spring'> = {
   withThumbs?: false | undefined
   thumbsSlideAxis?: never
-  items: ItemWithNoThumb[]
+  items: ItemWithNoThumb<T>[]
   prepareThumbsData?: never
 }
 export type SpringCarouselWithFixedItems = {

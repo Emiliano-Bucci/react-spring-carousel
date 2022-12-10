@@ -589,6 +589,7 @@ function useSpringCarousel({
     }
     if ('ResizeObserver' in window && mainCarouselWrapperRef.current) {
       const observer = new ResizeObserver(() => {
+        console.log(windowIsHidden)
         if (windowIsHidden.current) return
         if (!resizeByPropChange.current) {
           prevWindowWidth.current = window.innerWidth
