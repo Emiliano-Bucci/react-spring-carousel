@@ -68,7 +68,8 @@ export function UseSpringCarousel(props: Props) {
       renderItem: (
         <div
           style={{
-            width: '350px',
+            flex: '1',
+            minWidth: '480px',
             backgroundColor: i.color,
           }}
         >
@@ -77,6 +78,7 @@ export function UseSpringCarousel(props: Props) {
       ),
     })),
     ...props,
+    slideType: 'fluid',
   })
 
   return (

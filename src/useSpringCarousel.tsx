@@ -76,6 +76,7 @@ function useSpringCarousel({
   const slideActionType = useRef<SlideActionType>('initial')
   const slideModeType = useRef<SlideMode>('initial')
   const prevSlidedValue = useRef(0)
+  const isFirstMount = useRef(true)
   const [spring, setSpring] = useSpring(
     () => ({
       val: 0,
@@ -315,13 +316,25 @@ function useSpringCarousel({
     }
 
     const currentFromValue = Math.abs(getFromValue())
-    if (
-      currentFromValue < getTotalScrollValue() &&
-      slideType === 'fluid' &&
-      lastItemReached.current &&
-      !withLoop
-    ) {
-      lastItemReached.current = false
+
+    if (slideType === 'fluid') {
+      /**
+       * User reached the last item and now is resizing the container that becomes smaller/bigger.
+       * Example: on mobile devices the user rotates the device
+       */
+      if (
+        lastItemReached.current &&
+        getTotalScrollValue() !== Math.abs(prevSlidedValue.current) &&
+        !withLoop
+      ) {
+        const newVal = -getTotalScrollValue()
+        prevSlidedValue.current = newVal
+        setSpring.start({
+          immediate: true,
+          val: prevSlidedValue.current,
+        })
+      }
+      return
     }
 
     if (!freeScroll && slideType === 'fixed') {
@@ -534,10 +547,18 @@ function useSpringCarousel({
     prevWindowWidth.current = window.innerWidth
   }, [])
   useEffect(() => {
-    resizeByPropChange.current = true
-    adjustCarouselWrapperPosition()
+    if (!isFirstMount.current) {
+      resizeByPropChange.current = true
+      adjustCarouselWrapperPosition()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialStartingPosition, itemsPerSlide, startEndGutter, gutter, init])
+  useEffect(() => {
+    isFirstMount.current = false
+    return () => {
+      isFirstMount.current = true
+    }
+  }, [])
   useEffect(() => {
     /**
      * When these props change we reset the carousel
@@ -589,7 +610,6 @@ function useSpringCarousel({
     }
     if ('ResizeObserver' in window && mainCarouselWrapperRef.current) {
       const observer = new ResizeObserver(() => {
-        console.log(windowIsHidden)
         if (windowIsHidden.current) return
         if (!resizeByPropChange.current) {
           prevWindowWidth.current = window.innerWidth
