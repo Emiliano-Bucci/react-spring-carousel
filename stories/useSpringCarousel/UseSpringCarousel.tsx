@@ -69,7 +69,7 @@ export function UseSpringCarousel(props: Props) {
         <div
           style={{
             flex: '1',
-            minWidth: '480px',
+            minWidth: '400px',
             backgroundColor: i.color,
           }}
         >

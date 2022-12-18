@@ -77,6 +77,8 @@ function useSpringCarousel({
   const draggingSlideTreshold = useRef(_draggingSlideTreshold ?? 0)
   const slideActionType = useRef<SlideActionType>('initial')
   const slideModeType = useRef<SlideMode>('initial')
+  const directionAfterReachingEdges =
+    useRef<'forward' | 'backward' | 'initial'>('initial')
 
   const activeItem = useRef(initialActiveItem)
   const firstItemReached = useRef(initialActiveItem === 0)
@@ -88,6 +90,7 @@ function useSpringCarousel({
 
   const isFirstMount = useRef(true)
 
+  const prevTotalScrollValue = useRef(0)
   const prevWindowWidth = useRef(0)
   const prevSlidedValue = useRef(0)
   const prevWithLoop = useRef(withLoop)
@@ -257,6 +260,7 @@ function useSpringCarousel({
       handleScroll(activeItem.current)
     }
   }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   function getTotalScrollValue() {
     if (withLoop) {
       return getSlideValue() * items.length
@@ -355,16 +359,20 @@ function useSpringCarousel({
         Math.abs(prevSlidedValue.current) > 0 &&
         getTotalScrollValue() !== Math.abs(prevSlidedValue.current) &&
         !withLoop &&
-        !freeScroll
+        !freeScroll &&
+        directionAfterReachingEdges.current === 'backward'
       ) {
-        console.log({
-          new: getSlideValue() * activeItem.current,
+        const diff = prevTotalScrollValue.current - getTotalScrollValue()
+        const next = prevSlidedValue.current + diff
+
+        setSpring.start({
+          immediate: true,
+          val: next,
         })
-        // prevSlidedValue.current = prevSlidedValue.current - diff
-        // setSpring.start({
-        //   immediate: true,
-        //   val: prevSlidedValue.current,
-        // })
+
+        return () => {
+          prevSlidedValue.current = next
+        }
       }
 
       return
@@ -374,7 +382,7 @@ function useSpringCarousel({
       const nextValue = -(getSlideValue() * activeItem.current)
 
       /**
-       * Here we make sure to not exceed the latest item as the
+       * Here we make sure to always show the latest item as the
        * latest item visible in the viewport.
        */
       if (Math.abs(nextValue) > getTotalScrollValue() && !withLoop) {
@@ -444,6 +452,10 @@ function useSpringCarousel({
   function slideToPrevItem({ type, index, immediate }: SlideToPrevNextItem) {
     if (!init || windowIsHidden.current || (firstItemReached.current && !withLoop)) return
 
+    if (lastItemReached.current) {
+      directionAfterReachingEdges.current = 'backward'
+    }
+
     slideActionType.current = 'prev'
     lastItemReached.current = false
 
@@ -497,6 +509,10 @@ function useSpringCarousel({
   }
   function slideToNextItem({ type, index, immediate }: SlideToPrevNextItem) {
     if (!init || windowIsHidden.current || (lastItemReached.current && !withLoop)) return
+
+    if (firstItemReached.current) {
+      directionAfterReachingEdges.current = 'forward'
+    }
 
     slideActionType.current = 'next'
     firstItemReached.current = false
@@ -584,12 +600,20 @@ function useSpringCarousel({
     prevWindowWidth.current = window.innerWidth
   }, [])
   useEffect(() => {
+    prevTotalScrollValue.current = getTotalScrollValue()
     if (!isFirstMount.current) {
       resizeByPropChange.current = true
       adjustCarouselWrapperPosition()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialStartingPosition, itemsPerSlide, startEndGutter, gutter, init])
+  }, [
+    initialStartingPosition,
+    itemsPerSlide,
+    startEndGutter,
+    gutter,
+    init,
+    getTotalScrollValue,
+  ])
   useEffect(() => {
     /**
      * When these props change we reset the carousel
@@ -635,6 +659,7 @@ function useSpringCarousel({
   }, [_draggingSlideTreshold, itemsPerSlide, slideType])
   useEffect(() => {
     if (mainCarouselWrapperRef.current) {
+      let timer: NodeJS.Timeout
       const observer = new ResizeObserver(() => {
         if (isFirstMount.current) {
           isFirstMount.current = false
@@ -644,7 +669,15 @@ function useSpringCarousel({
         if (windowIsHidden.current) return
         if (!resizeByPropChange.current) {
           prevWindowWidth.current = window.innerWidth
-          adjustCarouselWrapperPosition()
+          const cb = adjustCarouselWrapperPosition()
+          window.clearTimeout(timer)
+
+          timer = setTimeout(() => {
+            prevTotalScrollValue.current = getTotalScrollValue()
+            if (typeof cb === 'function') {
+              cb()
+            }
+          }, 100)
         }
       })
       observer.observe(mainCarouselWrapperRef.current)
@@ -652,7 +685,7 @@ function useSpringCarousel({
         observer.disconnect()
       }
     }
-  }, [adjustCarouselWrapperPosition])
+  }, [adjustCarouselWrapperPosition, getTotalScrollValue])
   useEffect(() => {
     if (!init) return
     function handleVisibilityChange() {
