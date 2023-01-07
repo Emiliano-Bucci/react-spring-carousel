@@ -1135,7 +1135,7 @@ function useSpringCarousel({
                   display: 'flex',
                   position: 'relative',
                   flex: '1',
-                  ...getItemStyles(!!freeScroll && index === items.length - 1),
+                  ...getItemStyles(item.id === items[items.length - 1].id),
                 }}
               >
                 {typeof item.renderItem === 'function'
@@ -1153,7 +1153,7 @@ function useSpringCarousel({
             <div
               style={{
                 flexShrink: 0,
-                width: '1px',
+                width: startEndGutter,
               }}
             />
           ) : null}

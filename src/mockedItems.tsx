@@ -1,5 +1,5 @@
 import { ItemWithNoThumb } from './types/common'
-export const mockedItems: ItemWithNoThumb[] = [
+export const mockedItems: ItemWithNoThumb<'use-transition'>[] = [
   {
     id: 'item-1',
     renderItem: (
