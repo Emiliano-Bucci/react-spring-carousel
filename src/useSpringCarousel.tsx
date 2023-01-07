@@ -84,8 +84,9 @@ function useSpringCarousel({
    * to correctly resize the carousel when the carousel is going
    * backward after reaching the last item in fluid slide mode
    */
-  const directionAfterReachingEdges =
-    useRef<'forward' | 'backward' | 'initial'>('initial')
+  const directionAfterReachingEdges = useRef<'forward' | 'backward' | 'initial'>(
+    'initial',
+  )
 
   const activeItem = useRef(initialActiveItem)
   const firstItemReached = useRef(initialActiveItem === 0)
@@ -1148,11 +1149,11 @@ function useSpringCarousel({
               </div>
             )
           })}
-          {freeScroll && startEndGutter ? (
+          {(freeScroll || !withLoop) && startEndGutter ? (
             <div
               style={{
                 flexShrink: 0,
-                width: startEndGutter,
+                width: '1px',
               }}
             />
           ) : null}
@@ -1169,8 +1170,9 @@ type ContextProps<T = undefined> = Omit<
   'carouselFragment' | 'thumbsFragment'
 >
 
-const Context =
-  createContext<ContextProps | ContextProps<'free-scroll'> | undefined>(undefined)
+const Context = createContext<ContextProps | ContextProps<'free-scroll'> | undefined>(
+  undefined,
+)
 
 function useSpringCarouselContext<T>() {
   const context = useContext(Context)

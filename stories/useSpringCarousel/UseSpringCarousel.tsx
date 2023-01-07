@@ -60,9 +60,7 @@ export type Props = {
 
 export function UseSpringCarousel(props: Props) {
   const controllerRef = useRef<ControllerRef>()
-  // @ts-ignore
   const { carouselFragment } = useSpringCarousel({
-    getControllerRef: ref => (controllerRef.current = ref),
     items: mockedItems.map(i => ({
       id: i.id,
       renderItem: (
@@ -78,7 +76,6 @@ export function UseSpringCarousel(props: Props) {
       ),
     })),
     ...props,
-    slideType: 'fluid',
   })
 
   return (
