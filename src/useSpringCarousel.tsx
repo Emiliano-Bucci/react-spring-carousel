@@ -1,12 +1,5 @@
-import { config, useSpring } from '@react-spring/web'
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-} from 'react'
+import { config, useIsomorphicLayoutEffect, useSpring } from '@react-spring/web'
+import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react'
 
 import { useEventsModule } from './modules/useEventsModule'
 import { useDrag } from '@use-gesture/react'
@@ -647,7 +640,7 @@ function useSpringCarousel({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [withLoop, slideType, freeScroll])
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     /**
      * Set initial track position
      */
@@ -1135,7 +1128,12 @@ function useSpringCarousel({
                   display: 'flex',
                   position: 'relative',
                   flex: '1',
-                  ...getItemStyles(item.id === items[items.length - 1].id),
+                  ...getItemStyles(
+                    index ===
+                      internalItems.findIndex(
+                        i => i.id === internalItems[internalItems.length - 1].id,
+                      ),
+                  ),
                 }}
               >
                 {typeof item.renderItem === 'function'
