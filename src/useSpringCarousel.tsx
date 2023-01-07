@@ -77,6 +77,13 @@ function useSpringCarousel({
   const draggingSlideTreshold = useRef(_draggingSlideTreshold ?? 0)
   const slideActionType = useRef<SlideActionType>('initial')
   const slideModeType = useRef<SlideMode>('initial')
+
+  /**
+   * After the user hits start/end edges of the carousel,
+   * we check where the user is going. This is useful
+   * to correctly resize the carousel when the carousel is going
+   * backward after reaching the last item in fluid slide mode
+   */
   const directionAfterReachingEdges =
     useRef<'forward' | 'backward' | 'initial'>('initial')
 
@@ -383,7 +390,7 @@ function useSpringCarousel({
 
       /**
        * Here we make sure to always show the latest item as the
-       * latest item visible in the viewport.
+       * latest item visible in the carousel viewport.
        */
       if (Math.abs(nextValue) > getTotalScrollValue() && !withLoop) {
         const val = -getTotalScrollValue()
