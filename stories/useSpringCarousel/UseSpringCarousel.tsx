@@ -1,8 +1,7 @@
-import React, { useRef } from 'react'
+import React from 'react'
 import { SlideType } from '../../src/types'
 
 import { useSpringCarousel } from '../../src/useSpringCarousel'
-import { ControllerRef } from '../../src/types/useSpringCarousel.types'
 
 const mockedItems = [
   {
@@ -59,8 +58,7 @@ export type Props = {
 }
 
 export function UseSpringCarousel(props: Props) {
-  const controllerRef = useRef<ControllerRef>()
-  const { carouselFragment } = useSpringCarousel({
+  const { carouselFragment, slideToNextItem, slideToPrevItem } = useSpringCarousel({
     items: mockedItems.map(i => ({
       id: i.id,
       renderItem: (
@@ -94,7 +92,7 @@ export function UseSpringCarousel(props: Props) {
       >
         <button
           onClick={() => {
-            controllerRef.current?.slideToPrevItem()
+            slideToPrevItem()
           }}
         >
           PREV
@@ -107,7 +105,7 @@ export function UseSpringCarousel(props: Props) {
         >
           {carouselFragment}
         </div>
-        <button onClick={() => controllerRef.current?.slideToNextItem()}>NEXT</button>
+        <button onClick={() => slideToNextItem()}>NEXT</button>
       </div>
     </div>
   )

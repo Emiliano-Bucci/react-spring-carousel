@@ -462,6 +462,10 @@ function useSpringCarousel({
 
     const nextItem = typeof index === 'number' ? index : activeItem.current - 1
 
+    if (freeScroll) {
+      setStartEndItemReachedOnFreeScroll()
+    }
+
     if (!withLoop) {
       const nextItemWillExceed = freeScroll
         ? getToValue('prev', index) - getSlideValue() / 3 < 0
@@ -519,6 +523,10 @@ function useSpringCarousel({
     firstItemReached.current = false
 
     const nextItem = index || activeItem.current + 1
+
+    if (freeScroll) {
+      setStartEndItemReachedOnFreeScroll()
+    }
 
     if (!withLoop) {
       const nextItemWillExceed =
@@ -702,6 +710,9 @@ function useSpringCarousel({
     }
   }, [init])
 
+  const enableDrag =
+    (init && !disableGestures && !freeScroll) || (!!freeScroll && !!enableFreeScrollDrag)
+
   const bindDrag = useDrag(
     state => {
       const isDragging = state.dragging
@@ -811,7 +822,6 @@ function useSpringCarousel({
           slideToNextItem({ type: 'drag' })
         }
       }
-
       if (state.last && !state.canceled && !freeScroll) {
         if (nextItemTreshold) {
           if (!withLoop && lastItemReached.current) {
@@ -858,9 +868,7 @@ function useSpringCarousel({
       }
     },
     {
-      enabled:
-        (init && !disableGestures && !freeScroll) ||
-        (!!freeScroll && !!enableFreeScrollDrag),
+      enabled: enableDrag,
       axis: carouselSlideAxis,
       from: () => {
         if (freeScroll && mainCarouselWrapperRef.current) {
@@ -890,7 +898,6 @@ function useSpringCarousel({
     }
     return {}
   }
-
   function setStartEndItemReachedOnFreeScroll() {
     if (mainCarouselWrapperRef.current) {
       prevSlidedValue.current =
@@ -938,7 +945,6 @@ function useSpringCarousel({
     }
     return {}
   }
-
   function findItemIndex(id: string | number, error?: string) {
     let itemIndex = 0
 
@@ -1081,6 +1087,17 @@ function useSpringCarousel({
     }
   }, [getControllerRef, res.slideToItem, res.slideToNextItem, res.slideToPrevItem])
 
+  function getTouchAction() {
+    if (disableGestures) {
+      return 'unset'
+    }
+
+    if (carouselSlideAxis === 'x') {
+      return 'pan-y'
+    }
+    return 'pan-x'
+  }
+
   const _thumbsFragment = (
     <Context.Provider value={res}>{thumbsFragment}</Context.Provider>
   )
@@ -1106,7 +1123,7 @@ function useSpringCarousel({
             position: 'relative',
             display: 'flex',
             flexDirection: carouselSlideAxis === 'x' ? 'row' : 'column',
-            touchAction: 'none',
+            touchAction: getTouchAction(),
             ...getAnimatedWrapperStyles(),
           }}
         >
