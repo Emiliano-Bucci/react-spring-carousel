@@ -69,7 +69,7 @@ export type SpringCarouselFreeScroll = {
   freeScroll: true
   withLoop?: never
   slideType?: never
-  enableFreeScrollDrag?: true
+  enableFreeScrollDrag?: true | false
   initialActiveItem?: never
   itemsPerSlide?: never
   animateWhenActiveItemChange?: never
