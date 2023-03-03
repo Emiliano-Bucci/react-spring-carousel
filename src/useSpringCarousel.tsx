@@ -321,7 +321,7 @@ function useSpringCarousel({
       }
     }
 
-    if (slideType === 'fixed' && withLoop) {
+    if (slideType === 'fixed') {
       if (initialStartingPosition === 'center') {
         setPosition(
           getCarouselItemWidth() * items.length -
@@ -613,6 +613,7 @@ function useSpringCarousel({
     if (!isFirstMount.current) {
       resizeByPropChange.current = true
       adjustCarouselWrapperPosition()
+      console.log('here')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -622,6 +623,7 @@ function useSpringCarousel({
     gutter,
     init,
     getTotalScrollValue,
+    withLoop,
   ])
   useEffect(() => {
     /**
