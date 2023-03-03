@@ -27,5 +27,5 @@
     "rootDir": "./"
   },
   "include": ["src/**/*", "Examples"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "src/modules/screenfull.js"]
 }

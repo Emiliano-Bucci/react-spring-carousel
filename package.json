@@ -82,7 +82,6 @@
   },
   "dependencies": {
     "@use-gesture/react": "^10.2.23",
-    "resize-observer-polyfill": "^1.5.1",
-    "screenfull": "^5.2.0"
+    "resize-observer-polyfill": "^1.5.1"
   }
 }

@@ -73,7 +73,6 @@ export default [
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
-          screenfull: 'Screenfull',
           'react/jsx-runtime': 'ReactJSXRuntime',
           '@react-spring/web': 'ReactSpring',
           '@use-gesture/react': 'UseGestureReact',
