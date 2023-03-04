@@ -177,7 +177,6 @@ function useSpringCarousel({
       ...{ marginRight: `${isLastItem ? 0 : gutter}px` },
     }
   }
-
   function getSlideValue() {
     const carouselItem = mainCarouselWrapperRef.current?.querySelector(
       '.use-spring-carousel-item',
@@ -617,12 +616,14 @@ function useSpringCarousel({
    * When these props change we reset the carousel
    */
   useEffect(() => {
-    prevTotalScrollValue.current = getTotalScrollValue()
     if (!isFirstMount.current && carouselTrackWrapperRef.current) {
       resizeByPropChange.current = true
+      prevTotalScrollValue.current = getTotalScrollValue()
       prevWithLoop.current = withLoop
       prevSlideType.current = slideType
       prevFreeScroll.current = freeScroll
+      prevWindowWidth.current = window.innerWidth
+      prevSlidedValue.current = 0
 
       internalSlideToItem({ id: 0, immediate: true, shouldReset: true })
       setDraggingSliderTreshold()
@@ -647,15 +648,6 @@ function useSpringCarousel({
       adjustCarouselWrapperPosition()
     }
   }, [])
-  useEffect(() => {
-    /**
-     * When itemsPerSlide change we need to update the draggingSlideTreshold.current,
-     * since it's default value is based on the calculation of the
-     * width of a single item
-     */
-    // getDraggingSliderTreshold()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [_draggingSlideTreshold, itemsPerSlide, slideType])
   useEffect(() => {
     if (mainCarouselWrapperRef.current) {
       let timer: NodeJS.Timeout
