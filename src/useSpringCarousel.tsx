@@ -599,103 +599,6 @@ function useSpringCarousel({
     }
   }
 
-  useIsomorphicLayoutEffect(() => {
-    /**
-     * Set initial track position
-     */
-    if (carouselTrackWrapperRef.current && init) {
-      resizeByPropChange.current = true
-      initializeCarousel()
-    }
-  }, [init])
-  useEffect(() => {
-    if (activeItem.current !== initialActiveItem) {
-      internalSlideToItem({
-        id: initialActiveItem,
-        immediate: !animateWhenActiveItemChange,
-      })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialActiveItem])
-  useEffect(() => {
-    if (init) {
-      if (initialActiveItem > items.length - 1) {
-        throw new Error(
-          `initialActiveItem (${initialActiveItem}) is greater than the total quantity available items (${items.length}).`,
-        )
-      }
-      if (itemsPerSlide > items.length) {
-        console.warn(
-          `itemsPerSlide (${itemsPerSlide}) is greater than the total quantity available items (${items.length}). Fallback to ${items.length})`,
-        )
-      }
-    }
-  }, [initialActiveItem, items, itemsPerSlide, init])
-  useEffect(() => {
-    prevWindowWidth.current = window.innerWidth
-  }, [])
-  /**
-   * When these props change we reset the carousel
-   */
-  useEffect(() => {
-    if (init) {
-      resizeByPropChange.current = true
-      initializeCarousel()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    initialStartingPosition,
-    itemsPerSlide,
-    startEndGutter,
-    gutter,
-    init,
-    getTotalScrollValue,
-    withLoop,
-  ])
-  useEffect(() => {
-    if (mainCarouselWrapperRef.current) {
-      let timer: NodeJS.Timeout
-      const observer = new ResizeObserver(() => {
-        if (isFirstMount.current) {
-          isFirstMount.current = false
-          return
-        }
-
-        if (windowIsHidden.current) return
-        if (!resizeByPropChange.current) {
-          prevWindowWidth.current = window.innerWidth
-          const cb = adjustCarouselWrapperPosition()
-          window.clearTimeout(timer)
-
-          timer = setTimeout(() => {
-            prevTotalScrollValue.current = getTotalScrollValue()
-            if (typeof cb === 'function') {
-              cb()
-            }
-          }, 100)
-        }
-      })
-      observer.observe(mainCarouselWrapperRef.current)
-      return () => {
-        observer.disconnect()
-      }
-    }
-  }, [adjustCarouselWrapperPosition, getTotalScrollValue])
-  useEffect(() => {
-    if (!init) return
-    function handleVisibilityChange() {
-      if (document.hidden) {
-        windowIsHidden.current = true
-      } else {
-        windowIsHidden.current = false
-      }
-    }
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
-  }, [init])
-
   const enableDrag =
     (init && !disableGestures && !freeScroll) || (!!freeScroll && !!enableFreeScrollDrag)
 
@@ -1018,6 +921,16 @@ function useSpringCarousel({
       ) === activeItem.current
     )
   }
+  function getTouchAction() {
+    if (disableGestures) {
+      return 'unset'
+    }
+
+    if (carouselSlideAxis === 'x') {
+      return 'pan-y'
+    }
+    return 'pan-x'
+  }
 
   const res = freeScroll
     ? {
@@ -1063,6 +976,96 @@ function useSpringCarousel({
         getIsActiveItem,
       }
 
+  // uwc-debug-below
+  useIsomorphicLayoutEffect(() => {
+    /**
+     * Set initial track position
+     */
+    if (carouselTrackWrapperRef.current && init) {
+      resizeByPropChange.current = true
+      initializeCarousel()
+    }
+  }, [init])
+  useEffect(() => {
+    if (activeItem.current !== initialActiveItem) {
+      internalSlideToItem({
+        id: initialActiveItem,
+        immediate: !animateWhenActiveItemChange,
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialActiveItem])
+  useEffect(() => {
+    if (init) {
+      if (initialActiveItem > items.length - 1) {
+        throw new Error(
+          `initialActiveItem (${initialActiveItem}) is greater than the total quantity available items (${items.length}).`,
+        )
+      }
+      if (itemsPerSlide > items.length) {
+        console.warn(
+          `itemsPerSlide (${itemsPerSlide}) is greater than the total quantity available items (${items.length}). Fallback to ${items.length})`,
+        )
+      }
+    }
+  }, [initialActiveItem, items.length, itemsPerSlide, init])
+  useEffect(() => {
+    prevWindowWidth.current = window.innerWidth
+  }, [])
+  useEffect(() => {
+    /**
+     * When these props change we reset the carousel
+     */
+    if (init) {
+      resizeByPropChange.current = true
+      initializeCarousel()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialStartingPosition, itemsPerSlide, startEndGutter, gutter, init, withLoop])
+  useEffect(() => {
+    if (!init) return
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        windowIsHidden.current = true
+      } else {
+        windowIsHidden.current = false
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [init])
+
+  useEffect(() => {
+    if (mainCarouselWrapperRef.current) {
+      let timer: NodeJS.Timeout
+      const observer = new ResizeObserver(() => {
+        if (isFirstMount.current) {
+          isFirstMount.current = false
+          return
+        }
+
+        if (windowIsHidden.current) return
+        if (!resizeByPropChange.current) {
+          prevWindowWidth.current = window.innerWidth
+          const cb = adjustCarouselWrapperPosition()
+          window.clearTimeout(timer)
+
+          timer = setTimeout(() => {
+            prevTotalScrollValue.current = getTotalScrollValue()
+            if (typeof cb === 'function') {
+              cb()
+            }
+          }, 100)
+        }
+      })
+      observer.observe(mainCarouselWrapperRef.current)
+      return () => {
+        observer.disconnect()
+      }
+    }
+  }, [adjustCarouselWrapperPosition, getTotalScrollValue])
   useEffect(() => {
     if (getControllerRef) {
       getControllerRef({
@@ -1072,17 +1075,6 @@ function useSpringCarousel({
       })
     }
   }, [getControllerRef, res.slideToItem, res.slideToNextItem, res.slideToPrevItem])
-
-  function getTouchAction() {
-    if (disableGestures) {
-      return 'unset'
-    }
-
-    if (carouselSlideAxis === 'x') {
-      return 'pan-y'
-    }
-    return 'pan-x'
-  }
 
   const _thumbsFragment = (
     <Context.Provider value={res}>{thumbsFragment}</Context.Provider>
