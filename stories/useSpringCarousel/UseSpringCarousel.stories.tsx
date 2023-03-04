@@ -6,6 +6,12 @@ export default {
   title: 'UseSpringCarousel',
   component: UseSpringCarousel,
   argTypes: {
+    init: {
+      defaultValue: true,
+      control: {
+        type: 'boolean',
+      },
+    },
     withLoop: {
       defaultValue: false,
       control: { type: 'boolean' },

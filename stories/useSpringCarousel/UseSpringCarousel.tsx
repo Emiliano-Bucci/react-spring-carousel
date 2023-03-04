@@ -47,6 +47,7 @@ const mockedItems = [
 ]
 
 export type Props = {
+  init: boolean
   withLoop: boolean
   itemsPerSlide: number
   slideType: SlideType

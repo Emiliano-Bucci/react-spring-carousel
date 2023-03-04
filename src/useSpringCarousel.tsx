@@ -65,7 +65,6 @@ function useSpringCarousel({
   getControllerRef,
 }: UseSpringCarouselComplete): ReturnType<typeof freeScroll> {
   const itemsPerSlide = _itemsPerSlide > items.length ? items.length : _itemsPerSlide
-
   const resizeByPropChange = useRef(false)
   const draggingSlideTreshold = useRef(_draggingSlideTreshold ?? 0)
   const slideActionType = useRef<SlideActionType>('initial')
@@ -585,6 +584,30 @@ function useSpringCarousel({
     }
   }
 
+  function initializeCarousel() {
+    if (!isFirstMount.current && carouselTrackWrapperRef.current) {
+      prevTotalScrollValue.current = getTotalScrollValue()
+      prevWithLoop.current = withLoop
+      prevSlideType.current = slideType
+      prevFreeScroll.current = freeScroll
+      prevWindowWidth.current = window.innerWidth
+      prevSlidedValue.current = 0
+
+      internalSlideToItem({ id: 0, immediate: true, shouldReset: true })
+      setDraggingSliderTreshold()
+      adjustCarouselWrapperPosition()
+    }
+  }
+
+  useIsomorphicLayoutEffect(() => {
+    /**
+     * Set initial track position
+     */
+    if (carouselTrackWrapperRef.current && init) {
+      resizeByPropChange.current = true
+      initializeCarousel()
+    }
+  }, [init])
   useEffect(() => {
     if (activeItem.current !== initialActiveItem) {
       internalSlideToItem({
@@ -611,25 +634,14 @@ function useSpringCarousel({
   useEffect(() => {
     prevWindowWidth.current = window.innerWidth
   }, [])
-
   /**
    * When these props change we reset the carousel
    */
   useEffect(() => {
-    if (!isFirstMount.current && carouselTrackWrapperRef.current) {
+    if (init) {
       resizeByPropChange.current = true
-      prevTotalScrollValue.current = getTotalScrollValue()
-      prevWithLoop.current = withLoop
-      prevSlideType.current = slideType
-      prevFreeScroll.current = freeScroll
-      prevWindowWidth.current = window.innerWidth
-      prevSlidedValue.current = 0
-
-      internalSlideToItem({ id: 0, immediate: true, shouldReset: true })
-      setDraggingSliderTreshold()
-      adjustCarouselWrapperPosition()
+      initializeCarousel()
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     initialStartingPosition,
@@ -640,14 +652,6 @@ function useSpringCarousel({
     getTotalScrollValue,
     withLoop,
   ])
-  useIsomorphicLayoutEffect(() => {
-    /**
-     * Set initial track position
-     */
-    if (carouselTrackWrapperRef.current) {
-      adjustCarouselWrapperPosition()
-    }
-  }, [])
   useEffect(() => {
     if (mainCarouselWrapperRef.current) {
       let timer: NodeJS.Timeout
