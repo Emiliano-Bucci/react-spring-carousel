@@ -300,25 +300,30 @@ function useSpringCarousel({
     )
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  function adjustCarouselWrapperPosition() {
+  function setPosition(v: number) {
     const positionProperty = carouselSlideAxis === 'x' ? 'left' : 'top'
+    const ref = carouselTrackWrapperRef.current
+    if (!ref) return
 
-    function setPosition(v: number) {
-      const ref = carouselTrackWrapperRef.current
-      if (!ref) return
+    if (withLoop) {
+      ref.style.top = '0px'
+      ref.style.left = '0px'
+      ref.style[positionProperty] = `-${v - startEndGutter}px`
 
-      if (withLoop) {
-        ref.style.top = '0px'
-        ref.style.left = '0px'
-        ref.style[positionProperty] = `-${v - startEndGutter}px`
+      firstItemReached.current = false
+      lastItemReached.current = false
+    } else {
+      ref.style.left = '0px'
+      ref.style.top = '0px'
+    }
+  }
 
-        firstItemReached.current = false
-        lastItemReached.current = false
-      } else {
-        ref.style.left = '0px'
-        ref.style.top = '0px'
-      }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  function adjustCarouselWrapperPosition(shouldResetPosition = false) {
+    if (carouselTrackWrapperRef.current && shouldResetPosition) {
+      carouselTrackWrapperRef.current.style.transform = `translate3d(0px, 0px,0px)`
+      carouselTrackWrapperRef.current.style.left = `0`
+      carouselTrackWrapperRef.current.style.top = `0`
     }
 
     if (slideType === 'fixed') {
@@ -573,13 +578,12 @@ function useSpringCarousel({
       immediate,
     })
   }
-  function getDraggingSliderTreshold() {
+  function setDraggingSliderTreshold() {
     if (_draggingSlideTreshold) {
       draggingSlideTreshold.current = _draggingSlideTreshold
     } else {
       draggingSlideTreshold.current = Math.floor(getSlideValue() / 2 / 2)
     }
-    return draggingSlideTreshold.current
   }
 
   useEffect(() => {
@@ -608,13 +612,23 @@ function useSpringCarousel({
   useEffect(() => {
     prevWindowWidth.current = window.innerWidth
   }, [])
+
+  /**
+   * When these props change we reset the carousel
+   */
   useEffect(() => {
     prevTotalScrollValue.current = getTotalScrollValue()
-    if (!isFirstMount.current) {
+    if (!isFirstMount.current && carouselTrackWrapperRef.current) {
       resizeByPropChange.current = true
+      prevWithLoop.current = withLoop
+      prevSlideType.current = slideType
+      prevFreeScroll.current = freeScroll
+
+      internalSlideToItem({ id: 0, immediate: true, shouldReset: true })
+      setDraggingSliderTreshold()
       adjustCarouselWrapperPosition()
-      console.log('here')
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     initialStartingPosition,
@@ -625,31 +639,6 @@ function useSpringCarousel({
     getTotalScrollValue,
     withLoop,
   ])
-  useEffect(() => {
-    /**
-     * When these props change we reset the carousel
-     */
-    if (
-      withLoop !== prevWithLoop.current ||
-      slideType !== prevSlideType.current ||
-      freeScroll !== prevFreeScroll.current
-    ) {
-      prevWithLoop.current = withLoop
-      prevSlideType.current = slideType
-      prevFreeScroll.current = freeScroll
-
-      if (carouselTrackWrapperRef.current) {
-        carouselTrackWrapperRef.current.style.transform = `translate3d(0px, 0px,0px)`
-        setSpring.start({
-          val: 0,
-          immediate: true,
-        })
-      }
-
-      internalSlideToItem({ id: 0, immediate: true, shouldReset: true })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [withLoop, slideType, freeScroll])
   useIsomorphicLayoutEffect(() => {
     /**
      * Set initial track position
@@ -657,7 +646,6 @@ function useSpringCarousel({
     if (carouselTrackWrapperRef.current) {
       adjustCarouselWrapperPosition()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   useEffect(() => {
     /**
@@ -665,7 +653,7 @@ function useSpringCarousel({
      * since it's default value is based on the calculation of the
      * width of a single item
      */
-    getDraggingSliderTreshold()
+    // getDraggingSliderTreshold()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_draggingSlideTreshold, itemsPerSlide, slideType])
   useEffect(() => {
@@ -722,8 +710,8 @@ function useSpringCarousel({
       const currentMovement = state.movement[carouselSlideAxis === 'x' ? 0 : 1]
       const direction = state.direction[carouselSlideAxis === 'x' ? 0 : 1]
 
-      const prevItemTreshold = currentMovement > getDraggingSliderTreshold()
-      const nextItemTreshold = currentMovement < -getDraggingSliderTreshold()
+      const prevItemTreshold = currentMovement > draggingSlideTreshold.current
+      const nextItemTreshold = currentMovement < -draggingSlideTreshold.current
       const tot = getTotalScrollValue()
 
       if (isDragging) {
