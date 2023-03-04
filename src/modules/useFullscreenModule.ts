@@ -1,5 +1,5 @@
 import { useRef, MutableRefObject, useEffect } from 'react'
-import screenfull from './screenfull'
+import screenfull from 'screenfull'
 
 type FullscreenModule = {
   mainCarouselWrapperRef: MutableRefObject<HTMLDivElement | null>

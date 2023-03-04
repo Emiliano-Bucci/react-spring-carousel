@@ -77,6 +77,7 @@ export default [
           '@react-spring/web': 'ReactSpring',
           '@use-gesture/react': 'UseGestureReact',
           'resize-observer-polyfill': 'ResizeObserver',
+          screenfull: 'screenfull',
         },
       },
     ],

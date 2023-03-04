@@ -583,7 +583,6 @@ function useSpringCarousel({
       draggingSlideTreshold.current = Math.floor(getSlideValue() / 2 / 2)
     }
   }
-
   function initializeCarousel() {
     if (!isFirstMount.current && carouselTrackWrapperRef.current) {
       prevTotalScrollValue.current = getTotalScrollValue()
