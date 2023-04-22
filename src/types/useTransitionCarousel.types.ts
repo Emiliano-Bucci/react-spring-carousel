@@ -6,7 +6,7 @@ import {
   SpringCarouselWithThumbs,
 } from '../types'
 import { ReactNode } from 'react'
-import { UseListenToCustomEvent } from '../modules'
+import { UseListenToCustomEvent } from './useEventsModule.types'
 
 type Item = ItemWithThumb<'use-transition'> | ItemWithNoThumb<'use-transition'>
 

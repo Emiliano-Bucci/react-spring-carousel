@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import * as packageJson from './package.json'
 import dts from 'vite-plugin-dts'
 import tsConfigPaths from 'vite-tsconfig-paths'
 
@@ -10,22 +9,26 @@ export default defineConfig({
     react(),
     tsConfigPaths(),
     dts({
-      include: ['src/**/*'],
+      outputDir: 'dist/types/',
+      insertTypesEntry: true,
     }),
   ],
   build: {
+    sourcemap: true,
     lib: {
-      entry: [
-        'src/index.tsx',
-        'src/modules/index.tsx',
-        'src/useSpringCarousel.tsx',
-        'src/useTransitionCarousel.tsx',
-      ],
+      entry: ['src/index.tsx'],
+      name: 'react-spring-carousel',
+      formats: ['es', 'cjs'],
+      fileName: (format) => `index.${format}.js`,
     },
     rollupOptions: {
       external: [
-        ...Object.keys(packageJson.dependencies),
-        ...Object.keys(packageJson.peerDependencies),
+        'react',
+        'react-dom',
+        '@react-spring/web',
+        '@use-gesture/react',
+        'resize-observer-polyfill',
+        'screenfull',
       ],
     },
   },

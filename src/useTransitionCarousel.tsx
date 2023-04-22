@@ -241,7 +241,7 @@ function useTransitionCarousel({
     let itemIndex = 0
 
     if (typeof id === 'string') {
-      itemIndex = items.findIndex(item => item.id === id)
+      itemIndex = items.findIndex((item) => item.id === id)
     } else {
       itemIndex = id
     }
@@ -249,9 +249,7 @@ function useTransitionCarousel({
       if (error) {
         throw new Error(error)
       }
-      console.error(
-        `The item doesn't exist; check that the id provided - ${id} - is correct.`,
-      )
+      console.error(`The item doesn't exist; check that the id provided - ${id} - is correct.`)
       itemIndex = -1
     }
 
@@ -308,9 +306,7 @@ function useTransitionCarousel({
     slideToNextItem: () => slideToNextItem('click'),
   }
 
-  const _thumbsFragment = (
-    <Context.Provider value={result}>{thumbsFragment}</Context.Provider>
-  )
+  const _thumbsFragment = <Context.Provider value={result}>{thumbsFragment}</Context.Provider>
   const carouselFragment = (
     <Context.Provider value={result}>
       <div
@@ -336,10 +332,7 @@ function useTransitionCarousel({
   }
 }
 
-type ContextProps = Omit<
-  UseTransitionCarouselReturnProps,
-  'carouselFragment' | 'thumbsFragment'
->
+type ContextProps = Omit<UseTransitionCarouselReturnProps, 'carouselFragment' | 'thumbsFragment'>
 
 const Context = createContext<ContextProps | undefined>(undefined)
 

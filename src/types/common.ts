@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
-import { UseListenToCustomEvent } from '../modules/useEventsModule'
+
 import { UseSpringReturnType } from './useSpringCarousel.types'
+import { UseListenToCustomEvent } from './useEventsModule.types'
 
 export type SlideActionType = 'prev' | 'next' | 'initial'
 export type SlideMode = 'drag' | 'click' | 'initial'
@@ -22,9 +23,7 @@ type TransitionRenderItem = {
   }
 }
 
-export type RenderItemProps<T> = T extends 'use-spring'
-  ? SpringRenderItem
-  : TransitionRenderItem
+export type RenderItemProps<T> = T extends 'use-spring' ? SpringRenderItem : TransitionRenderItem
 
 type RenderItemFn<T> = (props: RenderItemProps<T>) => JSX.Element
 

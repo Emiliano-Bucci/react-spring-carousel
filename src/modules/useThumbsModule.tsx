@@ -1,20 +1,7 @@
 import { useSpring } from '@react-spring/web'
 import { useRef } from 'react'
-
-import {
-  ItemWithThumb,
-  PrepareThumbsData,
-  RenderItemProps,
-  SpringCarouselWithThumbs,
-} from '../types'
-
-type Props<T extends 'use-spring' | 'use-transition'> = {
-  withThumbs?: boolean
-  thumbsSlideAxis: SpringCarouselWithThumbs['thumbsSlideAxis']
-  prepareThumbsData?: PrepareThumbsData<T>
-  items: ItemWithThumb<T>[]
-  renderThumbFnProps: RenderItemProps<T>
-}
+import { PrepareThumbsData } from '../types'
+import { UseThumbsModule } from '../types/useThumbsModule.types'
 
 function isInViewport(el: HTMLElement) {
   const rect = el.getBoundingClientRect()
@@ -32,7 +19,7 @@ export function useThumbsModule<T extends 'use-spring' | 'use-transition'>({
   prepareThumbsData,
   items,
   renderThumbFnProps,
-}: Props<T>) {
+}: UseThumbsModule<T>) {
   const wrapperRef = useRef<HTMLDivElement | null>(null)
   const [spring, setSpring] = useSpring(() => ({
     val: 0,
@@ -40,12 +27,8 @@ export function useThumbsModule<T extends 'use-spring' | 'use-transition'>({
 
   function getTotalScrollValue() {
     return Math.round(
-      Number(
-        wrapperRef.current?.[thumbsSlideAxis === 'x' ? 'scrollWidth' : 'scrollHeight'],
-      ) -
-        wrapperRef.current!.getBoundingClientRect()[
-          thumbsSlideAxis === 'x' ? 'width' : 'height'
-        ],
+      Number(wrapperRef.current?.[thumbsSlideAxis === 'x' ? 'scrollWidth' : 'scrollHeight']) -
+        wrapperRef.current!.getBoundingClientRect()[thumbsSlideAxis === 'x' ? 'width' : 'height'],
     )
   }
 
@@ -67,18 +50,16 @@ export function useThumbsModule<T extends 'use-spring' | 'use-transition'>({
 
         setSpring.start({
           from: {
-            val:
-              wrapperRef.current?.[
-                thumbsSlideAxis === 'x' ? 'scrollLeft' : 'scrollTop'
-              ] ?? 0,
+            val: wrapperRef.current?.[thumbsSlideAxis === 'x' ? 'scrollLeft' : 'scrollTop'] ?? 0,
           },
           to: {
             val,
           },
           onChange: ({ value }) => {
             if (wrapperRef.current) {
-              wrapperRef.current[thumbsSlideAxis === 'x' ? 'scrollLeft' : 'scrollTop'] =
-                Math.abs(value.val)
+              wrapperRef.current[thumbsSlideAxis === 'x' ? 'scrollLeft' : 'scrollTop'] = Math.abs(
+                value.val,
+              )
             }
           },
         })
@@ -90,7 +71,7 @@ export function useThumbsModule<T extends 'use-spring' | 'use-transition'>({
     function getPreparedItems(
       _items: ReturnType<PrepareThumbsData<T>>,
     ): ReturnType<PrepareThumbsData<T>> {
-      return _items.map(i => ({
+      return _items.map((i) => ({
         id: i.id,
         renderThumb: i.renderThumb,
       }))
@@ -126,9 +107,7 @@ export function useThumbsModule<T extends 'use-spring' | 'use-transition'>({
         const thumbId = `thumb-item-${id}`
         return (
           <div key={thumbId} id={thumbId} className="thumb-item">
-            {typeof renderThumb === 'function'
-              ? renderThumb(renderThumbFnProps)
-              : renderThumb}
+            {typeof renderThumb === 'function' ? renderThumb(renderThumbFnProps) : renderThumb}
           </div>
         )
       })}

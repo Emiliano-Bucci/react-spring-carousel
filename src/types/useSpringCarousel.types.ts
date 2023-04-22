@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
-import { UseListenToCustomEvent } from '../modules/useEventsModule'
+
 import { ItemWithThumb, ItemWithNoThumb, PrepareThumbsData } from '../types'
+import { UseListenToCustomEvent } from './useEventsModule.types'
 
 export type UseSpringReturnType = {
   carouselFragment: ReactNode
@@ -29,17 +30,13 @@ export type UseSpringFreeScrollReturnType = {
 
 export type SlideType = 'fixed' | 'fluid'
 
-export type SpringCarouselWithThumbs<
-  T extends 'use-spring' | 'use-transition' = 'use-spring',
-> = {
+export type SpringCarouselWithThumbs<T extends 'use-spring' | 'use-transition' = 'use-spring'> = {
   withThumbs: true
   thumbsSlideAxis?: 'x' | 'y'
   items: ItemWithThumb<T>[]
   prepareThumbsData?: PrepareThumbsData<T>
 }
-export type SpringCarouselWithNoThumbs<
-  T extends 'use-spring' | 'use-transition' = 'use-spring',
-> = {
+export type SpringCarouselWithNoThumbs<T extends 'use-spring' | 'use-transition' = 'use-spring'> = {
   withThumbs?: false | undefined
   thumbsSlideAxis?: never
   items: ItemWithNoThumb<T>[]
@@ -102,9 +99,7 @@ export type BaseProps = {
   getControllerRef?(ref: ControllerRef): void
 }
 
-type ScrollType<T> = T extends true
-  ? SpringCarouselFreeScroll
-  : SpringCarouselNoFreeScroll
+type ScrollType<T> = T extends true ? SpringCarouselFreeScroll : SpringCarouselNoFreeScroll
 
 export type UseSpringCarouselWithThumbs<T> = BaseProps &
   SpringCarouselWithThumbs &

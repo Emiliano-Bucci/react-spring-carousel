@@ -1,11 +1,6 @@
-import { useRef, MutableRefObject, useEffect } from 'react'
+import { useRef, useEffect } from 'react'
 import screenfull from 'screenfull'
-
-type FullscreenModule = {
-  mainCarouselWrapperRef: MutableRefObject<HTMLDivElement | null>
-  handleResize?(): void
-  onFullScreenChange(isFullscreen: boolean): void
-}
+import { FullscreenModule } from '../types/useFullscreenModule.types'
 
 export function useFullscreenModule({
   mainCarouselWrapperRef,
