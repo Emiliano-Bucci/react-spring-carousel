@@ -6,7 +6,7 @@ import {
   SpringCarouselWithThumbs,
 } from '../types'
 import { ReactNode } from 'react'
-import { UseListenToCustomEvent } from 'src/modules'
+import { UseListenToCustomEvent } from '../modules'
 
 type Item = ItemWithThumb<'use-transition'> | ItemWithNoThumb<'use-transition'>
 
@@ -32,10 +32,7 @@ type BaseProps = {
 }
 
 export type UseTransitionCarouselProps = BaseProps &
-  (
-    | SpringCarouselWithThumbs<'use-transition'>
-    | SpringCarouselWithNoThumbs<'use-transition'>
-  )
+  (SpringCarouselWithThumbs<'use-transition'> | SpringCarouselWithNoThumbs<'use-transition'>)
 
 export type UseTransitionCarouselReturnProps = {
   useListenToCustomEvent: UseListenToCustomEvent<'use-transition'>['useListenToCustomEvent']
