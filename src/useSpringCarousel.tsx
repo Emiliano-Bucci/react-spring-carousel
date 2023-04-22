@@ -81,8 +81,6 @@ function useSpringCarousel({
   const mainCarouselWrapperRef = useRef<HTMLDivElement | null>(null)
   const carouselTrackWrapperRef = useRef<HTMLDivElement | null>(null)
 
-  const isFirstMount = useRef(true)
-
   const prevTotalScrollValue = useRef(0)
   const prevWindowWidth = useRef(0)
   const prevSlidedValue = useRef(0)
@@ -560,7 +558,7 @@ function useSpringCarousel({
     }
   }
   function initializeCarousel() {
-    if (!isFirstMount.current && carouselTrackWrapperRef.current) {
+    if (carouselTrackWrapperRef.current) {
       prevTotalScrollValue.current = getTotalScrollValue()
       prevWithLoop.current = withLoop
       prevSlideType.current = slideType
@@ -1000,11 +998,6 @@ function useSpringCarousel({
     if (mainCarouselWrapperRef.current) {
       let timer: NodeJS.Timeout
       const observer = new ResizeObserver(() => {
-        if (isFirstMount.current) {
-          isFirstMount.current = false
-          return
-        }
-
         if (windowIsHidden.current) return
         if (!resizeByPropChange.current) {
           prevWindowWidth.current = window.innerWidth

@@ -53,19 +53,15 @@ export default {
     },
     startEndGutter: {
       defaultValue: 0,
-      control: {
-        type: 'number',
-      },
+      control: 'number',
     },
     initialStartingPosition: {
       defaultValue: 'start',
+      control: 'radio',
+      options: ['start', 'center', 'end'],
       if: {
         arg: 'slideType',
         eq: 'fixed',
-      },
-      control: {
-        type: 'radio',
-        options: ['start', 'center', 'end'],
       },
     },
     disableGestures: {

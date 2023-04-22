@@ -74,6 +74,9 @@ export function UseSpringCarousel(props: Props) {
       ),
     })),
     ...props,
+    withLoop: true,
+    initialStartingPosition: 'center',
+    slideType: 'fixed',
   })
 
   return (
