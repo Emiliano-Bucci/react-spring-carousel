@@ -945,6 +945,7 @@ function useSpringCarousel({
   }, [init])
   useEffect(() => {
     if (activeItem.current !== initialActiveItem) {
+      resizeByPropChange.current = true
       internalSlideToItem({
         id: initialActiveItem,
         immediate: !animateWhenActiveItemChange,
