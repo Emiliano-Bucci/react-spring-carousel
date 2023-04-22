@@ -12,8 +12,11 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "@use-gesture/react": "^10.2.26",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "resize-observer-polyfill": "^1.5.1",
+    "screenfull": "^5.2.0"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.0.6",

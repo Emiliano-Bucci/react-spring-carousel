@@ -60,7 +60,7 @@ export type Props = {
 
 export function UseSpringCarousel(props: Props) {
   const { carouselFragment, slideToNextItem, slideToPrevItem } = useSpringCarousel({
-    items: mockedItems.map(i => ({
+    items: mockedItems.map((i) => ({
       id: i.id,
       renderItem: (
         <div
@@ -77,36 +77,16 @@ export function UseSpringCarousel(props: Props) {
   })
 
   return (
-    <div
-      className="wrapper"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          flex: '1',
+    <div className="container">
+      <button
+        onClick={() => {
+          slideToPrevItem()
         }}
       >
-        <button
-          onClick={() => {
-            slideToPrevItem()
-          }}
-        >
-          PREV
-        </button>
-        <div
-          className="carousel-wrapper"
-          style={{
-            flex: '1',
-          }}
-        >
-          {carouselFragment}
-        </div>
-        <button onClick={() => slideToNextItem()}>NEXT</button>
-      </div>
+        PREV
+      </button>
+      <div className="carousel-wrapper">{carouselFragment}</div>
+      <button onClick={() => slideToNextItem()}>NEXT</button>
     </div>
   )
 }
