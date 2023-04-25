@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 
-import { ItemWithThumb, ItemWithNoThumb, PrepareThumbsData } from '../types'
+import { ItemWithNoThumb, ItemWithThumb, PrepareThumbsData } from '../types'
 import { UseListenToCustomEvent } from './useEventsModule.types'
 
 export type UseSpringReturnType = {

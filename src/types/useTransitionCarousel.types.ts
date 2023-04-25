@@ -1,11 +1,12 @@
 import { SpringConfig, TransitionFrom, TransitionTo } from '@react-spring/web'
+import { ReactNode } from 'react'
+
 import {
   ItemWithNoThumb,
   ItemWithThumb,
   SpringCarouselWithNoThumbs,
   SpringCarouselWithThumbs,
 } from '../types'
-import { ReactNode } from 'react'
 import { UseListenToCustomEvent } from './useEventsModule.types'
 
 type Item = ItemWithThumb<'use-transition'> | ItemWithNoThumb<'use-transition'>

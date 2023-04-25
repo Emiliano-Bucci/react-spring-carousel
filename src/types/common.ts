@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 
-import { UseSpringReturnType } from './useSpringCarousel.types'
 import { UseListenToCustomEvent } from './useEventsModule.types'
+import { UseSpringReturnType } from './useSpringCarousel.types'
 
 export type SlideActionType = 'prev' | 'next' | 'initial'
 export type SlideMode = 'drag' | 'click' | 'initial'

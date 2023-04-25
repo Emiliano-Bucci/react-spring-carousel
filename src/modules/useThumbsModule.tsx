@@ -1,5 +1,6 @@
 import { useSpring } from '@react-spring/web'
 import { useRef } from 'react'
+
 import { PrepareThumbsData } from '../types'
 import { UseThumbsModule } from '../types/useThumbsModule.types'
 
@@ -26,9 +27,10 @@ export function useThumbsModule<T extends 'use-spring' | 'use-transition'>({
   }))
 
   function getTotalScrollValue() {
+    if (!wrapperRef.current) return 0
     return Math.round(
       Number(wrapperRef.current?.[thumbsSlideAxis === 'x' ? 'scrollWidth' : 'scrollHeight']) -
-        wrapperRef.current!.getBoundingClientRect()[thumbsSlideAxis === 'x' ? 'width' : 'height'],
+        wrapperRef.current.getBoundingClientRect()[thumbsSlideAxis === 'x' ? 'width' : 'height'],
     )
   }
 

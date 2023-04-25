@@ -1,27 +1,25 @@
 import { config, useIsomorphicLayoutEffect, useSpring } from '@react-spring/web'
-import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react'
-
-import { useEventsModule } from './modules/useEventsModule'
 import { useDrag } from '@use-gesture/react'
-
-import { useThumbsModule } from './modules/useThumbsModule'
+import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react'
 import ResizeObserver from 'resize-observer-polyfill'
 
+import { useEventsModule } from './modules/useEventsModule'
+import { useFullscreenModule } from './modules/useFullscreenModule'
+import { useThumbsModule } from './modules/useThumbsModule'
 import {
+  ItemWithThumb,
   SlideActionType,
   SlideMode,
+  SlideType,
   UseSpringCarouselComplete,
-  UseSpringCarouselWithFreeScroll,
-  UseSpringCarouselWithThumbs,
-  UseSpringCarouselWithNoThumbs,
-  UseSpringCarouselWithNoFixedItems,
   UseSpringCarouselWithFixedItems,
+  UseSpringCarouselWithFreeScroll,
+  UseSpringCarouselWithNoFixedItems,
+  UseSpringCarouselWithNoThumbs,
+  UseSpringCarouselWithThumbs,
   UseSpringFreeScrollReturnType,
   UseSpringReturnType,
-  SlideType,
-  ItemWithThumb,
 } from './types'
-import { useFullscreenModule } from './modules/useFullscreenModule'
 
 type ReturnType<T> = T extends true ? UseSpringFreeScrollReturnType : UseSpringReturnType
 
@@ -240,8 +238,8 @@ function useSpringCarousel({
       handleScroll(activeItem.current)
     }
   }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   function getTotalScrollValue() {
+    if (!carouselTrackWrapperRef.current) return 0
     if (withLoop) {
       return getSlideValue() * items.length
     }
@@ -251,7 +249,7 @@ function useSpringCarousel({
           carouselSlideAxis === 'x' ? 'scrollWidth' : 'scrollHeight'
         ],
       ) -
-        carouselTrackWrapperRef.current!.getBoundingClientRect()[
+        carouselTrackWrapperRef.current.getBoundingClientRect()[
           carouselSlideAxis === 'x' ? 'width' : 'height'
         ] -
         startEndGutter * 2,

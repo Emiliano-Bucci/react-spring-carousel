@@ -1,5 +1,6 @@
-import { useRef, useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import screenfull from 'screenfull'
+
 import { FullscreenModule } from '../types/useFullscreenModule.types'
 
 export function useFullscreenModule({

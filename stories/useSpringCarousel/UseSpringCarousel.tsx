@@ -1,6 +1,6 @@
 import React from 'react'
-import { SlideType } from '../../src/types'
 
+import { SlideType } from '../../src/types'
 import { useSpringCarousel } from '../../src/useSpringCarousel'
 
 const mockedItems = [
