@@ -33,6 +33,22 @@ export default {
         options: ['fixed', 'fluid'],
       },
     },
+    freeScroll: {
+      defaultValue: false,
+      control: 'boolean',
+      if: {
+        arg: 'slideType',
+        eq: 'fluid',
+      },
+    },
+    itemsWidth: {
+      defaultValue: 340,
+      control: 'number',
+      if: {
+        arg: 'slideType',
+        eq: 'fluid',
+      },
+    },
     initialActiveItem: {
       defaultValue: 0,
       control: {

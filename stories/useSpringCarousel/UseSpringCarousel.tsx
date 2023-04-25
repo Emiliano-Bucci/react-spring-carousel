@@ -56,9 +56,10 @@ export type Props = {
   startEndGutter: number
   disableGestures?: boolean
   slideWhenThresholdIsReached?: boolean
+  itemsWidth?: number
 }
 
-export function UseSpringCarousel(props: Props) {
+export function UseSpringCarousel({ itemsWidth, ...rest }: Props) {
   const { carouselFragment, slideToNextItem, slideToPrevItem } = useSpringCarousel({
     items: mockedItems.map((i) => ({
       id: i.id,
@@ -67,16 +68,14 @@ export function UseSpringCarousel(props: Props) {
           style={{
             flex: '1',
             backgroundColor: i.color,
+            ...(itemsWidth ? { width: itemsWidth } : {}),
           }}
         >
           {i.title}
         </div>
       ),
     })),
-    ...props,
-    withLoop: true,
-    initialStartingPosition: 'center',
-    slideType: 'fixed',
+    ...rest,
   })
 
   return (

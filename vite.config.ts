@@ -16,7 +16,7 @@ export default defineConfig({
   build: {
     sourcemap: true,
     lib: {
-      entry: ['src/index.tsx'],
+      entry: ['src/useSpringCarousel.tsx', 'src/useTransitionCarousel.tsx', 'src/index.tsx'],
       name: 'react-spring-carousel',
       formats: ['es', 'cjs'],
       fileName: (format) => `index.${format}.js`,

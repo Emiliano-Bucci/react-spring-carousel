@@ -20,6 +20,7 @@ body,
   display: flex;
   flex: 1;
   border: 20px solid rgba(0, 0, 0, 0.88);
+  overflow: hidden;
 }
 
 .carousel-wrapper {
