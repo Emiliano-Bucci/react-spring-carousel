@@ -165,7 +165,7 @@ function useSpringCarousel({
       ...{ marginRight: `${isLastItem ? 0 : gutter}px` },
     }
   }
-  function getSlideValue() {
+  const getSlideValue = useCallback(() => {
     const carouselItem = mainCarouselWrapperRef.current?.querySelector('.use-spring-carousel-item')
 
     if (!carouselItem) {
@@ -175,7 +175,7 @@ function useSpringCarousel({
     return (
       carouselItem.getBoundingClientRect()[carouselSlideAxis === 'x' ? 'width' : 'height'] + gutter
     )
-  }
+  }, [carouselSlideAxis, gutter])
 
   type SlideToItem = {
     from: number
@@ -238,7 +238,7 @@ function useSpringCarousel({
       handleScroll(activeItem.current)
     }
   }
-  function getTotalScrollValue() {
+  const getTotalScrollValue = useCallback(() => {
     if (!carouselTrackWrapperRef.current) return 0
     if (withLoop) {
       return getSlideValue() * items.length
@@ -254,7 +254,7 @@ function useSpringCarousel({
         ] -
         startEndGutter * 2,
     )
-  }
+  }, [carouselSlideAxis, getSlideValue, items.length, startEndGutter, withLoop])
   function getAnimatedWrapperStyles() {
     const percentValue = `calc(100% - ${startEndGutter * 2}px)`
     return {
@@ -263,7 +263,7 @@ function useSpringCarousel({
     }
   }
 
-  function getCarouselItemWidth() {
+  const getCarouselItemWidth = useCallback(() => {
     const carouselItem = carouselTrackWrapperRef.current?.querySelector('.use-spring-carousel-item')
     if (!carouselItem) {
       throw Error('No carousel items available!')
@@ -271,119 +271,136 @@ function useSpringCarousel({
     return (
       carouselItem.getBoundingClientRect()[carouselSlideAxis === 'x' ? 'width' : 'height'] + gutter
     )
-  }
+  }, [carouselSlideAxis, gutter])
 
-  function setPosition(v: number) {
-    const positionProperty = carouselSlideAxis === 'x' ? 'left' : 'top'
-    const ref = carouselTrackWrapperRef.current
-    if (!ref) return
+  const setPosition = useCallback(
+    (v: number) => {
+      const positionProperty = carouselSlideAxis === 'x' ? 'left' : 'top'
+      const ref = carouselTrackWrapperRef.current
+      if (!ref) return
 
-    if (withLoop) {
-      ref.style.top = '0px'
-      ref.style.left = '0px'
-      ref.style[positionProperty] = `-${v - startEndGutter}px`
+      if (withLoop) {
+        ref.style.top = '0px'
+        ref.style.left = '0px'
+        ref.style[positionProperty] = `-${v - startEndGutter}px`
 
-      firstItemReached.current = false
-      lastItemReached.current = false
-    } else {
-      ref.style.left = '0px'
-      ref.style.top = '0px'
-    }
-  }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  function adjustCarouselWrapperPosition(shouldResetPosition = false) {
-    if (carouselTrackWrapperRef.current && shouldResetPosition) {
-      carouselTrackWrapperRef.current.style.transform = `translate3d(0px, 0px,0px)`
-      carouselTrackWrapperRef.current.style.left = `0`
-      carouselTrackWrapperRef.current.style.top = `0`
-    }
-
-    if (slideType === 'fixed') {
-      if (initialStartingPosition === 'center') {
-        setPosition(
-          getCarouselItemWidth() * items.length -
-            getSlideValue() * Math.round((itemsPerSlide - 1) / 2),
-        )
-      } else if (initialStartingPosition === 'end') {
-        setPosition(
-          getCarouselItemWidth() * items.length - getSlideValue() * Math.round(itemsPerSlide - 1),
-        )
+        firstItemReached.current = false
+        lastItemReached.current = false
       } else {
-        setPosition(getCarouselItemWidth() * items.length)
+        ref.style.left = '0px'
+        ref.style.top = '0px'
       }
-    }
+    },
+    [carouselSlideAxis, startEndGutter, withLoop],
+  )
 
-    if (slideType === 'fluid') {
-      /**
-       * User reached the last item and now is resizing the container that becomes smaller/bigger.
-       * Example: on mobile devices the user rotates the device
-       */
-      if (
-        lastItemReached.current &&
-        getTotalScrollValue() !== Math.abs(prevSlidedValue.current) &&
-        !withLoop
-      ) {
-        const newVal = -getTotalScrollValue()
-        prevSlidedValue.current = newVal
-        setSpring.start({
-          immediate: true,
-          val: prevSlidedValue.current,
-        })
-        return
+  const adjustCarouselWrapperPosition = useCallback(
+    (shouldResetPosition = false) => {
+      if (carouselTrackWrapperRef.current && shouldResetPosition) {
+        carouselTrackWrapperRef.current.style.transform = `translate3d(0px, 0px,0px)`
+        carouselTrackWrapperRef.current.style.left = `0`
+        carouselTrackWrapperRef.current.style.top = `0`
       }
 
-      if (
-        Math.abs(prevSlidedValue.current) > 0 &&
-        getTotalScrollValue() !== Math.abs(prevSlidedValue.current) &&
-        !withLoop &&
-        !freeScroll &&
-        directionAfterReachingEdges.current === 'backward'
-      ) {
-        const diff = prevTotalScrollValue.current - getTotalScrollValue()
-        const next = prevSlidedValue.current + diff
-
-        setSpring.start({
-          immediate: true,
-          val: next,
-        })
-
-        return () => {
-          prevSlidedValue.current = next
+      if (slideType === 'fixed') {
+        if (initialStartingPosition === 'center') {
+          setPosition(
+            getCarouselItemWidth() * items.length -
+              getSlideValue() * Math.round((itemsPerSlide - 1) / 2),
+          )
+        } else if (initialStartingPosition === 'end') {
+          setPosition(
+            getCarouselItemWidth() * items.length - getSlideValue() * Math.round(itemsPerSlide - 1),
+          )
+        } else {
+          setPosition(getCarouselItemWidth() * items.length)
         }
       }
 
-      return
-    }
+      if (slideType === 'fluid') {
+        /**
+         * User reached the last item and now is resizing the container that becomes smaller/bigger.
+         * Example: on mobile devices the user rotates the device
+         */
+        if (
+          lastItemReached.current &&
+          getTotalScrollValue() !== Math.abs(prevSlidedValue.current) &&
+          !withLoop
+        ) {
+          const newVal = -getTotalScrollValue()
+          prevSlidedValue.current = newVal
+          setSpring.start({
+            immediate: true,
+            val: prevSlidedValue.current,
+          })
+          return
+        }
 
-    if (!freeScroll && slideType === 'fixed') {
-      const nextValue = -(getSlideValue() * activeItem.current)
+        if (
+          Math.abs(prevSlidedValue.current) > 0 &&
+          getTotalScrollValue() !== Math.abs(prevSlidedValue.current) &&
+          !withLoop &&
+          !freeScroll &&
+          directionAfterReachingEdges.current === 'backward'
+        ) {
+          const diff = prevTotalScrollValue.current - getTotalScrollValue()
+          const next = prevSlidedValue.current + diff
 
-      /**
-       * Here we make sure to always show the latest item as the
-       * latest item visible in the carousel viewport.
-       */
-      if (Math.abs(nextValue) > getTotalScrollValue() && !withLoop) {
-        const val = -getTotalScrollValue()
-        lastItemReached.current = true
-        prevSlidedValue.current = val
-        setSpring.start({
-          immediate: true,
-          val: prevSlidedValue.current,
-        })
-      } else {
-        prevSlidedValue.current = nextValue
-        setSpring.start({
-          immediate: true,
-          val: nextValue,
-        })
+          setSpring.start({
+            immediate: true,
+            val: next,
+          })
+
+          return () => {
+            prevSlidedValue.current = next
+          }
+        }
+
+        return
       }
 
-      setTimeout(() => {
-        resizeByPropChange.current = false
-      }, 0)
-    }
-  }
+      if (!freeScroll && slideType === 'fixed') {
+        const nextValue = -(getSlideValue() * activeItem.current)
+
+        /**
+         * Here we make sure to always show the latest item as the
+         * latest item visible in the carousel viewport.
+         */
+        if (Math.abs(nextValue) > getTotalScrollValue() && !withLoop) {
+          const val = -getTotalScrollValue()
+          lastItemReached.current = true
+          prevSlidedValue.current = val
+          setSpring.start({
+            immediate: true,
+            val: prevSlidedValue.current,
+          })
+        } else {
+          prevSlidedValue.current = nextValue
+          setSpring.start({
+            immediate: true,
+            val: nextValue,
+          })
+        }
+
+        setTimeout(() => {
+          resizeByPropChange.current = false
+        }, 0)
+      }
+    },
+    [
+      freeScroll,
+      getCarouselItemWidth,
+      getSlideValue,
+      getTotalScrollValue,
+      initialStartingPosition,
+      items.length,
+      itemsPerSlide,
+      setPosition,
+      setSpring,
+      slideType,
+      withLoop,
+    ],
+  )
   function getFromValue() {
     if (freeScroll && mainCarouselWrapperRef.current) {
       return mainCarouselWrapperRef.current[carouselSlideAxis === 'x' ? 'scrollLeft' : 'scrollTop']
@@ -934,7 +951,7 @@ function useSpringCarousel({
   // uwc-debug-below
   useIsomorphicLayoutEffect(() => {
     /**
-     * Set initial track position
+     * Set initial track position when carousel is initialized
      */
     if (carouselTrackWrapperRef.current && init) {
       resizeByPropChange.current = true
@@ -968,16 +985,18 @@ function useSpringCarousel({
   useEffect(() => {
     prevWindowWidth.current = window.innerWidth
   }, [])
+
+  /**
+   * When these props change we reset the carousel
+   */
   useEffect(() => {
-    /**
-     * When these props change we reset the carousel
-     */
     if (init) {
       resizeByPropChange.current = true
       initializeCarousel()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialStartingPosition, itemsPerSlide, startEndGutter, gutter, init, withLoop])
+
   useEffect(() => {
     if (!init) return
     function handleVisibilityChange() {
