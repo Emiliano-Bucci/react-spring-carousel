@@ -318,6 +318,7 @@ function useSpringCarousel({
       }
 
       if (slideType === 'fluid') {
+        setPosition(getCarouselItemWidth() * items.length)
         /**
          * User reached the last item and now is resizing the container that becomes smaller/bigger.
          * Example: on mobile devices the user rotates the device
@@ -356,6 +357,7 @@ function useSpringCarousel({
           }
         }
 
+        console.log('here')
         return
       }
 
@@ -995,7 +997,7 @@ function useSpringCarousel({
       initializeCarousel()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialStartingPosition, itemsPerSlide, startEndGutter, gutter, init, withLoop])
+  }, [initialStartingPosition, itemsPerSlide, startEndGutter, gutter, init, withLoop, slideType])
 
   useEffect(() => {
     if (!init) return

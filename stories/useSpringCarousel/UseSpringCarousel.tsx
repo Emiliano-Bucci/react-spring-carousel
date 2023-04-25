@@ -48,15 +48,10 @@ const mockedItems = [
 
 export type Props = {
   init: boolean
-  withLoop: boolean
-  itemsPerSlide: number
+  itemsWidth: number
   slideType: SlideType
-  initialActiveItem: number
-  gutter: number
-  startEndGutter: number
-  disableGestures?: boolean
-  slideWhenThresholdIsReached?: boolean
-  itemsWidth?: number
+  itemsPerSlide: number
+  withLoop: boolean
 }
 
 export function UseSpringCarousel({ itemsWidth, ...rest }: Props) {

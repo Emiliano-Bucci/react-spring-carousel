@@ -44,7 +44,7 @@ export type SpringCarouselWithNoThumbs<T extends 'use-spring' | 'use-transition'
 }
 export type SpringCarouselWithFixedItems = {
   slideType?: SlideType[0]
-  itemsPerSlide?: number
+  itemsPerSlide?: number | undefined
   startEndGutter?: number
   initialActiveItem?: number
 }
@@ -78,7 +78,7 @@ export type SpringCarouselNoFreeScroll = {
   slideType?: SlideType
   enableFreeScrollDrag?: never
   initialActiveItem?: number
-  itemsPerSlide?: number
+  itemsPerSlide?: number | undefined
   animateWhenActiveItemChange?: boolean
   slideWhenThresholdIsReached?: boolean
 }
