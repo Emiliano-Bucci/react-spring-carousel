@@ -29,6 +29,7 @@ export type UseSpringFreeScrollReturnType = {
 }
 
 export type SlideType = 'fixed' | 'fluid'
+export type StartingPosition = 'start' | 'center' | 'end'
 
 export type SpringCarouselWithThumbs<T extends 'use-spring' | 'use-transition' = 'use-spring'> = {
   withThumbs: true
@@ -56,7 +57,7 @@ export type SpringCarouselWithNoFixedItems = {
 }
 export type SpringCarouselWithLoop = {
   withLoop: true
-  initialStartingPosition?: 'start' | 'center' | 'end'
+  initialStartingPosition?: StartingPosition
 }
 export type SpringCarouselWithNoLoop = {
   withLoop?: false | undefined

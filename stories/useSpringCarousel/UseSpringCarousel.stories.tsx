@@ -11,6 +11,13 @@ const meta: Meta<Props> = {
     slideType: 'fixed',
     itemsPerSlide: 1,
     withLoop: false,
+    initialActiveItem: 0,
+    animateWhenActiveItemChange: true,
+    gutter: 0,
+    startEndGutter: 0,
+    disableGestures: false,
+    initialStartingPosition: 'start',
+    slideWhenThresholdIsReached: false,
   },
   argTypes: {
     init: {
@@ -30,6 +37,15 @@ const meta: Meta<Props> = {
       control: 'radio',
       options: ['fixed', 'fluid'],
     },
+    initialStartingPosition: {
+      defaultValue: 'start',
+      control: 'radio',
+      options: ['start', 'center', 'end'],
+      if: {
+        arg: 'slideType',
+        eq: 'fixed',
+      },
+    },
     itemsPerSlide: {
       defaultValue: 1,
       control: 'number',
@@ -42,56 +58,36 @@ const meta: Meta<Props> = {
       defaultValue: false,
       control: 'boolean',
     },
+    initialActiveItem: {
+      defaultValue: 0,
+      control: 'number',
+    },
+    animateWhenActiveItemChange: {
+      defaultValue: true,
+      control: 'boolean',
+    },
+    gutter: {
+      defaultValue: 0,
+      control: 'number',
+    },
+    startEndGutter: {
+      defaultValue: 0,
+      control: 'number',
+    },
+    disableGestures: {
+      defaultValue: false,
+      control: 'boolean',
+    },
+    slideWhenThresholdIsReached: {
+      defaultValue: false,
+      control: 'boolean',
+    },
     // freeScroll: {
     //   defaultValue: false,
     //   control: 'boolean',
     //   if: {
     //     arg: 'slideType',
     //     eq: 'fluid',
-    //   },
-    // },
-
-    // initialActiveItem: {
-    //   defaultValue: 0,
-    //   control: {
-    //     type: 'number',
-    //   },
-    // },
-    // animateWhenActiveItemChange: {
-    //   defaultValue: true,
-    //   control: {
-    //     type: 'boolean',
-    //   },
-    // },
-    // gutter: {
-    //   defaultValue: 0,
-    //   control: {
-    //     type: 'number',
-    //   },
-    // },
-    // startEndGutter: {
-    //   defaultValue: 0,
-    //   control: 'number',
-    // },
-    // initialStartingPosition: {
-    //   defaultValue: 'start',
-    //   control: 'radio',
-    //   options: ['start', 'center', 'end'],
-    //   if: {
-    //     arg: 'slideType',
-    //     eq: 'fixed',
-    //   },
-    // },
-    // disableGestures: {
-    //   defaultValue: false,
-    //   control: {
-    //     type: 'boolean',
-    //   },
-    // },
-    // slideWhenThresholdIsReached: {
-    //   defaultValue: false,
-    //   control: {
-    //     type: 'boolean',
     //   },
     // },
   },

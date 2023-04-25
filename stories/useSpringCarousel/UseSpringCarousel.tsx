@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { SlideType } from '../../src/types'
+import { StartingPosition } from '../../src/types/useSpringCarousel.types'
 import { useSpringCarousel } from '../../src/useSpringCarousel'
 
 const mockedItems = [
@@ -50,8 +51,15 @@ export type Props = {
   init: boolean
   itemsWidth: number
   slideType: SlideType
+  initialStartingPosition: StartingPosition
   itemsPerSlide: number
   withLoop: boolean
+  initialActiveItem: number
+  animateWhenActiveItemChange: boolean
+  gutter: number
+  startEndGutter: number
+  disableGestures: boolean
+  slideWhenThresholdIsReached: boolean
 }
 
 export function UseSpringCarousel({ itemsWidth, ...rest }: Props) {
