@@ -18,6 +18,8 @@ const meta: Meta<Props> = {
     disableGestures: false,
     initialStartingPosition: 'start',
     slideWhenThresholdIsReached: false,
+    freeScroll: false,
+    enableFreeScrollDrag: false,
   },
   argTypes: {
     init: {
@@ -41,18 +43,10 @@ const meta: Meta<Props> = {
       defaultValue: 'start',
       control: 'radio',
       options: ['start', 'center', 'end'],
-      if: {
-        arg: 'slideType',
-        eq: 'fixed',
-      },
     },
     itemsPerSlide: {
       defaultValue: 1,
       control: 'number',
-      if: {
-        arg: 'slideType',
-        eq: 'fixed',
-      },
     },
     withLoop: {
       defaultValue: false,
@@ -82,14 +76,14 @@ const meta: Meta<Props> = {
       defaultValue: false,
       control: 'boolean',
     },
-    // freeScroll: {
-    //   defaultValue: false,
-    //   control: 'boolean',
-    //   if: {
-    //     arg: 'slideType',
-    //     eq: 'fluid',
-    //   },
-    // },
+    freeScroll: {
+      defaultValue: false,
+      control: 'boolean',
+    },
+    enableFreeScrollDrag: {
+      defaultValue: false,
+      control: 'boolean',
+    },
   },
 }
 

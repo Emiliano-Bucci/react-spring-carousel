@@ -993,11 +993,33 @@ function useSpringCarousel({
    */
   useEffect(() => {
     if (init) {
+      if (withLoop && freeScroll) {
+        throw new Error("`withLoop` and `freeScroll` can't be used together.")
+      }
+      if (freeScroll && slideType === 'fixed') {
+        throw new Error("`freeScroll` can't be used when `scrollType=fixed`.")
+      }
+      if (enableFreeScrollDrag && (slideType !== 'fluid' || !freeScroll)) {
+        throw new Error(
+          '`enableFreeScrollDrag` must be used with `slideType=fluid` and `freeScroll=true`',
+        )
+      }
+
       resizeByPropChange.current = true
       initializeCarousel()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialStartingPosition, itemsPerSlide, startEndGutter, gutter, init, withLoop, slideType])
+  }, [
+    initialStartingPosition,
+    itemsPerSlide,
+    startEndGutter,
+    gutter,
+    init,
+    withLoop,
+    slideType,
+    freeScroll,
+    enableFreeScrollDrag,
+  ])
 
   useEffect(() => {
     if (!init) return

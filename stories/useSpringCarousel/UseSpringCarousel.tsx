@@ -60,9 +60,12 @@ export type Props = {
   startEndGutter: number
   disableGestures: boolean
   slideWhenThresholdIsReached: boolean
+  freeScroll: boolean
+  enableFreeScrollDrag: boolean
 }
 
 export function UseSpringCarousel({ itemsWidth, ...rest }: Props) {
+  // @ts-ignore
   const { carouselFragment, slideToNextItem, slideToPrevItem } = useSpringCarousel({
     items: mockedItems.map((i) => ({
       id: i.id,
