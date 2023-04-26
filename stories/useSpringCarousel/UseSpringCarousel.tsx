@@ -62,6 +62,7 @@ export type Props = {
   slideWhenThresholdIsReached: boolean
   freeScroll: boolean
   enableFreeScrollDrag: boolean
+  slideGroupOfItems: boolean
 }
 
 export function UseSpringCarousel({ itemsWidth, ...rest }: Props) {

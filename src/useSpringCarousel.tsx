@@ -58,6 +58,7 @@ function useSpringCarousel({
   initialActiveItem = 0,
   animateWhenActiveItemChange = true,
   getControllerRef,
+  slideGroupOfItems = false,
 }: UseSpringCarouselComplete): ReturnType<typeof freeScroll> {
   const itemsPerSlide = _itemsPerSlide > items.length ? items.length : _itemsPerSlide
   const resizeByPropChange = useRef(false)
@@ -166,7 +167,9 @@ function useSpringCarousel({
     }
   }
   const getSlideValue = useCallback(() => {
-    const carouselItem = mainCarouselWrapperRef.current?.querySelector('.use-spring-carousel-item')
+    const carouselItem = slideGroupOfItems
+      ? mainCarouselWrapperRef.current
+      : mainCarouselWrapperRef.current?.querySelector('.use-spring-carousel-item')
 
     if (!carouselItem) {
       throw Error('No carousel items available!')
@@ -175,7 +178,7 @@ function useSpringCarousel({
     return (
       carouselItem.getBoundingClientRect()[carouselSlideAxis === 'x' ? 'width' : 'height'] + gutter
     )
-  }, [carouselSlideAxis, gutter])
+  }, [carouselSlideAxis, gutter, slideGroupOfItems])
 
   type SlideToItem = {
     from: number
@@ -1004,6 +1007,9 @@ function useSpringCarousel({
           '`enableFreeScrollDrag` must be used with `slideType=fluid` and `freeScroll=true`',
         )
       }
+      if (slideGroupOfItems && freeScroll) {
+        throw new Error("`slideGroupOfItems` and `freeScroll` can't be used together.")
+      }
 
       resizeByPropChange.current = true
       initializeCarousel()
@@ -1019,6 +1025,7 @@ function useSpringCarousel({
     slideType,
     freeScroll,
     enableFreeScrollDrag,
+    slideGroupOfItems,
   ])
 
   useEffect(() => {

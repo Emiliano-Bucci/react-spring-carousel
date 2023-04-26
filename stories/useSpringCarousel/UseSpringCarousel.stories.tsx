@@ -20,6 +20,7 @@ const meta: Meta<Props> = {
     slideWhenThresholdIsReached: false,
     freeScroll: false,
     enableFreeScrollDrag: false,
+    slideGroupOfItems: false,
   },
   argTypes: {
     init: {
@@ -69,6 +70,10 @@ const meta: Meta<Props> = {
       control: 'number',
     },
     disableGestures: {
+      defaultValue: false,
+      control: 'boolean',
+    },
+    slideGroupOfItems: {
       defaultValue: false,
       control: 'boolean',
     },
