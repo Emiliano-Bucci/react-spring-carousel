@@ -175,10 +175,17 @@ function useSpringCarousel({
       throw Error('No carousel items available!')
     }
 
-    return (
-      carouselItem.getBoundingClientRect()[carouselSlideAxis === 'x' ? 'width' : 'height'] + gutter
-    )
-  }, [carouselSlideAxis, gutter, slideGroupOfItems])
+    let main = carouselItem.getBoundingClientRect()[carouselSlideAxis === 'x' ? 'width' : 'height']
+
+    if (!slideGroupOfItems) {
+      main += gutter
+    }
+    if (slideGroupOfItems) {
+      main += gutter - startEndGutter * 2
+    }
+
+    return main
+  }, [carouselSlideAxis, gutter, slideGroupOfItems, startEndGutter])
 
   type SlideToItem = {
     from: number
@@ -606,6 +613,8 @@ function useSpringCarousel({
       const nextItemTreshold = currentMovement < -draggingSlideTreshold.current
       const tot = getTotalScrollValue()
 
+      const velocity = state.velocity
+
       if (isDragging) {
         if (direction > 0) {
           slideActionType.current = 'prev'
@@ -629,7 +638,7 @@ function useSpringCarousel({
                 val: 0,
               },
               config: {
-                velocity: state.velocity,
+                velocity: velocity,
                 friction: 50,
                 tension: 1000,
               },
@@ -646,7 +655,7 @@ function useSpringCarousel({
               val: -movement,
             },
             config: {
-              velocity: state.velocity,
+              velocity: velocity,
               friction: 50,
               tension: 1000,
             },
@@ -657,7 +666,7 @@ function useSpringCarousel({
         setSpring.start({
           val: movement,
           config: {
-            velocity: state.velocity,
+            velocity: velocity,
             friction: 50,
             tension: 1000,
           },
@@ -689,7 +698,7 @@ function useSpringCarousel({
             val: 0,
           },
           config: {
-            velocity: state.velocity,
+            velocity: velocity,
             friction: 50,
             tension: 1000,
           },
@@ -711,7 +720,7 @@ function useSpringCarousel({
               val: -getTotalScrollValue(),
               config: {
                 ...config.default,
-                velocity: state.velocity,
+                velocity: velocity,
               },
             })
           } else {
@@ -723,7 +732,7 @@ function useSpringCarousel({
               val: 0,
               config: {
                 ...config.default,
-                velocity: state.velocity,
+                velocity: velocity,
               },
             })
           } else {
@@ -734,7 +743,7 @@ function useSpringCarousel({
             val: prevSlidedValue.current,
             config: {
               ...config.default,
-              velocity: state.velocity,
+              velocity: velocity,
             },
           })
         }
@@ -744,7 +753,7 @@ function useSpringCarousel({
           val: prevSlidedValue.current,
           config: {
             ...config.default,
-            velocity: state.velocity,
+            velocity: velocity,
           },
         })
       }
