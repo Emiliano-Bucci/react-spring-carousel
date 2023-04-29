@@ -1,7 +1,6 @@
 import React from 'react'
 
-import { SlideType } from '../../src/types'
-import { Complete, StartingPosition } from '../../src/types/useSpringCarousel.types'
+import { Complete } from '../../src/types/useSpringCarousel.types'
 import { useSpringCarousel } from '../../src/useSpringCarousel'
 
 const mockedItems = [
@@ -51,7 +50,8 @@ export type Props = {
   itemsWidth: number
 }
 
-export function UseSpringCarousel({ itemsWidth, ...rest }: Complete & Props) {
+export function UseSpringCarousel({ itemsWidth, ...rest }: Omit<Complete, 'items'> & Props) {
+  // @ts-ignore
   const { carouselFragment, slideToNextItem, slideToPrevItem } = useSpringCarousel({
     items: mockedItems.map((i) => ({
       id: i.id,
@@ -67,17 +67,12 @@ export function UseSpringCarousel({ itemsWidth, ...rest }: Complete & Props) {
         </div>
       ),
     })),
+    ...rest,
   })
 
   return (
     <div className="container">
-      <button
-        onClick={() => {
-          slideToPrevItem()
-        }}
-      >
-        PREV
-      </button>
+      <button onClick={() => slideToPrevItem()}>PREV</button>
       <div className="carousel-wrapper">{carouselFragment}</div>
       <button onClick={() => slideToNextItem()}>NEXT</button>
     </div>

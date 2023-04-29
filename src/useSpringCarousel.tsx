@@ -20,7 +20,6 @@ import {
   FixedWithNoLoop,
   FluidWithFreeScroll,
   FluidWithNoFreeScroll,
-  Total,
 } from './types/useSpringCarousel.types'
 
 type ReturnType<T> = T extends true ? UseSpringFreeScrollReturnType : UseSpringReturnType
@@ -54,7 +53,7 @@ function useSpringCarousel({
   animateWhenActiveItemChange = true,
   slideGroupOfItems = false,
   slideAmount,
-}: Total): ReturnType<typeof freeScroll> {
+}: Complete): ReturnType<typeof freeScroll> {
   const itemsPerSlide = _itemsPerSlide > items.length ? items.length : _itemsPerSlide
   const resizeByPropChange = useRef(false)
   const draggingSlideTreshold = useRef(_draggingSlideTreshold ?? 0)
