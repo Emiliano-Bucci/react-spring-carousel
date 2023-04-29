@@ -28,70 +28,10 @@ export type UseSpringFreeScrollReturnType = {
   slideToPrevItem(animate?: boolean): void
 }
 
-export type SlideType = 'fixed' | 'fluid'
+const NSlideType = ['fixed', 'fluid'] as const
+export type SlideType = (typeof NSlideType)[number]
+export type SlideAxis = 'x' | 'y'
 export type StartingPosition = 'start' | 'center' | 'end'
-
-export type SpringCarouselWithThumbs<T extends 'use-spring' | 'use-transition' = 'use-spring'> = {
-  withThumbs: true
-  thumbsSlideAxis?: 'x' | 'y'
-  items: ItemWithThumb<T>[]
-  prepareThumbsData?: PrepareThumbsData<T>
-}
-export type SpringCarouselWithNoThumbs<T extends 'use-spring' | 'use-transition' = 'use-spring'> = {
-  withThumbs?: false | undefined
-  thumbsSlideAxis?: never
-  items: ItemWithNoThumb<T>[]
-  prepareThumbsData?: never
-}
-export type SpringCarouselWithFixedItems = {
-  slideType?: SlideType[0]
-  itemsPerSlide?: number | undefined
-  slideGroupOfItems?: boolean | undefined
-  startEndGutter?: number
-  initialActiveItem?: number
-}
-export type SpringCarouselWithNoFixedItems = {
-  slideType?: SlideType[1]
-  itemsPerSlide?: never
-  slideGroupOfItems?: never
-  startEndGutter?: never
-  initialActiveItem?: never
-}
-export type SpringCarouselWithLoop = {
-  withLoop: true
-  initialStartingPosition?: StartingPosition
-}
-export type SpringCarouselWithNoLoop = {
-  withLoop?: false | undefined
-  initialStartingPosition?: never
-}
-export type SpringCarouselFreeScroll = {
-  freeScroll: true
-  withLoop?: never
-  slideType?: never
-  enableFreeScrollDrag?: true | false
-  initialActiveItem?: never
-  itemsPerSlide?: never
-  animateWhenActiveItemChange?: never
-  slideWhenThresholdIsReached?: never
-}
-export type SpringCarouselNoFreeScroll = {
-  freeScroll?: never | false | undefined
-  withLoop?: boolean
-  slideType?: SlideType
-  enableFreeScrollDrag?: never
-  initialActiveItem?: number
-  itemsPerSlide?: number | undefined
-  slideGroupOfItems?: never
-  animateWhenActiveItemChange?: boolean
-  slideWhenThresholdIsReached?: boolean
-}
-
-export type ControllerRef = {
-  slideToNextItem: UseSpringReturnType['slideToNextItem']
-  slideToPrevItem: UseSpringReturnType['slideToPrevItem']
-  slideToItem?: UseSpringReturnType['slideToItem']
-}
 
 export type BaseProps = {
   init?: boolean
@@ -100,40 +40,82 @@ export type BaseProps = {
   draggingSlideTreshold?: number
   disableGestures?: boolean
   startEndGutter?: number
-  getControllerRef?(ref: ControllerRef): void
+  animateWhenActiveItemChange?: boolean
+  slideWhenThresholdIsReached?: boolean
 }
 
-type ScrollType<T> = T extends true ? SpringCarouselFreeScroll : SpringCarouselNoFreeScroll
+type Fixed = {
+  slideType: (typeof NSlideType)[0]
+  itemsPerSlide?: number
+  slideGroupOfItems?: boolean
+  startEndGutter?: number
+  initialActiveItem?: number
+  /** @deprecated Musts be used with slideType: fluid */
+  freeScroll?: never
+  /** @deprecated Musts be used with slideType: fluid */
+  slideAmount?: never
+}
 
-export type UseSpringCarouselWithThumbs<T> = BaseProps &
-  SpringCarouselWithThumbs &
-  ScrollType<T> &
-  (SpringCarouselWithFixedItems | SpringCarouselWithNoFixedItems) &
-  (SpringCarouselWithLoop | SpringCarouselWithNoLoop)
-export type UseSpringCarouselWithNoThumbs<T> = BaseProps &
-  SpringCarouselWithNoThumbs &
-  ScrollType<T> &
-  (SpringCarouselWithFixedItems | SpringCarouselWithNoFixedItems) &
-  (SpringCarouselWithLoop | SpringCarouselWithNoLoop)
+type WithThumbs = {
+  withThumbs: true
+  items: ItemWithThumb<'use-spring'>[]
+  thumbsSlideAxis?: SlideAxis
+  prepareThumbsData?: PrepareThumbsData<'use-spring'>
+}
+type WithNoThumbs = {
+  withThumbs?: false | undefined
+  items: ItemWithNoThumb<'use-spring'>[]
+  /** @deprecated Must be used with withThumbs: true */
+  thumbsSlideAxis?: never
+  /** @deprecated Must be used with withThumbs: true */
+  prepareThumbsData?: never
+}
 
-export type UseSpringCarouselWithFixedItems<T> = BaseProps &
-  SpringCarouselWithFixedItems &
-  ScrollType<T> &
-  (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs) &
-  (SpringCarouselWithLoop | SpringCarouselWithNoLoop)
+type CommonBase = BaseProps & (WithThumbs | WithNoThumbs)
 
-export type UseSpringCarouselWithNoFixedItems<T> = BaseProps &
-  SpringCarouselWithNoFixedItems &
-  ScrollType<T> &
-  (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs) &
-  (SpringCarouselWithLoop | SpringCarouselWithNoLoop)
+export type FixedWithLoop = CommonBase &
+  Fixed & {
+    withLoop: true
+    initialStartingPosition?: StartingPosition
+  }
+export type FixedWithNoLoop = CommonBase &
+  Fixed & {
+    withLoop?: false
+  }
+export type FluidWithFreeScroll = CommonBase & {
+  slideType: (typeof NSlideType)[1]
+  freeScroll: true
+  slideAmount?: number
+  enableFreeScrollDrag?: boolean
+  /** @deprecated Can't be used with freeScroll: true */
+  withLoop?: never
+  /** @deprecated Can't be used with slideType: fluid */
+  initialActiveItem?: never
+  /** @deprecated Should be used with slideType: fixed and withLoop: true */
+  initialStartingPosition?: never
+}
+export type FluidWithNoFreeScroll = CommonBase & {
+  slideType?: (typeof NSlideType)[1]
+  withLoop?: boolean
+  freeScroll?: false
+  /** @deprecated Can't be used with slideType: fluid */
+  initialActiveItem?: never
+  /** @deprecated Should be used with slideType: fixed and withLoop: true */
+  initialStartingPosition?: never
+}
 
-export type UseSpringCarouselWithFreeScroll = BaseProps &
-  SpringCarouselFreeScroll &
-  (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs)
+export type Complete = FixedWithLoop | FixedWithNoLoop | FluidWithFreeScroll | FluidWithNoFreeScroll
 
-export type UseSpringCarouselComplete = BaseProps &
-  (SpringCarouselWithThumbs | SpringCarouselWithNoThumbs) &
-  (SpringCarouselWithFixedItems | SpringCarouselWithNoFixedItems) &
-  (SpringCarouselWithLoop | SpringCarouselWithNoLoop) &
-  (SpringCarouselFreeScroll | SpringCarouselNoFreeScroll)
+export type Total = CommonBase & {
+  slideType?: SlideType
+  withLoop?: boolean
+  freeScroll?: boolean
+  slideAmount?: number
+  itemsPerSlide?: number
+  slideGroupOfItems?: boolean
+  startEndGutter?: number
+  initialActiveItem?: number
+  initialStartingPosition?: StartingPosition
+  enableFreeScrollDrag?: boolean
+  thumbsSlideAxis?: SlideAxis
+}

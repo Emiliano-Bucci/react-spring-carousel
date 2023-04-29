@@ -11,31 +11,26 @@ import {
   SlideActionType,
   SlideMode,
   SlideType,
-  UseSpringCarouselComplete,
-  UseSpringCarouselWithFixedItems,
-  UseSpringCarouselWithFreeScroll,
-  UseSpringCarouselWithNoFixedItems,
-  UseSpringCarouselWithNoThumbs,
-  UseSpringCarouselWithThumbs,
   UseSpringFreeScrollReturnType,
   UseSpringReturnType,
 } from './types'
+import {
+  Complete,
+  FixedWithLoop,
+  FixedWithNoLoop,
+  FluidWithFreeScroll,
+  FluidWithNoFreeScroll,
+  Total,
+} from './types/useSpringCarousel.types'
 
 type ReturnType<T> = T extends true ? UseSpringFreeScrollReturnType : UseSpringReturnType
 
-/**
- * With free scroll
- */
-function useSpringCarousel(props: UseSpringCarouselWithFreeScroll): ReturnType<true>
-function useSpringCarousel(props: UseSpringCarouselWithThumbs<true>): ReturnType<true>
-function useSpringCarousel(props: UseSpringCarouselWithNoThumbs<true>): ReturnType<true>
-/**
- * No free scroll
- */
-function useSpringCarousel(props: UseSpringCarouselWithThumbs<false>): ReturnType<false>
-function useSpringCarousel(props: UseSpringCarouselWithNoThumbs<false>): ReturnType<false>
-function useSpringCarousel(props: UseSpringCarouselWithFixedItems<false>): ReturnType<false>
-function useSpringCarousel(props: UseSpringCarouselWithNoFixedItems<false>): ReturnType<false>
+function useSpringCarousel(props: FixedWithLoop): ReturnType<false>
+function useSpringCarousel(props: FixedWithNoLoop): ReturnType<false>
+function useSpringCarousel(props: FluidWithFreeScroll): ReturnType<true>
+function useSpringCarousel(props: FluidWithNoFreeScroll): ReturnType<false>
+function useSpringCarousel(props: Complete): ReturnType<true>
+function useSpringCarousel(props: Complete): ReturnType<false>
 
 function useSpringCarousel({
   items,
@@ -57,9 +52,9 @@ function useSpringCarousel({
   prepareThumbsData,
   initialActiveItem = 0,
   animateWhenActiveItemChange = true,
-  getControllerRef,
   slideGroupOfItems = false,
-}: UseSpringCarouselComplete): ReturnType<typeof freeScroll> {
+  slideAmount,
+}: Total): ReturnType<typeof freeScroll> {
   const itemsPerSlide = _itemsPerSlide > items.length ? items.length : _itemsPerSlide
   const resizeByPropChange = useRef(false)
   const draggingSlideTreshold = useRef(_draggingSlideTreshold ?? 0)
@@ -167,6 +162,14 @@ function useSpringCarousel({
     }
   }
   const getSlideValue = useCallback(() => {
+    if (
+      typeof slideAmount === 'number' &&
+      slideAmount > 0 &&
+      (slideType === 'fluid' || freeScroll)
+    ) {
+      return slideAmount
+    }
+
     const carouselItem = slideGroupOfItems
       ? mainCarouselWrapperRef.current
       : mainCarouselWrapperRef.current?.querySelector('.use-spring-carousel-item')
@@ -185,7 +188,15 @@ function useSpringCarousel({
     }
 
     return main
-  }, [carouselSlideAxis, gutter, slideGroupOfItems, startEndGutter])
+  }, [
+    carouselSlideAxis,
+    freeScroll,
+    gutter,
+    slideAmount,
+    slideGroupOfItems,
+    slideType,
+    startEndGutter,
+  ])
 
   type SlideToItem = {
     from: number
@@ -1019,6 +1030,9 @@ function useSpringCarousel({
       if (slideGroupOfItems && freeScroll) {
         throw new Error("`slideGroupOfItems` and `freeScroll` can't be used together.")
       }
+      if (typeof slideAmount === 'number' && slideAmount > 0 && slideType === 'fixed') {
+        throw new Error('`slideAmount` must be used with slideType=fluid')
+      }
 
       resizeByPropChange.current = true
       initializeCarousel()
@@ -1076,15 +1090,6 @@ function useSpringCarousel({
       }
     }
   }, [adjustCarouselWrapperPosition, getTotalScrollValue])
-  useEffect(() => {
-    if (getControllerRef) {
-      getControllerRef({
-        slideToNextItem: res.slideToNextItem,
-        slideToPrevItem: res.slideToPrevItem,
-        slideToItem: res?.slideToItem,
-      })
-    }
-  }, [getControllerRef, res.slideToItem, res.slideToNextItem, res.slideToPrevItem])
 
   const _thumbsFragment = <Context.Provider value={res}>{thumbsFragment}</Context.Provider>
   const carouselFragment = (

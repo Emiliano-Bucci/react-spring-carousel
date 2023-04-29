@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { SlideType } from '../../src/types'
-import { StartingPosition } from '../../src/types/useSpringCarousel.types'
+import { Complete, StartingPosition } from '../../src/types/useSpringCarousel.types'
 import { useSpringCarousel } from '../../src/useSpringCarousel'
 
 const mockedItems = [
@@ -48,25 +48,10 @@ const mockedItems = [
 ]
 
 export type Props = {
-  init: boolean
   itemsWidth: number
-  slideType: SlideType
-  initialStartingPosition: StartingPosition
-  itemsPerSlide: number
-  withLoop: boolean
-  initialActiveItem: number
-  animateWhenActiveItemChange: boolean
-  gutter: number
-  startEndGutter: number
-  disableGestures: boolean
-  slideWhenThresholdIsReached: boolean
-  freeScroll: boolean
-  enableFreeScrollDrag: boolean
-  slideGroupOfItems: boolean
 }
 
-export function UseSpringCarousel({ itemsWidth, ...rest }: Props) {
-  // @ts-ignore
+export function UseSpringCarousel({ itemsWidth, ...rest }: Complete & Props) {
   const { carouselFragment, slideToNextItem, slideToPrevItem } = useSpringCarousel({
     items: mockedItems.map((i) => ({
       id: i.id,
@@ -82,7 +67,6 @@ export function UseSpringCarousel({ itemsWidth, ...rest }: Props) {
         </div>
       ),
     })),
-    ...rest,
   })
 
   return (

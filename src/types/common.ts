@@ -35,6 +35,8 @@ export type ItemWithThumb<T extends 'use-spring' | 'use-transition'> = {
 export type ItemWithNoThumb<T extends 'use-spring' | 'use-transition'> = {
   id: string
   renderItem: ReactNode | RenderItemFn<T>
+  /** @deprecated Must be used with withThumbs: true */
+  renderThumb?: never
 }
 
 export type PrepareThumbsData<T extends 'use-spring' | 'use-transition'> = (

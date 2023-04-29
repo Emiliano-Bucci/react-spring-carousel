@@ -1,8 +1,9 @@
 import type { Meta } from '@storybook/react'
 
+import { Total } from '../../src/types'
 import { Props, UseSpringCarousel } from './UseSpringCarousel'
 
-const meta: Meta<Props> = {
+const meta: Meta<Total & Props> = {
   title: 'UseSpringCarousel',
   component: UseSpringCarousel,
   args: {
@@ -21,6 +22,7 @@ const meta: Meta<Props> = {
     freeScroll: false,
     enableFreeScrollDrag: false,
     slideGroupOfItems: false,
+    slideAmount: 0,
   },
   argTypes: {
     init: {
@@ -88,6 +90,10 @@ const meta: Meta<Props> = {
     enableFreeScrollDrag: {
       defaultValue: false,
       control: 'boolean',
+    },
+    slideAmount: {
+      defaultValue: 0,
+      control: 'number',
     },
   },
 }
