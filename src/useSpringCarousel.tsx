@@ -1019,18 +1019,18 @@ function useSpringCarousel({
         throw new Error("`withLoop` and `freeScroll` can't be used together.")
       }
       if (freeScroll && slideType === 'fixed') {
-        throw new Error("`freeScroll` can't be used when `scrollType=fixed`.")
+        throw new Error("`freeScroll` can't be used when `scrollType: fixed`.")
       }
       if (enableFreeScrollDrag && (slideType !== 'fluid' || !freeScroll)) {
         throw new Error(
-          '`enableFreeScrollDrag` must be used with `slideType=fluid` and `freeScroll=true`',
+          '`enableFreeScrollDrag` must be used with `slideType: fluid` and `freeScroll=true`',
         )
       }
       if (slideGroupOfItems && freeScroll) {
         throw new Error("`slideGroupOfItems` and `freeScroll` can't be used together.")
       }
       if (typeof slideAmount === 'number' && slideAmount > 0 && slideType === 'fixed') {
-        throw new Error('`slideAmount` must be used with slideType=fluid')
+        throw new Error('`slideAmount` must be used with `slideType: fluid`')
       }
 
       resizeByPropChange.current = true

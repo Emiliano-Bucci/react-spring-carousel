@@ -1,12 +1,7 @@
 import { SpringConfig, TransitionFrom, TransitionTo } from '@react-spring/web'
 import { ReactNode } from 'react'
 
-import {
-  ItemWithNoThumb,
-  ItemWithThumb,
-  SpringCarouselWithNoThumbs,
-  SpringCarouselWithThumbs,
-} from '../types'
+import { ItemWithNoThumb, ItemWithThumb } from '../types'
 import { UseListenToCustomEvent } from './useEventsModule.types'
 
 type Item = ItemWithThumb<'use-transition'> | ItemWithNoThumb<'use-transition'>
@@ -32,8 +27,9 @@ type BaseProps = {
   activeItem?: number
 }
 
-export type UseTransitionCarouselProps = BaseProps &
-  (SpringCarouselWithThumbs<'use-transition'> | SpringCarouselWithNoThumbs<'use-transition'>)
+export type UseTransitionCarouselProps = BaseProps & {
+  items: ItemWithNoThumb<'use-transition'>[] | ItemWithThumb<'use-transition'>[]
+}
 
 export type UseTransitionCarouselReturnProps = {
   useListenToCustomEvent: UseListenToCustomEvent<'use-transition'>['useListenToCustomEvent']
