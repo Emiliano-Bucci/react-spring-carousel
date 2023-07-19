@@ -1134,7 +1134,7 @@ function useSpringCarousel({
                 style={{
                   display: 'flex',
                   position: 'relative',
-                  flex: '1',
+                  ...(slideType === 'fixed' ? { flex: '1' } : {}),
                   ...getItemStyles(
                     index ===
                       internalItems.findIndex(
