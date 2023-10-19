@@ -1127,34 +1127,22 @@ function useSpringCarousel({
             />
           ) : null}
           {internalItems.map((item, index) => {
-            const itemStyles = {
-              display: 'flex',
-              position: 'relative',
-              ...(slideType === 'fixed' ? { flex: '1' } : {}),
-              ...getItemStyles(
-                index ===
-                  internalItems.findIndex(
-                    (i) => i.id === internalItems[internalItems.length - 1].id,
-                  ),
-              ),
-            }
-
             return (
               <Fragment key={`${item.id}-${index}`}>
-                <style
-                  dangerouslySetInnerHTML={{
-                    __html: `
-                        .use-spring-carousel-item {
-                          ${Object.entries(itemStyles)
-                            .map(([k, v]) => `${k}:${v}`)
-                            .join(';')}
-                        }  
-                    `.trim(),
-                  }}
-                />
                 <div
                   className="use-spring-carousel-item"
                   data-testid="use-spring-carousel-item-wrapper"
+                  style={{
+                    display: 'flex',
+                    position: 'relative',
+                    ...(slideType === 'fixed' ? { flex: '1' } : {}),
+                    ...getItemStyles(
+                      index ===
+                        internalItems.findIndex(
+                          (i) => i.id === internalItems[internalItems.length - 1].id,
+                        ),
+                    ),
+                  }}
                 >
                   {typeof item.renderItem === 'function'
                     ? item.renderItem({
