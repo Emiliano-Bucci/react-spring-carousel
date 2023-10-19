@@ -23,7 +23,7 @@
   "ignorePatterns": ["dist"],
   "plugins": ["react", "@typescript-eslint", "react-hooks", "prettier", "simple-import-sort"],
   "rules": {
-    "camelcase": "error",
+    "camelcase": "off",
     "no-duplicate-imports": "error",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-explicit-any": "off",

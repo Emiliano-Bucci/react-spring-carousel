@@ -49,6 +49,8 @@ type Fixed = {
   itemsPerSlide?: number
   slideGroupOfItems?: boolean
   startEndGutter?: number
+  /** For testint purposes */
+  __unstable_stretch_tems__?: boolean
   initialActiveItem?: number
   /** @deprecated Must be used with slideType: fluid and freeScroll: true */
   enableFreeScrollDrag?: never
@@ -102,9 +104,11 @@ export type FluidWithFreeScroll = Common & {
   initialActiveItem?: never
   /** @deprecated Should be used with slideType: fixed and withLoop: true */
   initialStartingPosition?: never
+  __unstable_stretch_tems__?: never
 }
 export type FluidWithNoFreeScroll = Common & {
   slideType?: (typeof NSlideType)[1]
+  __unstable_stretch_tems__?: never
   withLoop?: boolean
   freeScroll?: false
   enableFreeScrollDrag?: never
@@ -133,4 +137,5 @@ export type Total = Common & {
   initialStartingPosition?: StartingPosition
   enableFreeScrollDrag?: boolean
   thumbsSlideAxis?: SlideAxis
+  __unstable_stretch_tems__?: boolean
 }

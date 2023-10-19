@@ -1,6 +1,6 @@
 import { config, useIsomorphicLayoutEffect, useSpring } from '@react-spring/web'
 import { useDrag } from '@use-gesture/react'
-import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react'
+import React, { createContext, Fragment, useCallback, useContext, useEffect, useRef } from 'react'
 import ResizeObserver from 'resize-observer-polyfill'
 
 import { useEventsModule } from './modules/useEventsModule'
@@ -52,9 +52,10 @@ function useSpringCarousel({
   initialActiveItem = 0,
   animateWhenActiveItemChange = true,
   slideGroupOfItems = false,
+  __unstable_stretch_tems__ = true,
   slideAmount,
 }: Complete): ReturnType<typeof freeScroll> {
-  const itemsPerSlide = _itemsPerSlide > items.length ? items.length : _itemsPerSlide
+  const itemsPerSlide = _itemsPerSlide
   const resizeByPropChange = useRef(false)
   const draggingSlideTreshold = useRef(_draggingSlideTreshold ?? 0)
   const slideActionType = useRef<SlideActionType>('initial')
@@ -151,7 +152,7 @@ function useSpringCarousel({
     if (slideType === 'fixed' && !freeScroll) {
       return {
         marginRight: `${isLastItem ? 0 : gutter}px`,
-        flex: `1 0 calc(100% / ${itemsPerSlide} - ${
+        flex: `${__unstable_stretch_tems__ ? '1' : '0'} 0 calc(100% / ${itemsPerSlide} - ${
           (gutter * (itemsPerSlide - 1)) / itemsPerSlide
         }px)`,
       }
@@ -377,7 +378,6 @@ function useSpringCarousel({
           }
         }
 
-        console.log('here')
         return
       }
 
@@ -1091,6 +1091,7 @@ function useSpringCarousel({
   }, [adjustCarouselWrapperPosition, getTotalScrollValue])
 
   const _thumbsFragment = <Context.Provider value={res}>{thumbsFragment}</Context.Provider>
+
   const carouselFragment = (
     <Context.Provider value={res}>
       <div
@@ -1126,32 +1127,45 @@ function useSpringCarousel({
             />
           ) : null}
           {internalItems.map((item, index) => {
-            return (
-              <div
-                key={`${item.id}-${index}`}
-                className="use-spring-carousel-item"
-                data-testid="use-spring-carousel-item-wrapper"
-                style={{
-                  display: 'flex',
-                  position: 'relative',
-                  ...(slideType === 'fixed' ? { flex: '1' } : {}),
-                  ...getItemStyles(
-                    index ===
-                      internalItems.findIndex(
-                        (i) => i.id === internalItems[internalItems.length - 1].id,
-                      ),
+            const itemStyles = {
+              display: 'flex',
+              position: 'relative',
+              ...(slideType === 'fixed' ? { flex: '1' } : {}),
+              ...getItemStyles(
+                index ===
+                  internalItems.findIndex(
+                    (i) => i.id === internalItems[internalItems.length - 1].id,
                   ),
-                }}
-              >
-                {typeof item.renderItem === 'function'
-                  ? item.renderItem({
-                      getIsActiveItem,
-                      getIsNextItem,
-                      getIsPrevItem,
-                      useListenToCustomEvent,
-                    })
-                  : item.renderItem}
-              </div>
+              ),
+            }
+
+            return (
+              <Fragment key={`${item.id}-${index}`}>
+                <style
+                  dangerouslySetInnerHTML={{
+                    __html: `
+                        .use-spring-carousel-item {
+                          ${Object.entries(itemStyles)
+                            .map(([k, v]) => `${k}:${v}`)
+                            .join(';')}
+                        }  
+                    `.trim(),
+                  }}
+                />
+                <div
+                  className="use-spring-carousel-item"
+                  data-testid="use-spring-carousel-item-wrapper"
+                >
+                  {typeof item.renderItem === 'function'
+                    ? item.renderItem({
+                        getIsActiveItem,
+                        getIsNextItem,
+                        getIsPrevItem,
+                        useListenToCustomEvent,
+                      })
+                    : item.renderItem}
+                </div>
+              </Fragment>
             )
           })}
           {(freeScroll || !withLoop) && startEndGutter ? (

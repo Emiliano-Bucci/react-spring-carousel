@@ -23,8 +23,13 @@ const meta: Meta<Total & Props> = {
     enableFreeScrollDrag: false,
     slideGroupOfItems: false,
     slideAmount: 0,
+    __unstable_stretch_tems__: true,
   },
   argTypes: {
+    __unstable_stretch_tems__: {
+      defaultValue: true,
+      control: 'boolean',
+    },
     init: {
       defaultValue: false,
       control: 'boolean',

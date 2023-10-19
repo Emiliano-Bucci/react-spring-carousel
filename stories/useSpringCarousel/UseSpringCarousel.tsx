@@ -51,9 +51,8 @@ export type Props = {
 }
 
 export function UseSpringCarousel({ itemsWidth, ...rest }: Omit<Complete, 'items'> & Props) {
-  // @ts-ignore
   const { carouselFragment, slideToNextItem, slideToPrevItem } = useSpringCarousel({
-    items: mockedItems.map((i) => ({
+    items: mockedItems.slice(0, 2).map((i) => ({
       id: i.id,
       renderItem: (
         <div
@@ -68,7 +67,7 @@ export function UseSpringCarousel({ itemsWidth, ...rest }: Omit<Complete, 'items
       ),
     })),
     ...rest,
-  })
+  } as Complete)
 
   return (
     <div className="container">
