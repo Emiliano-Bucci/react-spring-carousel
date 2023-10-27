@@ -305,7 +305,7 @@ function useTransitionCarousel({
     if (disableGestures) {
       return 'unset'
     }
-    return 'pan-x'
+    return 'pan-y'
   }
 
   const result = {
