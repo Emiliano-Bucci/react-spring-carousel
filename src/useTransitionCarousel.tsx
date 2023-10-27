@@ -313,6 +313,25 @@ function useTransitionCarousel({
     slideToPrevItem: () => slideToPrevItem('click'),
     slideToNextItem: () => slideToNextItem('click'),
     activeItem,
+    slideToItem: (index: number) => {
+      const itemIndex = findItemIndex(
+        index,
+        "The item you want to slide to doesn't exist; check the provided id.",
+      )
+
+      if (index === activeItem) {
+        return
+      }
+
+      const currentItem = findItemIndex(items[activeItem].id)
+      const newActiveItem = findItemIndex(items[itemIndex].id)
+
+      slideToItem({
+        to: newActiveItem,
+        slideType: newActiveItem > currentItem ? 'next' : 'prev',
+        slideMode: 'click',
+      })
+    },
   }
 
   const _thumbsFragment = <Context.Provider value={result}>{thumbsFragment}</Context.Provider>

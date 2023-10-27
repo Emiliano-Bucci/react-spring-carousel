@@ -38,4 +38,5 @@ export type UseTransitionCarouselReturnProps = {
   activeItem: number
   slideToPrevItem(): void
   slideToNextItem(): void
+  slideToItem(index: number): void
 }
