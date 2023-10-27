@@ -301,6 +301,13 @@ function useTransitionCarousel({
     )
   })
 
+  function getTouchAction() {
+    if (disableGestures) {
+      return 'unset'
+    }
+    return 'pan-x'
+  }
+
   const result = {
     useListenToCustomEvent,
     slideToPrevItem: () => slideToPrevItem('click'),
@@ -311,6 +318,7 @@ function useTransitionCarousel({
   const carouselFragment = (
     <Context.Provider value={result}>
       <div
+        className="use-transition-carousel-wrapper"
         ref={mainCarouselWrapperRef}
         {...bindSwipe()}
         style={{
@@ -319,6 +327,7 @@ function useTransitionCarousel({
           width: '100%',
           height: '100%',
           overflow: 'hidden',
+          touchAction: getTouchAction(),
         }}
       >
         {itemsFragment}
