@@ -312,6 +312,7 @@ function useTransitionCarousel({
     useListenToCustomEvent,
     slideToPrevItem: () => slideToPrevItem('click'),
     slideToNextItem: () => slideToNextItem('click'),
+    activeItem,
   }
 
   const _thumbsFragment = <Context.Provider value={result}>{thumbsFragment}</Context.Provider>

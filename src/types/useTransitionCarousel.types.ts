@@ -35,6 +35,7 @@ export type UseTransitionCarouselReturnProps = {
   useListenToCustomEvent: UseListenToCustomEvent<'use-transition'>['useListenToCustomEvent']
   carouselFragment: ReactNode
   thumbsFragment: ReactNode
+  activeItem: number
   slideToPrevItem(): void
   slideToNextItem(): void
 }
