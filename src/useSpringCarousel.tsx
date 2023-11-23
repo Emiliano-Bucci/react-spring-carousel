@@ -724,7 +724,15 @@ function useSpringCarousel({
         }
       }
       if (state.last && !state.canceled && !freeScroll) {
-        if (nextItemTreshold) {
+        if (itemsPerSlide === items.length) {
+          setSpring.start({
+            val: prevSlidedValue.current,
+            config: {
+              ...config.default,
+              velocity: velocity,
+            },
+          })
+        } else if (nextItemTreshold) {
           if (!withLoop && lastItemReached.current) {
             setSpring.start({
               val: -getTotalScrollValue(),
