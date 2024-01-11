@@ -603,7 +603,7 @@ function useSpringCarousel({
       prevWindowWidth.current = window.innerWidth
       prevSlidedValue.current = 0
 
-      internalSlideToItem({ id: 0, immediate: true, shouldReset: true })
+      internalSlideToItem({ id: activeItem.current, immediate: true, shouldReset: true })
       setDraggingSliderTreshold()
       adjustCarouselWrapperPosition()
     }
