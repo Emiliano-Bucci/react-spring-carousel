@@ -476,10 +476,6 @@ function useSpringCarousel({
 
     const nextItem = typeof index === 'number' ? index : activeItem.current - 1
 
-    if (freeScroll) {
-      setStartEndItemReachedOnFreeScroll()
-    }
-
     if (!withLoop) {
       const nextItemWillExceed = freeScroll
         ? getToValue('prev', index) - getSlideValue() / 3 < 0
@@ -512,12 +508,14 @@ function useSpringCarousel({
       })
       return
     }
-    if (nextItem === 0) {
+
+    if (nextItem === 0 && !freeScroll) {
       firstItemReached.current = true
     }
-    if (nextItem === items.length - 1 || nextItem === -1) {
+    if ((nextItem === items.length - 1 || nextItem === -1) && !freeScroll) {
       lastItemReached.current = true
     }
+
     slideToItem({
       slideMode: type,
       from: getFromValue(),
@@ -537,10 +535,6 @@ function useSpringCarousel({
     firstItemReached.current = false
 
     const nextItem = index || activeItem.current + 1
-
-    if (freeScroll) {
-      setStartEndItemReachedOnFreeScroll()
-    }
 
     if (!withLoop) {
       const nextItemWillExceed =
@@ -573,12 +567,14 @@ function useSpringCarousel({
       })
       return
     }
-    if (nextItem === 0) {
+
+    if (nextItem === 0 && !freeScroll) {
       firstItemReached.current = true
     }
-    if (nextItem === items.length - 1) {
+    if (nextItem === items.length - 1 && !freeScroll) {
       lastItemReached.current = true
     }
+
     slideToItem({
       slideMode: type,
       from: getFromValue(),
@@ -811,6 +807,7 @@ function useSpringCarousel({
     if (mainCarouselWrapperRef.current) {
       prevSlidedValue.current =
         mainCarouselWrapperRef.current[carouselSlideAxis === 'x' ? 'scrollLeft' : 'scrollTop']
+
       if (
         mainCarouselWrapperRef.current[carouselSlideAxis === 'x' ? 'scrollLeft' : 'scrollTop'] === 0
       ) {

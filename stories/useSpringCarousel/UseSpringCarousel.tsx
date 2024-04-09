@@ -51,23 +51,28 @@ export type Props = {
 }
 
 export function UseSpringCarousel({ itemsWidth, ...rest }: Omit<Complete, 'items'> & Props) {
-  const { carouselFragment, slideToNextItem, slideToPrevItem } = useSpringCarousel({
-    items: mockedItems.map((i) => ({
-      id: i.id,
-      renderItem: (
-        <div
-          style={{
-            flex: '1',
-            backgroundColor: i.color,
-            ...(itemsWidth ? { width: itemsWidth } : {}),
-          }}
-        >
-          {i.title}
-        </div>
-      ),
-    })),
-    ...rest,
-  } as Complete)
+  const { carouselFragment, slideToNextItem, slideToPrevItem, useListenToCustomEvent } =
+    useSpringCarousel({
+      items: mockedItems.map((i) => ({
+        id: i.id,
+        renderItem: (
+          <div
+            style={{
+              flex: '1',
+              backgroundColor: i.color,
+              ...(itemsWidth ? { width: itemsWidth } : {}),
+            }}
+          >
+            {i.title}
+          </div>
+        ),
+      })),
+      ...rest,
+    } as Complete)
+
+  useListenToCustomEvent((e) => {
+    console.log(e)
+  })
 
   return (
     <div className="container">
