@@ -19,10 +19,18 @@ const items = [
 ];
 
 export function Main() {
-  const { carouselFragment, slideToPrevItem, slideToNextItem } =
-    useSpringCarousel({
-      items: items,
-    });
+  const {
+    carouselFragment,
+    slideToPrevItem,
+    slideToNextItem,
+    useListenToCustomEvent,
+  } = useSpringCarousel({
+    items: items,
+  });
+
+  useListenToCustomEvent((ev) => {
+    console.log(ev);
+  });
 
   return (
     <div className="wrapper">

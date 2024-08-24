@@ -22,3 +22,5 @@ export type Props = {
   slideType?: SlideType;
   items: Item[];
 } & (FixedSlideTypeProps | FluidSlideTypeProps);
+
+export * from "./events";

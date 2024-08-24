@@ -1,6 +1,7 @@
 import { ElementRef, useEffect, useId, useRef } from "react";
 import { Props } from "./types";
 import { useSpring } from "@react-spring/web";
+import { useEventsModule } from "./useEventsModule";
 
 export function useSpringCarousel({
   init,
@@ -21,6 +22,8 @@ export function useSpringCarousel({
     x: 0,
     y: 0,
   }));
+
+  const { useListenToCustomEvent, emitEvent } = useEventsModule();
 
   const carouselFragment = (
     <>
@@ -76,6 +79,18 @@ export function useSpringCarousel({
       if (type === "next") {
         activeItem.current = activeItem.current + 1;
       }
+
+      emitEvent({
+        eventName: "onSlideStartChange",
+        slideMode: "click",
+        slideActionType: type,
+        nextItem: {
+          startReached: activeItem.current === 0,
+          endReached: activeItem.current === items.length - 1,
+          index: activeItem.current,
+          id: items[activeItem.current].id,
+        },
+      });
     }
 
     setSpring.start({
@@ -121,5 +136,10 @@ export function useSpringCarousel({
     }
   }, [scrollAmount]);
 
-  return { carouselFragment, slideToNextItem, slideToPrevItem };
+  return {
+    carouselFragment,
+    slideToNextItem,
+    slideToPrevItem,
+    useListenToCustomEvent,
+  };
 }
