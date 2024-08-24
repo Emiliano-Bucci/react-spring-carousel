@@ -16,6 +16,18 @@ const items = [
     id: "item-3",
     renderItem: <div>Item 3</div>,
   },
+  {
+    id: "item-4",
+    renderItem: <div>Item 4</div>,
+  },
+  {
+    id: "item-5",
+    renderItem: <div>Item 5</div>,
+  },
+  {
+    id: "item-6",
+    renderItem: <div>Item 6</div>,
+  },
 ];
 
 export function Main() {
@@ -26,6 +38,7 @@ export function Main() {
     useListenToCustomEvent,
   } = useSpringCarousel({
     items: items,
+    slideType: "fluid",
   });
 
   useListenToCustomEvent((ev) => {

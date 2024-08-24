@@ -7,4 +7,9 @@
 .carousel-container {
   display: flex;
   flex: 1;
+  overflow: hidden;
+}
+
+.wrapper .carousel-container .use-spring-carousel-item {
+  min-width: 300px;
 }

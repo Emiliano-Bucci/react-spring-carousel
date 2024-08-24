@@ -18,15 +18,14 @@ export function useEventsModule() {
         targetEvent.current = document.createElement("div");
       }
 
-      function handleEvent(event: CustomEvent<SpringCarouselEvents>) {
+      function handleEvent(_event: Event) {
+        const event = _event as CustomEvent<SpringCarouselEvents>;
         eventHandler(event.detail);
       }
 
       if (targetEvent.current) {
-        // @ts-ignore
         targetEvent.current.addEventListener(eventLabel, handleEvent, false);
         return () => {
-          // @ts-ignore
           targetEvent.current?.removeEventListener(
             eventLabel,
             handleEvent,
