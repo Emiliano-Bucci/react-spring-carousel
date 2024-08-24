@@ -19,9 +19,16 @@ const items = [
 ];
 
 export function Main() {
-  const { carouselFragment } = useSpringCarousel({
-    items: items,
-  });
+  const { carouselFragment, slideToPrevItem, slideToNextItem } =
+    useSpringCarousel({
+      items: items,
+    });
 
-  return <div className="wrapper">{carouselFragment}</div>;
+  return (
+    <div className="wrapper">
+      <button onClick={() => slideToPrevItem()}>Prev</button>
+      <div className="carousel-container">{carouselFragment}</div>
+      <button onClick={() => slideToNextItem()}>Next</button>
+    </div>
+  );
 }

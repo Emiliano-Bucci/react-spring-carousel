@@ -3,3 +3,8 @@
   padding: 24px;
   height: 100%;
 }
+
+.carousel-container {
+  display: flex;
+  flex: 1;
+}

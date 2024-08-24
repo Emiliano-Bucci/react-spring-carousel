@@ -1,16 +1,26 @@
-import { useEffect, useId } from "react";
+import { ElementRef, useEffect, useId, useRef } from "react";
 import { Props } from "./types";
+import { useSpring } from "@react-spring/web";
 
-export function useSpringCarousel({ init, items, slideType = "fixed" }: Props) {
-  const carouselId = useId().replace(":", "").replace(":", "");
+export function useSpringCarousel({
+  init,
+  items,
+  slideType = "fixed",
+  scrollAmount,
+}: Props) {
+  const carouselId = useId().replace(/:/g, "");
+  const carouselContainerRef = useRef<ElementRef<"div">>(null);
+  const carouselTrackRef = useRef<ElementRef<"div">>(null);
 
-  useEffect(() => {
-    if (init && items.length === 0) {
-      console.warn(
-        "Init is true but no items are available; carousel will not be initialized"
-      );
-    }
-  }, []);
+  const startReached = useRef(true);
+  const endReached = useRef(false);
+
+  const activeItem = useRef(0);
+
+  const [, setSpring] = useSpring(() => ({
+    x: 0,
+    y: 0,
+  }));
 
   const carouselFragment = (
     <>
@@ -38,8 +48,11 @@ export function useSpringCarousel({ init, items, slideType = "fixed" }: Props) {
           `.trim(),
         }}
       />
-      <div className={`use-spring-carousel-container carousel-${carouselId}`}>
-        <div className={`use-spring-carousel-track`}>
+      <div
+        className={`use-spring-carousel-container carousel-${carouselId}`}
+        ref={carouselContainerRef}
+      >
+        <div className={`use-spring-carousel-track`} ref={carouselTrackRef}>
           {items.map((item, index) => {
             return (
               <div
@@ -55,5 +68,58 @@ export function useSpringCarousel({ init, items, slideType = "fixed" }: Props) {
     </>
   );
 
-  return { carouselFragment };
+  function slideToItemValue(total: number, type: "prev" | "next") {
+    if (slideType === "fixed") {
+      if (type === "prev") {
+        activeItem.current = activeItem.current - 1;
+      }
+      if (type === "next") {
+        activeItem.current = activeItem.current + 1;
+      }
+    }
+
+    setSpring.start({
+      x: total,
+      y: 0,
+      onChange({ value }) {
+        carouselTrackRef.current!.style.transform = `translateX(${value.x}%)`;
+      },
+    });
+
+    if (slideType === "fixed") {
+      if (activeItem.current === items.length - 1) {
+        endReached.current = true;
+      } else if (activeItem.current === 0) {
+        startReached.current = true;
+      } else {
+        startReached.current = false;
+        endReached.current = false;
+      }
+    }
+  }
+
+  function slideToNextItem() {
+    if (slideType === "fixed" && !endReached.current) {
+      slideToItemValue(-((activeItem.current + 1) * 100), "next");
+    }
+  }
+  function slideToPrevItem() {
+    if (slideType === "fixed" && !startReached.current) {
+      slideToItemValue(-((activeItem.current - 1) * 100), "prev");
+    }
+  }
+
+  useEffect(() => {
+    if (init && items.length === 0) {
+      console.warn(
+        "Init is true but no items are available; carousel will not be initialized"
+      );
+    }
+  }, []);
+  useEffect(() => {
+    if (scrollAmount === undefined && carouselTrackRef.current) {
+    }
+  }, [scrollAmount]);
+
+  return { carouselFragment, slideToNextItem, slideToPrevItem };
 }

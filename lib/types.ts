@@ -8,8 +8,17 @@ type Item = {
 
 type SlideType = "fixed" | "fluid";
 
+type FixedSlideTypeProps = {
+  slideType?: "fixed";
+  scrollAmount?: never;
+};
+type FluidSlideTypeProps = {
+  slideType?: "fluid";
+  scrollAmount?: number;
+};
+
 export type Props = {
   init?: boolean;
   slideType?: SlideType;
   items: Item[];
-};
+} & (FixedSlideTypeProps | FluidSlideTypeProps);
