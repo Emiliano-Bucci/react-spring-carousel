@@ -1,7 +1,7 @@
 export type SlideMode = "drag" | "click";
 export type SlideDirection = "prev" | "next";
 
-export type OnSlideStartChange = {
+type OnSlideStartChange = {
   eventName: "onSlideStartChange";
   slideActionType: SlideDirection;
   slideMode: SlideMode;
@@ -12,8 +12,19 @@ export type OnSlideStartChange = {
     endReached: boolean;
   };
 };
+type OnSlideChangeComplete = {
+  eventName: "onSlideChangeComplete";
+  slideActionType: SlideDirection;
+  slideMode: SlideMode;
+  currentItem: {
+    index: number;
+    id: string;
+    startReached: boolean;
+    endReached: boolean;
+  };
+};
 
-export type SpringCarouselEvents = OnSlideStartChange;
+export type SpringCarouselEvents = OnSlideStartChange | OnSlideChangeComplete;
 export type SpringCarouselEventsEventHandler = (
   props: SpringCarouselEvents
 ) => void;

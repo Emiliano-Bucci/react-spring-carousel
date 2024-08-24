@@ -99,6 +99,21 @@ export function useSpringCarousel({
       onChange({ value }) {
         carouselTrackRef.current!.style.transform = `translateX(${value.x}%)`;
       },
+      onRest({ finished }) {
+        if (finished) {
+          emitEvent({
+            eventName: "onSlideChangeComplete",
+            slideMode: "click",
+            slideActionType: type,
+            currentItem: {
+              startReached: activeItem.current === 0,
+              endReached: activeItem.current === items.length - 1,
+              index: activeItem.current,
+              id: items[activeItem.current].id,
+            },
+          });
+        }
+      },
     });
 
     if (slideType === "fixed") {
