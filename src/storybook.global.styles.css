@@ -1,0 +1,5 @@
+body {
+  display: flex;
+  padding: 0 !important;
+  flex: 1;
+}

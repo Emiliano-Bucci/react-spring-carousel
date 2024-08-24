@@ -1,4 +1,15 @@
-export type Props = {
+import { ReactNode } from "react";
+
+type Item = {
   id: string;
-  value: string;
+  renderItem: ReactNode;
+  renderThumb?: ReactNode;
+};
+
+type SlideType = "fixed" | "fluid";
+
+export type Props = {
+  init?: boolean;
+  slideType?: SlideType;
+  items: Item[];
 };

@@ -24,7 +24,6 @@ export default defineConfig({
         "react-dom",
         "react/jsx-runtime",
         "@react-spring/web",
-        "@use-gesture/react",
       ],
     },
   },

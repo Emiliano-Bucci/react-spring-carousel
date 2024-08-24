@@ -11,9 +11,11 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
+  "dependencies": {
+    "@use-gesture/react": "^10.2.26"
+  },
   "peerDependencies": {
     "@react-spring/web": "^9.5.4",
-    "@use-gesture/react": "^10.2.26",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
