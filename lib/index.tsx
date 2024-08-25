@@ -79,10 +79,17 @@ export function useSpringCarousel({
   const [spring, setSpring] = useSpring(() => ({
     value: 0,
     onChange({ value }) {
-      if (carouselAxis === "x") {
-        carouselTrackRef.current!.style.transform = `translateX(${value.value}px)`;
-      } else {
-        carouselTrackRef.current!.style.transform = `translateY(${value.value}px)`;
+      if (slideType === "fixed" || slideType === "fluid") {
+        if (carouselAxis === "x") {
+          carouselTrackRef.current!.style.transform = `translateX(${value.value}px)`;
+        } else {
+          carouselTrackRef.current!.style.transform = `translateY(${value.value}px)`;
+        }
+      }
+      if (slideType === "freeScroll") {
+        carouselTrackRef.current![
+          carouselAxis === "x" ? "scrollLeft" : "scrollTop"
+        ] = Math.abs(value.value);
       }
     },
   }));
@@ -333,6 +340,33 @@ export function useSpringCarousel({
         },
       });
     }
+    if (slideType === "freeScroll") {
+      const scrollValue =
+        carouselTrackRef.current![
+          carouselAxis === "x" ? "scrollLeft" : "scrollTop"
+        ];
+      const availableScrollSpace =
+        carouselAxis === "x"
+          ? carouselTrackRef.current!.scrollWidth -
+            carouselTrackRef.current!.clientWidth
+          : carouselTrackRef.current!.scrollHeight -
+            carouselTrackRef.current!.clientHeight;
+
+      from = scrollValue;
+
+      if (type === "prev") {
+        total = from - getScrollAmount();
+        if (total < 0) {
+          total = 0;
+        }
+      }
+      if (type === "next") {
+        total = from + getScrollAmount();
+        if (total > availableScrollSpace) {
+          total = availableScrollSpace;
+        }
+      }
+    }
 
     const parsedFrom = pFloat(from);
     const parsedTotal = pFloat(total);
@@ -392,7 +426,7 @@ export function useSpringCarousel({
         actionType,
         newActiveItem: index,
       });
-    } else if (slideType === "fluid") {
+    } else if (slideType === "fluid" || slideType === "freeScroll") {
       slideToItemValue({
         total: activeItem.current - getScrollAmount(),
         type: "next",
@@ -417,7 +451,7 @@ export function useSpringCarousel({
         actionType,
         newActiveItem: index,
       });
-    } else if (slideType === "fluid") {
+    } else if (slideType === "fluid" || slideType === "freeScroll") {
       slideToItemValue({
         total: activeItem.current + getScrollAmount(),
         type: "prev",
@@ -609,7 +643,8 @@ export function useSpringCarousel({
        * Real carousel initialization
        */
       if (
-        (slideType === "fluid" && scrollAmount === undefined) ||
+        (slideType === "fluid" && _scrollAmount === undefined) ||
+        (slideType === "freeScroll" && _scrollAmount === undefined) ||
         slideType === "fixed"
       ) {
         scrollAmount.current = handleSetScrollAmount();
@@ -663,6 +698,8 @@ export function useSpringCarousel({
               width: 100%;
               touch-action: ${!enableGestures ? "auto" : carouselAxis === "x" ? "pan-y" : "pan-x"};
               flex-direction: ${carouselAxis === "x" ? "row" : "column"};
+              overflow-x: ${slideType === "freeScroll" && carouselAxis === "x" ? "auto" : "initial"};
+              overflow-y: ${slideType === "freeScroll" && carouselAxis === "y" ? "auto" : "initial"};
             }
             .carousel-${carouselId} .use-spring-carousel-item {
               position: relative;

@@ -28,8 +28,7 @@ export function Main() {
     slideToIem,
     handleThumbsContainerScroll,
   } = useSpringCarousel({
-    withLoop: true,
-    itemsPerSlide: 3,
+    slideType: "freeScroll",
     items: Array(10)
       .fill(0)
       .map((_, i) => ({

@@ -6,7 +6,7 @@ type Item = {
   renderThumb?: ReactNode;
 };
 
-type SlideType = "fixed" | "fluid";
+type SlideType = "fixed" | "fluid" | "freeScroll";
 
 type FixedSlideTypeProps = {
   slideType?: "fixed";
@@ -20,6 +20,13 @@ type FluidSlideTypeProps = {
   itemsPerSlide?: never;
   scrollAmountType?: never;
 };
+type FreeScrollSlideTypeProps = {
+  slideType?: "freeScroll";
+  scrollAmount?: number;
+  itemsPerSlide?: never;
+  scrollAmountType?: never;
+  withLoop?: never;
+};
 
 export type Props = {
   init?: boolean;
@@ -29,6 +36,6 @@ export type Props = {
   enableGestures?: boolean;
   carouselAxis?: "x" | "y";
   slideWhenDragThresholdIsReached?: boolean;
-} & (FixedSlideTypeProps | FluidSlideTypeProps);
+} & (FixedSlideTypeProps | FluidSlideTypeProps | FreeScrollSlideTypeProps);
 
 export * from "./events";
