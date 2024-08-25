@@ -5,14 +5,17 @@ import { useEventsModule } from "./useEventsModule";
 import { useDrag } from "@use-gesture/react";
 import { SlideActionType } from "./events";
 
-function isOutOfViewport(element: Element) {
+function isOutOfViewport(element: Element): {
+  isOut: boolean;
+  direction: "start" | "end" | null;
+} {
   const { left, right, top, bottom } = element.getBoundingClientRect();
   const { innerWidth, innerHeight } = window;
 
   if (left < 0 || top < 0) {
     return {
       isOut: true,
-      direction: "left",
+      direction: "start",
     };
   }
 
@@ -22,7 +25,7 @@ function isOutOfViewport(element: Element) {
   ) {
     return {
       isOut: true,
-      direction: "right",
+      direction: "end",
     };
   }
 
@@ -444,12 +447,21 @@ export function useSpringCarousel({
     }
   }
   type ThumbsContainerScrollProps = {
-    getContainer(): HTMLElement | null;
     activeItem: number;
+    getContainer(): HTMLElement | null;
+    updateTotalValue?(props: {
+      from: number;
+      to: number;
+      itemOutOfViewport: {
+        isOut: boolean;
+        direction: "start" | "end" | null;
+      };
+    }): number;
   };
   function handleThumbsContainerScroll({
     getContainer,
     activeItem,
+    updateTotalValue,
   }: ThumbsContainerScrollProps) {
     const container = getContainer();
 
@@ -475,7 +487,7 @@ export function useSpringCarousel({
 
       if (outOfViewport.isOut) {
         const totalScroll =
-          outOfViewport.direction === "left"
+          outOfViewport.direction === "start"
             ? to < 0
               ? 0
               : to
@@ -483,12 +495,21 @@ export function useSpringCarousel({
               ? availableScrollableSpace
               : to;
 
+        const fromValue =
+          container[carouselAxis === "x" ? "scrollLeft" : "scrollTop"];
+
         new Controller({
           from: {
-            value: container[carouselAxis === "x" ? "scrollLeft" : "scrollTop"],
+            value: fromValue,
           },
           to: {
-            value: totalScroll,
+            value: updateTotalValue
+              ? updateTotalValue({
+                  from: fromValue,
+                  to: totalScroll,
+                  itemOutOfViewport: outOfViewport,
+                })
+              : totalScroll,
           },
           onChange({ value }) {
             container[carouselAxis === "x" ? "scrollLeft" : "scrollTop"] =

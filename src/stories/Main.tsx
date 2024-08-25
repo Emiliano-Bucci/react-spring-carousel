@@ -29,6 +29,7 @@ export function Main() {
     handleThumbsContainerScroll,
   } = useSpringCarousel({
     withLoop: true,
+    itemsPerSlide: 3,
     items: Array(10)
       .fill(0)
       .map((_, i) => ({
@@ -53,12 +54,7 @@ export function Main() {
   const ref = useRef<ElementRef<"div">>(null);
 
   useListenToCustomEvent((ev) => {
-    if (ev.eventName === "onSlideStartChange") {
-      handleThumbsContainerScroll({
-        getContainer: () => ref.current,
-        activeItem: ev.nextItem.index,
-      });
-    }
+    console.log(ev);
   });
 
   return (
