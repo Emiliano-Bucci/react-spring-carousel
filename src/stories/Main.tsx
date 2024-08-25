@@ -25,9 +25,10 @@ export function Main() {
     slideToPrevItem,
     slideToNextItem,
     useListenToCustomEvent,
+    slideToIem,
   } = useSpringCarousel({
+    carouselAxis: "y",
     withLoop: true,
-    itemsPerSlide: 6,
     items: Array(10)
       .fill(0)
       .map((_, i) => ({
@@ -36,6 +37,7 @@ export function Main() {
           <div
             style={{
               display: "flex",
+              alignItems: "center",
               justifyContent: "center",
               flex: "1",
               background: generateRGBA(i),
@@ -54,9 +56,22 @@ export function Main() {
 
   return (
     <div className="wrapper">
-      <button onClick={() => slideToPrevItem()}>Prev</button>
+      <button
+        onClick={() => {
+          slideToPrevItem();
+        }}
+      >
+        Prev
+      </button>
       <div className="carousel-container">{carouselFragment}</div>
-      <button onClick={() => slideToNextItem()}>Next</button>
+      <button
+        onClick={() => {
+          // slideToIem(3);
+          slideToNextItem();
+        }}
+      >
+        Next
+      </button>
     </div>
   );
 }
