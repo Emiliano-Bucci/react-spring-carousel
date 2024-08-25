@@ -27,10 +27,8 @@ export function Main() {
     useListenToCustomEvent,
   } = useSpringCarousel({
     withLoop: true,
-    // slideType: "fluid",
-    itemsPerSlide: 5,
-    scrollAmountType: "group",
-    items: Array(25)
+    itemsPerSlide: 6,
+    items: Array(10)
       .fill(0)
       .map((_, i) => ({
         id: `item-${i}`,
@@ -51,7 +49,7 @@ export function Main() {
   });
 
   useListenToCustomEvent((ev) => {
-    // console.table(ev);
+    console.table(ev);
   });
 
   return (

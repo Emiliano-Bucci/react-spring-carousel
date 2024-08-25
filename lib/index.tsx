@@ -96,31 +96,6 @@ export function useSpringCarousel({
         activeItem.current = activeItem.current + 1;
       }
 
-      if (!withLoop) {
-        if (activeItem.current === items.length - 1) {
-          endReached.current = true;
-        } else if (activeItem.current === 0) {
-          startReached.current = true;
-        } else {
-          startReached.current = false;
-          endReached.current = false;
-        }
-
-        if (scrollAmountType === "group") {
-          const totalGroups = _items.length / itemsPerSlide;
-          const lastGroupIsNotFilled = 2 % totalGroups !== 0;
-          const nextGroupIsLastGroup =
-            Math.floor(totalGroups) === activeItem.current;
-
-          if (nextGroupIsLastGroup) {
-            endReached.current = true;
-            if (lastGroupIsNotFilled) {
-              total = -getTotalScrollWidth();
-            }
-          }
-        }
-      }
-
       if (withLoop) {
         if (type === "next") {
           if (scrollAmountType === "group") {
@@ -144,17 +119,16 @@ export function useSpringCarousel({
               startReached.current = true;
             }
           } else {
+            const currentItemIsLastItem =
+              _items[activeItem.current]?.id === _items[_items.length - 1].id;
             const nextItemIsRepeatedItem =
               items[_items.length + activeItem.current].id.includes(
                 "repeated-item"
               );
 
-            if (
-              _items[activeItem.current]?.id === _items[_items.length - 1].id
-            ) {
+            if (currentItemIsLastItem) {
               endReached.current = true;
             }
-
             if (nextItemIsRepeatedItem) {
               activeItem.current = 0;
 
@@ -183,13 +157,14 @@ export function useSpringCarousel({
             const currentItemIndex = items.findIndex(
               (i) => i.id === _items[currentActiveItemIndex].id
             );
+            const currentItemIsFirstItem =
+              _items[activeItem.current]?.id === _items[0].id;
             const nextItemIsRepeatedItem =
               items[currentItemIndex - 1].id.includes("repeated-item");
 
-            if (_items[activeItem.current]?.id === _items[0].id) {
+            if (currentItemIsFirstItem) {
               startReached.current = true;
             }
-
             if (nextItemIsRepeatedItem) {
               startReached.current = false;
               endReached.current = true;
@@ -197,6 +172,28 @@ export function useSpringCarousel({
 
               from = spring.x.get() - getScrollAmount() * _items.length;
               total = -(getScrollAmount() * _items.length - getScrollAmount());
+            }
+          }
+        }
+      } else {
+        if (activeItem.current === items.length - 1) {
+          endReached.current = true;
+        } else if (activeItem.current === 0) {
+          startReached.current = true;
+        } else {
+          startReached.current = false;
+          endReached.current = false;
+        }
+        if (scrollAmountType === "group") {
+          const totalGroups = _items.length / itemsPerSlide;
+          const lastGroupIsNotFilled = 2 % totalGroups !== 0;
+          const nextGroupIsLastGroup =
+            Math.floor(totalGroups) === activeItem.current;
+
+          if (nextGroupIsLastGroup) {
+            endReached.current = true;
+            if (lastGroupIsNotFilled) {
+              total = -getTotalScrollWidth();
             }
           }
         }
@@ -214,7 +211,6 @@ export function useSpringCarousel({
         },
       });
     }
-
     if (slideType === "fluid") {
       if (type === "next") {
         const nextItemWillExceed = Math.abs(total) > getTotalScrollWidth();
@@ -275,9 +271,7 @@ export function useSpringCarousel({
             endReached.current = true;
           }
           activeItem.current = total;
-        }
-
-        if (!withLoop) {
+        } else {
           if (nextItemWillExceed) {
             total = 0;
             startReached.current = true;
@@ -302,45 +296,45 @@ export function useSpringCarousel({
       });
     }
 
-    currentSlidedValue.current = pFloat(total);
+    const parsedFrom = pFloat(from);
+    const parsedTotal = pFloat(total);
+    currentSlidedValue.current = parsedTotal;
+
     setSpring.start({
       from: {
-        x: pFloat(from),
+        x: parsedFrom,
         y: 0,
       },
       to: {
-        x: pFloat(total),
+        x: parsedTotal,
         y: 0,
       },
-
       onRest({ finished }) {
-        if (finished) {
-          if (slideType === "fixed") {
-            emitEvent({
-              eventName: "onSlideChangeComplete",
-              sliceActionType: actionType,
-              slideDirection: type,
-              currentItem: {
-                index: activeItem.current,
-                id: items[activeItem.current].id,
-                startReached: startReached.current,
-                endReached: endReached.current,
-              },
-            });
-          }
-          if (slideType === "fluid") {
-            emitEvent({
-              eventName: "onSlideChangeComplete",
-              sliceActionType: actionType,
-              slideDirection: type,
-              currentItem: {
-                index: 0,
-                id: "",
-                startReached: startReached.current,
-                endReached: endReached.current,
-              },
-            });
-          }
+        if (finished && slideType === "fixed") {
+          emitEvent({
+            eventName: "onSlideChangeComplete",
+            sliceActionType: actionType,
+            slideDirection: type,
+            currentItem: {
+              index: activeItem.current,
+              id: items[activeItem.current].id,
+              startReached: startReached.current,
+              endReached: endReached.current,
+            },
+          });
+        }
+        if (finished && slideType === "fluid") {
+          emitEvent({
+            eventName: "onSlideChangeComplete",
+            sliceActionType: actionType,
+            slideDirection: type,
+            currentItem: {
+              index: 0,
+              id: "",
+              startReached: startReached.current,
+              endReached: endReached.current,
+            },
+          });
         }
       },
     });
