@@ -44,53 +44,6 @@ export function useSpringCarousel({
 
   const { useListenToCustomEvent, emitEvent } = useEventsModule();
 
-  const carouselFragment = (
-    <>
-      <style
-        id={`carousel-container-${carouselId}`}
-        dangerouslySetInnerHTML={{
-          __html: `
-            .carousel-${carouselId} {
-              display: flex;
-              width: 100%;
-              height: 100%;
-              overflow: hidden;
-            }
-            .carousel-${carouselId} .use-spring-carousel-track {
-              position: relative;
-              display: flex;
-              width: 100%;
-            }
-            .carousel-${carouselId} .use-spring-carousel-item {
-              position: relative;
-              display: flex;
-              flex: 1;
-              min-width: ${slideType === "fixed" ? "100% !important" : "auto"};
-            }
-          `.trim(),
-        }}
-      />
-      <div
-        className={`use-spring-carousel-container carousel-${carouselId}`}
-        ref={carouselContainerRef}
-      >
-        <div className={`use-spring-carousel-track`} ref={carouselTrackRef}>
-          {items.map((item, index) => {
-            return (
-              <div
-                key={`${item.id}-${index}`}
-                className="use-spring-carousel-item"
-                id={item.id}
-              >
-                {item.renderItem}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </>
-  );
-
   function getScrollAmount() {
     return pFloat(scrollAmount ?? 0);
   }
@@ -189,13 +142,17 @@ export function useSpringCarousel({
         const nextItemWillExceed = Math.abs(total) > getTotalScrollWidth();
 
         if (withLoop) {
-          activeItem.current = total;
-
           const derivedNextActiveItem =
             Math.abs(activeItem.current) / getScrollAmount();
-
           const isDerivedNextActiveItemLastItem =
-            _items[_items.length - 1].id === _items[derivedNextActiveItem].id;
+            _items[derivedNextActiveItem].id === _items[_items.length - 1].id;
+
+          if (
+            _items[derivedNextActiveItem + 1]?.id ===
+            _items[_items.length - 1].id
+          ) {
+            endReached.current = true;
+          }
 
           if (isDerivedNextActiveItemLastItem) {
             activeItem.current = 0;
@@ -222,6 +179,25 @@ export function useSpringCarousel({
       }
       if (type === "prev") {
         const nextItemWillExceed = total > 0;
+
+        const derivedNextActiveItem =
+          Math.abs(activeItem.current) / getScrollAmount() - 1;
+        const isDerivedNextActiveItemFirstItem = derivedNextActiveItem === -1;
+
+        if (derivedNextActiveItem === 0) {
+          startReached.current = true;
+        }
+
+        if (withLoop) {
+          if (isDerivedNextActiveItemFirstItem) {
+            from = spring.x.get() - getScrollAmount() * _items.length;
+            total = -(getScrollAmount() * _items.length - getScrollAmount());
+
+            startReached.current = false;
+            endReached.current = true;
+          }
+          activeItem.current = total;
+        }
 
         if (!withLoop) {
           if (nextItemWillExceed) {
@@ -349,6 +325,53 @@ export function useSpringCarousel({
       initCarousel();
     }
   }, [scrollAmount, init, slideType, withLoop]);
+
+  const carouselFragment = (
+    <>
+      <style
+        id={`carousel-container-${carouselId}`}
+        dangerouslySetInnerHTML={{
+          __html: `
+            .carousel-${carouselId} {
+              display: flex;
+              width: 100%;
+              height: 100%;
+              overflow: hidden;
+            }
+            .carousel-${carouselId} .use-spring-carousel-track {
+              position: relative;
+              display: flex;
+              width: 100%;
+            }
+            .carousel-${carouselId} .use-spring-carousel-item {
+              position: relative;
+              display: flex;
+              flex: 1;
+              min-width: ${slideType === "fixed" ? "100% !important" : "auto"};
+            }
+          `.trim(),
+        }}
+      />
+      <div
+        className={`use-spring-carousel-container carousel-${carouselId}`}
+        ref={carouselContainerRef}
+      >
+        <div className={`use-spring-carousel-track`} ref={carouselTrackRef}>
+          {items.map((item, index) => {
+            return (
+              <div
+                key={`${item.id}-${index}`}
+                className="use-spring-carousel-item"
+                id={item.id}
+              >
+                {item.renderItem}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
 
   return {
     carouselFragment,
