@@ -237,7 +237,7 @@ export function useSpringCarousel({
         total = -(activeItem.current * getScrollAmount());
       }
 
-      if (!withLoop && scrollAmountType === "slide" && itemsPerSlide > 1) {
+      if (!withLoop && scrollAmountType === "slide") {
         if (activeItem.current === items.length - 1) {
           endReached.current = true;
         } else if (activeItem.current === 0) {
