@@ -26,7 +26,7 @@ export function Main() {
     slideToNextItem,
     useListenToCustomEvent,
   } = useSpringCarousel({
-    itemsPerSlide: 3,
+    itemsPerSlide: 2,
     items: Array(10)
       .fill(0)
       .map((_, i) => ({

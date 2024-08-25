@@ -144,6 +144,7 @@ export function useSpringCarousel({
           startReached.current = true;
         }
       }
+
       if (
         withLoop &&
         scrollAmountType === "group" &&
@@ -169,6 +170,7 @@ export function useSpringCarousel({
           total = -getScrollAmount() * totalGroups + getScrollAmount();
         }
       }
+
       if (!withLoop && scrollAmountType === "group" && itemsPerSlide > 1) {
         const totalGroups = _items.length / itemsPerSlide;
         const lastGroupIsNotFilled = 2 % totalGroups !== 0;
@@ -238,7 +240,10 @@ export function useSpringCarousel({
       }
 
       if (!withLoop && scrollAmountType === "slide") {
-        if (activeItem.current === items.length - 1) {
+        const nextItemIsLastItem =
+          _items[activeItem.current + 1]?.id === _items[_items.length - 1].id;
+
+        if (nextItemIsLastItem) {
           endReached.current = true;
         } else if (activeItem.current === 0) {
           startReached.current = true;
@@ -481,7 +486,7 @@ export function useSpringCarousel({
   }
   function getCarouselItemWidth() {
     if (itemsPerSlide > 1) {
-      return `calc(100% / ${itemsPerSlide}) !important`;
+      return `calc(100% / ${itemsPerSlide} - var(--react-spring-carouse-item-gutter)) !important`;
     }
     return "100% !important";
   }
@@ -617,10 +622,20 @@ export function useSpringCarousel({
 
       const prevItemTresholdReached = currentMovement > dragTreshold.current;
       const nextItemTresholdReached = currentMovement < -dragTreshold.current;
+      const direction = state.direction[carouselAxis === "x" ? 0 : 1];
 
       const velocity = state.velocity;
 
+      console.log({ movement });
+
       if (isDragging) {
+        // if (
+        //   (startReached.current && !withLoop && direction > 0) ||
+        //   (endReached.current && !withLoop && direction < 0)
+        // ) {
+        //   state.cancel();
+        //   return;
+        // }
         emitEvent({
           ...state,
           eventName: "onDrag",
@@ -802,6 +817,9 @@ export function useSpringCarousel({
         id={`carousel-container-${carouselId}`}
         dangerouslySetInnerHTML={{
           __html: `
+            :root {
+             --react-spring-carouse-item-gutter: 0px;
+            }
             .carousel-${carouselId} {
               display: flex;
               width: 100%;
@@ -824,6 +842,9 @@ export function useSpringCarousel({
               min-width: ${slideType === "fixed" && carouselAxis === "x" ? getCarouselItemWidth() : "auto"};
               min-height: ${slideType === "fixed" && carouselAxis === "y" ? getCarouselItemWidth() : "auto"};
             }
+              .carousel-${carouselId} .use-spring-carousel-item:not(:last-child) {
+                margin-right: var(--react-spring-carouse-item-gutter);
+              }
           `.trim(),
         }}
       />
