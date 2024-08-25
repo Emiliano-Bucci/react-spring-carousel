@@ -1,8 +1,14 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
 .wrapper {
   display: flex;
   padding: 24px;
   height: 100%;
   max-height: 400px;
+  height: 400px;
 }
 
 .wrapper button {
@@ -17,4 +23,15 @@
 
 .wrapper .carousel-container .use-spring-carousel-item {
   min-width: 350px;
+}
+
+.thumbs {
+  display: flex;
+  padding: 24px;
+  overflow-x: auto;
+}
+.thumb-item {
+  flex: 1;
+  min-width: 200px;
+  cursor: pointer;
 }

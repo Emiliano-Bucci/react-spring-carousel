@@ -97,10 +97,10 @@ export function useSpringCarousel({
       const currentActiveItemIndex = activeItem.current;
 
       if (type === "prev") {
-        activeItem.current = newActiveItem || activeItem.current - 1;
+        activeItem.current = newActiveItem ?? activeItem.current - 1;
       }
       if (type === "next") {
-        activeItem.current = newActiveItem || activeItem.current + 1;
+        activeItem.current = newActiveItem ?? activeItem.current + 1;
       }
 
       if (withLoop) {
@@ -346,7 +346,7 @@ export function useSpringCarousel({
   }
   function slideToNextItem(actionType: SlideActionType, index?: number) {
     if (withLoop && slideType === "fixed") {
-      const itemIndex = index || activeItem.current + 1;
+      const itemIndex = index ?? activeItem.current + 1;
       slideToItemValue({
         total: -(itemIndex * getScrollAmount()),
         type: "next",
@@ -354,7 +354,7 @@ export function useSpringCarousel({
         newActiveItem: index,
       });
     } else if (slideType === "fixed" && !endReached.current) {
-      const itemIndex = index || activeItem.current + 1;
+      const itemIndex = index ?? activeItem.current + 1;
       slideToItemValue({
         total: -(itemIndex * getScrollAmount()),
         type: "next",
@@ -369,18 +369,22 @@ export function useSpringCarousel({
       });
     }
   }
-  function slideToPrevItem(actionType: SlideActionType) {
+  function slideToPrevItem(actionType: SlideActionType, index?: number) {
     if (withLoop && slideType === "fixed") {
+      const itemIndex = index ?? activeItem.current - 1;
       slideToItemValue({
-        total: -((activeItem.current - 1) * getScrollAmount()),
+        total: -(itemIndex * getScrollAmount()),
         type: "prev",
         actionType,
+        newActiveItem: index,
       });
     } else if (slideType === "fixed" && !startReached.current) {
+      const itemIndex = index ?? activeItem.current - 1;
       slideToItemValue({
-        total: -((activeItem.current - 1) * getScrollAmount()),
+        total: -(itemIndex * getScrollAmount()),
         type: "prev",
         actionType,
+        newActiveItem: index,
       });
     } else if (slideType === "fluid") {
       slideToItemValue({
@@ -406,6 +410,9 @@ export function useSpringCarousel({
 
     if (itemIndex > activeItem.current) {
       slideToNextItem("click", itemIndex);
+    }
+    if (itemIndex < activeItem.current) {
+      slideToPrevItem("click", itemIndex);
     }
   }
 

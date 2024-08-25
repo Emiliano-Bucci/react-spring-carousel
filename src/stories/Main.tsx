@@ -27,7 +27,6 @@ export function Main() {
     useListenToCustomEvent,
     slideToIem,
   } = useSpringCarousel({
-    carouselAxis: "y",
     withLoop: true,
     items: Array(10)
       .fill(0)
@@ -55,23 +54,40 @@ export function Main() {
   });
 
   return (
-    <div className="wrapper">
-      <button
-        onClick={() => {
-          slideToPrevItem();
-        }}
-      >
-        Prev
-      </button>
-      <div className="carousel-container">{carouselFragment}</div>
-      <button
-        onClick={() => {
-          // slideToIem(3);
-          slideToNextItem();
-        }}
-      >
-        Next
-      </button>
+    <div className="container">
+      <div className="wrapper">
+        <button
+          onClick={() => {
+            slideToPrevItem();
+          }}
+        >
+          Prev
+        </button>
+        <div className="carousel-container">{carouselFragment}</div>
+        <button
+          onClick={() => {
+            // slideToIem(3);
+            slideToNextItem();
+          }}
+        >
+          Next
+        </button>
+      </div>
+      <div className="thumbs">
+        {Array(10)
+          .fill(0)
+          .map((_, i) => {
+            return (
+              <div
+                key={`thumb-item-${i}`}
+                className="thumb-item"
+                onClick={() => slideToIem(i)}
+              >
+                Thumb {i}
+              </div>
+            );
+          })}
+      </div>
     </div>
   );
 }
