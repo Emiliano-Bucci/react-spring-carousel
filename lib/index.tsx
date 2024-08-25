@@ -102,7 +102,7 @@ export function useSpringCarousel({
   }
   function slideToItemValue(_total: number, type: "prev" | "next") {
     let total = _total;
-    let from: number | undefined = undefined;
+    let from = spring.x.get();
 
     startReached.current = false;
     endReached.current = false;
@@ -134,11 +134,12 @@ export function useSpringCarousel({
             items[_items.length + activeItem.current].id.includes(
               "repeated-item"
             );
-          if (nextItemIsRepeatedItem) {
+
+          if (_items[activeItem.current]?.id === _items[_items.length - 1].id) {
             endReached.current = true;
           }
 
-          if (endReached.current) {
+          if (nextItemIsRepeatedItem) {
             activeItem.current = 0;
 
             from = spring.x.get() + getScrollAmount() * _items.length;
@@ -155,11 +156,11 @@ export function useSpringCarousel({
           const nextItemIsRepeatedItem =
             items[currentItemIndex - 1].id.includes("repeated-item");
 
-          if (nextItemIsRepeatedItem) {
+          if (_items[activeItem.current]?.id === _items[0].id) {
             startReached.current = true;
           }
 
-          if (startReached.current) {
+          if (nextItemIsRepeatedItem) {
             startReached.current = false;
             endReached.current = true;
             activeItem.current = _items.length - 1;
@@ -188,8 +189,25 @@ export function useSpringCarousel({
         const nextItemWillExceed = Math.abs(total) > getTotalScrollWidth();
 
         if (withLoop) {
-          console.log("32131");
           activeItem.current = total;
+
+          const derivedNextActiveItem =
+            Math.abs(activeItem.current) / getScrollAmount();
+
+          const isDerivedNextActiveItemLastItem =
+            _items[_items.length - 1].id === _items[derivedNextActiveItem].id;
+
+          if (isDerivedNextActiveItemLastItem) {
+            activeItem.current = 0;
+
+            from = spring.x.get() + getScrollAmount() * _items.length;
+            total = 0;
+
+            endReached.current = false;
+            startReached.current = true;
+          } else {
+            activeItem.current = total;
+          }
         }
         if (!withLoop) {
           if (nextItemWillExceed) {
@@ -231,18 +249,14 @@ export function useSpringCarousel({
     }
 
     setSpring.start({
-      ...(from
-        ? {
-            from: {
-              x: pFloat(from),
-              y: 0,
-            },
-            to: {
-              x: pFloat(total),
-              y: 0,
-            },
-          }
-        : { x: total, y: 0 }),
+      from: {
+        x: pFloat(from),
+        y: 0,
+      },
+      to: {
+        x: pFloat(total),
+        y: 0,
+      },
       onChange({ value }) {
         carouselTrackRef.current!.style.transform = `translateX(${value.x}px)`;
       },
