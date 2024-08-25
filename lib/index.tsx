@@ -4,39 +4,7 @@ import { Controller, useSpring } from "@react-spring/web";
 import { useEventsModule } from "./useEventsModule";
 import { useDrag } from "@use-gesture/react";
 import { SlideActionType } from "./events";
-
-function isOutOfViewport(element: Element): {
-  isOut: boolean;
-  direction: "start" | "end" | null;
-} {
-  const { left, right, top, bottom } = element.getBoundingClientRect();
-  const { innerWidth, innerHeight } = window;
-
-  if (left < 0 || top < 0) {
-    return {
-      isOut: true,
-      direction: "start",
-    };
-  }
-
-  if (
-    Math.floor(right) > Math.floor(innerWidth) ||
-    Math.floor(bottom) > Math.floor(innerHeight)
-  ) {
-    return {
-      isOut: true,
-      direction: "end",
-    };
-  }
-
-  return {
-    isOut: false,
-    direction: null,
-  };
-}
-function pFloat(v: number) {
-  return parseFloat(v.toFixed(2));
-}
+import { isOutOfViewport, pFloat, logWarn, logError } from "./utils";
 
 export function useSpringCarousel({
   init = true,
@@ -50,6 +18,9 @@ export function useSpringCarousel({
   itemsPerSlide = 1,
   scrollAmountType = "slide",
 }: Props) {
+  const carouselIsInitialized = useRef(false);
+  const errorMessages = useRef<string[]>([]);
+
   const items = withLoop
     ? [
         ..._items.map((i) => ({
@@ -112,6 +83,11 @@ export function useSpringCarousel({
       ]
     );
   }
+  function handleAppNotInitialized() {
+    logWarn("It seems that the carousel isn't initialized yet.");
+    console.log("The carousel register the following errors:");
+    console.table(errorMessages.current);
+  }
 
   type SlideToItemProps = {
     type: "prev" | "next";
@@ -139,7 +115,12 @@ export function useSpringCarousel({
         activeItem.current = newActiveItem ?? activeItem.current + 1;
       }
 
-      if (withLoop && scrollAmountType === "group" && type === "next") {
+      if (
+        withLoop &&
+        scrollAmountType === "group" &&
+        itemsPerSlide > 1 &&
+        type === "next"
+      ) {
         const totalGroups = _items.length / itemsPerSlide;
         const nextGroupIsLastGroup =
           Math.ceil(totalGroups) - 1 === activeItem.current;
@@ -162,7 +143,12 @@ export function useSpringCarousel({
           startReached.current = true;
         }
       }
-      if (withLoop && scrollAmountType === "group" && type === "prev") {
+      if (
+        withLoop &&
+        scrollAmountType === "group" &&
+        itemsPerSlide > 1 &&
+        type === "prev"
+      ) {
         const totalGroups = _items.length / itemsPerSlide;
         const isFirstGroup = activeItem.current === 0;
         const nextGroupIsRepeatedLastGroup = activeItem.current === -1;
@@ -182,7 +168,7 @@ export function useSpringCarousel({
           total = -getScrollAmount() * totalGroups + getScrollAmount();
         }
       }
-      if (!withLoop && scrollAmountType === "group") {
+      if (!withLoop && scrollAmountType === "group" && itemsPerSlide > 1) {
         const totalGroups = _items.length / itemsPerSlide;
         const lastGroupIsNotFilled = 2 % totalGroups !== 0;
         const nextGroupIsLastGroup =
@@ -196,7 +182,12 @@ export function useSpringCarousel({
         }
       }
 
-      if (withLoop && type === "next" && scrollAmountType === "slide") {
+      if (
+        withLoop &&
+        type === "next" &&
+        (scrollAmountType === "slide" ||
+          (scrollAmountType === "group" && itemsPerSlide === 1))
+      ) {
         const currentItemIsLastItem =
           _items[activeItem.current]?.id === _items[_items.length - 1].id;
         const nextItemIsRepeatedItem =
@@ -218,7 +209,12 @@ export function useSpringCarousel({
 
         total = -(activeItem.current * getScrollAmount());
       }
-      if (withLoop && scrollAmountType === "slide" && type === "prev") {
+      if (
+        withLoop &&
+        type === "prev" &&
+        (scrollAmountType === "slide" ||
+          (scrollAmountType === "group" && itemsPerSlide === 1))
+      ) {
         const currentItemIndex = items.findIndex(
           (i) => i.id === _items[currentActiveItemIndex].id
         );
@@ -240,7 +236,7 @@ export function useSpringCarousel({
         total = -(activeItem.current * getScrollAmount());
       }
 
-      if (!withLoop && scrollAmountType === "slide") {
+      if (!withLoop && scrollAmountType === "slide" && itemsPerSlide > 1) {
         if (activeItem.current === items.length - 1) {
           endReached.current = true;
         } else if (activeItem.current === 0) {
@@ -424,6 +420,11 @@ export function useSpringCarousel({
     });
   }
   function slideToNextItem(actionType: SlideActionType, index?: number) {
+    if (!carouselIsInitialized.current) {
+      handleAppNotInitialized();
+      return;
+    }
+
     if (withLoop && slideType === "fixed") {
       const itemIndex = index ?? activeItem.current + 1;
       slideToItemValue({
@@ -446,6 +447,11 @@ export function useSpringCarousel({
     }
   }
   function slideToPrevItem(actionType: SlideActionType, index?: number) {
+    if (!carouselIsInitialized.current) {
+      handleAppNotInitialized();
+      return;
+    }
+
     if (withLoop && slideType === "fixed") {
       const itemIndex = index ?? activeItem.current - 1;
       slideToItemValue({
@@ -594,6 +600,11 @@ export function useSpringCarousel({
 
   const bindDrag = useDrag(
     (state) => {
+      if (!carouselIsInitialized.current) {
+        handleAppNotInitialized();
+        return;
+      }
+
       const isDragging = state.dragging;
       const movement = state.offset[carouselAxis === "x" ? 0 : 1];
       const currentMovement = state.movement[carouselAxis === "x" ? 0 : 1];
@@ -653,7 +664,11 @@ export function useSpringCarousel({
   useEffect(() => {
     function handleSetScrollAmount() {
       const firstItem = carouselTrackRef.current!.children[0] as HTMLElement;
-      if (slideType === "fixed" && scrollAmountType === "group") {
+      if (
+        slideType === "fixed" &&
+        scrollAmountType === "group" &&
+        itemsPerSlide > 1
+      ) {
         return pFloat(
           carouselTrackRef.current!.getBoundingClientRect()[
             carouselAxis === "x" ? "width" : "height"
@@ -672,9 +687,28 @@ export function useSpringCarousel({
        * Initial checks
        */
       if (items.length === 0) {
-        console.warn(
+        logWarn(
           "Init is true but no items are available; carousel will not be initialized"
         );
+      }
+      if (
+        slideType === "fixed" &&
+        scrollAmountType === "group" &&
+        itemsPerSlide === 1
+      ) {
+        logWarn(
+          `Using scrollAmountType='group' and itemsPerSlide={1} makes no difference; itemsPerSlide must be greater than 1.`
+        );
+      }
+      if (
+        slideType === "fixed" &&
+        scrollAmountType === "group" &&
+        _items.length % itemsPerSlide !== 0
+      ) {
+        const errorMessage = `When using scrollAmountType='group' and itemsPerSlide={number>1} make sure that itemsPerSlides is divisible by the total quantity of items otherwise the carousel won't initialize.`;
+        logError(errorMessage);
+        errorMessages.current.push(errorMessage);
+        return;
       }
 
       /**
@@ -695,7 +729,11 @@ export function useSpringCarousel({
          */
         scrollAmount.current = handleSetScrollAmount();
 
-        if (slideType === "fixed" && scrollAmountType === "group") {
+        if (
+          slideType === "fixed" &&
+          scrollAmountType === "group" &&
+          itemsPerSlide > 1
+        ) {
           const totalGroups = (_items.length * 3) / itemsPerSlide;
           carouselTrackRef.current!.style[
             carouselAxis === "x" ? "left" : "top"
@@ -711,10 +749,16 @@ export function useSpringCarousel({
        * Set drag treshold based on scroll amount
        */
       dragTreshold.current = getScrollAmount() / 4;
+      /**
+       * Initialize carousel
+       */
+      carouselIsInitialized.current = true;
     }
 
     if (init) {
       initCarousel();
+    } else {
+      carouselIsInitialized.current = false;
     }
   }, [scrollAmount, init, slideType, withLoop]);
 
@@ -780,7 +824,13 @@ export function useSpringCarousel({
     useListenToCustomEvent,
     slideToNextItem: () => slideToNextItem("click"),
     slideToPrevItem: () => slideToPrevItem("click"),
-    slideToIem: (id: string | number) => handleSlideToItem(id),
+    slideToIem: (id: string | number) => {
+      if (!carouselIsInitialized.current) {
+        handleAppNotInitialized();
+        return;
+      }
+      handleSlideToItem(id);
+    },
     handleThumbsContainerScroll,
   };
 }

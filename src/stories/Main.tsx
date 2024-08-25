@@ -31,7 +31,7 @@ export function Main() {
     itemsPerSlide: 3,
     withLoop: true,
     scrollAmountType: "group",
-    items: Array(12)
+    items: Array(10)
       .fill(0)
       .map((_, i) => ({
         id: `item-${i}`,
