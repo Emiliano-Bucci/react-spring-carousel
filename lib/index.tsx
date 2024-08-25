@@ -672,8 +672,28 @@ export function useSpringCarousel({
         carouselIsInitialized.current = true;
       }
     }
+    function handleSetBasicCarouselPosition() {
+      scrollAmount.current = handleSetScrollAmount();
+      if (
+        slideType === "fixed" &&
+        scrollAmountType === "group" &&
+        itemsPerSlide > 1
+      ) {
+        const totalGroups = (_items.length * 3) / itemsPerSlide;
+        carouselTrackRef.current!.style[carouselAxis === "x" ? "left" : "top"] =
+          `-${pFloat((scrollAmount.current * totalGroups) / 3)}px`;
+      } else {
+        carouselTrackRef.current!.style[carouselAxis === "x" ? "left" : "top"] =
+          `-${pFloat((scrollAmount.current * items.length) / 3)}px`;
+      }
+    }
     function handleResize() {
       if (slideType === "fixed" && withLoop) {
+        handleSetBasicCarouselPosition();
+        setSpring.start({
+          immediate: true,
+          value: -(activeItem.current * getScrollAmount()),
+        });
       }
     }
     function handleSetScrollAmount() {
@@ -741,22 +761,7 @@ export function useSpringCarousel({
          * For loop option we set the initial
          * position of the carousel in the middle
          */
-        scrollAmount.current = handleSetScrollAmount();
-
-        if (
-          slideType === "fixed" &&
-          scrollAmountType === "group" &&
-          itemsPerSlide > 1
-        ) {
-          const totalGroups = (_items.length * 3) / itemsPerSlide;
-          carouselTrackRef.current!.style[
-            carouselAxis === "x" ? "left" : "top"
-          ] = `-${pFloat((scrollAmount.current * totalGroups) / 3)}px`;
-        } else {
-          carouselTrackRef.current!.style[
-            carouselAxis === "x" ? "left" : "top"
-          ] = `-${pFloat((scrollAmount.current * items.length) / 3)}px`;
-        }
+        handleSetBasicCarouselPosition();
       }
 
       /**
