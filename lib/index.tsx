@@ -277,34 +277,27 @@ export function useSpringCarousel({
       total = -(activeItem.current * getScrollAmount());
 
       if (type === "next") {
-        const nextItemWillExceed = Math.abs(total) > getTotalScrollWidth();
-
         if (withLoop) {
-          const derivedNextActiveItem =
-            Math.abs(activeItem.current) / getScrollAmount();
-          const isDerivedNextActiveItemLastItem =
-            _items[derivedNextActiveItem].id === _items[_items.length - 1].id;
+          const nextItemIsLastItem =
+            _items[activeItem.current]?.id === _items[_items.length - 1].id;
+          const nextItemIsRepeatedItem =
+            items[_items.length + activeItem.current].id.includes(
+              "repeated-item"
+            );
 
-          if (
-            _items[derivedNextActiveItem + 1]?.id ===
-            _items[_items.length - 1].id
-          ) {
+          if (nextItemIsLastItem) {
             endReached.current = true;
           }
-
-          if (isDerivedNextActiveItemLastItem) {
+          if (nextItemIsRepeatedItem) {
             activeItem.current = 0;
-
             from = spring.value.get() + getScrollAmount() * _items.length;
             total = 0;
-
             endReached.current = false;
             startReached.current = true;
-          } else {
-            activeItem.current = total;
           }
         }
         if (!withLoop) {
+          const nextItemWillExceed = Math.abs(total) > getTotalScrollWidth();
           if (nextItemWillExceed) {
             endReached.current = true;
             total = -getTotalScrollWidth();
@@ -315,25 +308,27 @@ export function useSpringCarousel({
         }
       }
       if (type === "prev") {
-        const nextItemWillExceed = total > 0;
+        const currentItemIsFirstItem =
+          _items[activeItem.current]?.id === _items[0].id;
+        const nextItemIsRepeatedItem =
+          items[_items.length + activeItem.current]?.id.includes(
+            "repeated-item"
+          );
 
-        const derivedNextActiveItem =
-          Math.abs(activeItem.current) / getScrollAmount() - 1;
-        const isDerivedNextActiveItemFirstItem = derivedNextActiveItem === -1;
-
-        if (derivedNextActiveItem === 0) {
+        if (currentItemIsFirstItem) {
           startReached.current = true;
         }
 
-        if (withLoop) {
-          if (isDerivedNextActiveItemFirstItem) {
-            from = spring.value.get() - getScrollAmount() * _items.length;
-            total = -(getScrollAmount() * _items.length - getScrollAmount());
+        if (withLoop && nextItemIsRepeatedItem) {
+          activeItem.current = _items.length - 1;
+          from = spring.value.get() - getScrollAmount() * _items.length;
+          total = -(getScrollAmount() * _items.length - getScrollAmount());
 
-            startReached.current = false;
-            endReached.current = true;
-          }
-        } else {
+          startReached.current = false;
+          endReached.current = true;
+        }
+        if (!withLoop) {
+          const nextItemWillExceed = total > 0;
           if (nextItemWillExceed) {
             total = 0;
             startReached.current = true;
