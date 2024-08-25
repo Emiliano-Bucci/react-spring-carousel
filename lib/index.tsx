@@ -20,6 +20,7 @@ export function useSpringCarousel({
 }: Props) {
   const carouselIsInitialized = useRef(false);
   const errorMessages = useRef<string[]>([]);
+  const windowIsHidden = useRef(false);
 
   const items = withLoop
     ? [
@@ -662,6 +663,19 @@ export function useSpringCarousel({
   );
 
   useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        windowIsHidden.current = true;
+        carouselIsInitialized.current = false;
+      } else {
+        windowIsHidden.current = false;
+        carouselIsInitialized.current = true;
+      }
+    }
+    function handleResize() {
+      if (slideType === "fixed" && withLoop) {
+      }
+    }
     function handleSetScrollAmount() {
       const firstItem = carouselTrackRef.current!.children[0] as HTMLElement;
       if (
@@ -757,6 +771,15 @@ export function useSpringCarousel({
 
     if (init) {
       initCarousel();
+      window.addEventListener("resize", handleResize);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      return () => {
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange
+        );
+        window.removeEventListener("resize", handleResize);
+      };
     } else {
       carouselIsInitialized.current = false;
     }
