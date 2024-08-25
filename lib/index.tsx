@@ -284,36 +284,42 @@ export function useSpringCarousel({
       }
       total = -(activeItem.current * getScrollAmount());
 
-      if (type === "next") {
-        if (withLoop) {
-          const nextItemIsLastItem =
-            _items[activeItem.current]?.id === _items[_items.length - 1].id;
-          const nextItemIsRepeatedItem =
-            items[_items.length + activeItem.current].id.includes(
-              "repeated-item"
-            );
+      if (type === "next" && withLoop) {
+        const nextItemIsLastItem =
+          _items[activeItem.current]?.id === _items[_items.length - 1].id;
+        const nextItemIsRepeatedItem =
+          items[_items.length + activeItem.current].id.includes(
+            "repeated-item"
+          );
 
-          if (nextItemIsLastItem) {
-            endReached.current = true;
-          }
-          if (nextItemIsRepeatedItem) {
-            activeItem.current = 0;
-            from = spring.value.get() + getScrollAmount() * _items.length;
-            total = 0;
-            endReached.current = false;
-            startReached.current = true;
-          }
+        if (nextItemIsLastItem) {
+          endReached.current = true;
         }
-        if (!withLoop) {
-          const nextItemWillExceed =
-            Math.abs(total) > getTotalScrollAvailableSpace();
+        if (nextItemIsRepeatedItem) {
+          activeItem.current = 0;
+          from = spring.value.get() + getScrollAmount() * _items.length;
+          total = 0;
+          endReached.current = false;
+          startReached.current = true;
+        }
+      }
+      if (type === "next" && !withLoop) {
+        const nextItemIsLastItem =
+          _items[activeItem.current + 1]?.id === _items[_items.length - 1].id;
+        const nextItemWillExceed =
+          Math.abs(total) > getTotalScrollAvailableSpace();
+
+        if (nextItemIsLastItem) {
+          endReached.current = true;
           if (nextItemWillExceed) {
-            endReached.current = true;
             total = -getTotalScrollAvailableSpace();
-          } else {
-            startReached.current = false;
-            endReached.current = false;
           }
+        } else if (nextItemWillExceed) {
+          endReached.current = true;
+          total = -getTotalScrollAvailableSpace();
+        } else {
+          startReached.current = false;
+          endReached.current = false;
         }
       }
       if (type === "prev") {
@@ -336,6 +342,7 @@ export function useSpringCarousel({
           startReached.current = false;
           endReached.current = true;
         }
+
         if (!withLoop) {
           const nextItemWillExceed = total > 0;
           if (nextItemWillExceed) {
@@ -440,21 +447,21 @@ export function useSpringCarousel({
       return;
     }
 
-    if (withLoop && slideType === "fixed") {
+    if (
+      (slideType === "fixed" && withLoop) ||
+      (slideType === "fixed" && !withLoop && !endReached.current)
+    ) {
       const itemIndex = index ?? activeItem.current + 1;
       slideToItemValue({
         type: "next",
         actionType,
         newActiveItem: itemIndex,
       });
-    } else if (slideType === "fixed" && !endReached.current) {
-      const itemIndex = index ?? activeItem.current + 1;
-      slideToItemValue({
-        type: "next",
-        actionType,
-        newActiveItem: itemIndex,
-      });
-    } else if (slideType === "fluid" || slideType === "freeScroll") {
+    }
+    if (
+      (slideType === "fluid" && !endReached.current) ||
+      slideType === "freeScroll"
+    ) {
       slideToItemValue({
         type: "next",
         actionType,
@@ -467,21 +474,18 @@ export function useSpringCarousel({
       return;
     }
 
-    if (withLoop && slideType === "fixed") {
+    if (
+      (withLoop && slideType === "fixed") ||
+      (slideType === "fixed" && !withLoop && !startReached.current)
+    ) {
       const itemIndex = index ?? activeItem.current - 1;
       slideToItemValue({
         type: "prev",
         actionType,
         newActiveItem: itemIndex,
       });
-    } else if (slideType === "fixed" && !startReached.current) {
-      const itemIndex = index ?? activeItem.current - 1;
-      slideToItemValue({
-        type: "prev",
-        actionType,
-        newActiveItem: itemIndex,
-      });
-    } else if (slideType === "fluid" || slideType === "freeScroll") {
+    }
+    if (slideType === "fluid" || slideType === "freeScroll") {
       slideToItemValue({
         type: "prev",
         actionType,
@@ -490,7 +494,7 @@ export function useSpringCarousel({
   }
   function getCarouselItemWidth() {
     if (itemsPerSlide > 1) {
-      return `calc(100% / ${itemsPerSlide} - var(--react-spring-carouse-item-gutter) * ${(itemsPerSlide - 1) / itemsPerSlide}) !important`;
+      return `calc(100% / ${itemsPerSlide} - var(--react-spring-carouse-item-gutter) / ${itemsPerSlide} * ${itemsPerSlide - 1}) !important`;
     }
 
     return "100% !important";
@@ -584,6 +588,18 @@ export function useSpringCarousel({
     }
   }
 
+  function getGutterCssVariable() {
+    let total = 0;
+    const gutterCssVar = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue("--react-spring-carouse-item-gutter");
+
+    if (gutterCssVar.includes("px")) {
+      total = Number(gutterCssVar.replace("px", ""));
+    }
+
+    return total;
+  }
   function getScrollHandlers() {
     if (slideType === "freeScroll") {
       return {
@@ -743,7 +759,11 @@ export function useSpringCarousel({
         ]
       );
 
+      let gutter = getGutterCssVariable();
+
+      total += gutter;
       scrollAmount.current = total;
+
       return total;
     }
     function initCarousel() {
@@ -822,7 +842,7 @@ export function useSpringCarousel({
         dangerouslySetInnerHTML={{
           __html: `
             :root {
-             --react-spring-carouse-item-gutter: 0px;
+              --react-spring-carouse-item-gutter: 0px;
             }
             .carousel-${carouselId} {
               display: flex;
