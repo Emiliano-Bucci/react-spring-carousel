@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ElementRef, useRef } from "react";
 
 import { useSpringCarousel } from "../../lib";
 import "./main.css";
@@ -26,6 +26,7 @@ export function Main() {
     slideToNextItem,
     useListenToCustomEvent,
     slideToIem,
+    handleThumbsContainerScroll,
   } = useSpringCarousel({
     withLoop: true,
     items: Array(10)
@@ -49,8 +50,15 @@ export function Main() {
       })),
   });
 
+  const ref = useRef<ElementRef<"div">>(null);
+
   useListenToCustomEvent((ev) => {
-    console.table(ev);
+    if (ev.eventName === "onSlideStartChange") {
+      handleThumbsContainerScroll({
+        getContainer: () => ref.current,
+        activeItem: ev.nextItem.index,
+      });
+    }
   });
 
   return (
@@ -73,7 +81,7 @@ export function Main() {
           Next
         </button>
       </div>
-      <div className="thumbs">
+      <div className="thumbs" ref={ref}>
         {Array(10)
           .fill(0)
           .map((_, i) => {

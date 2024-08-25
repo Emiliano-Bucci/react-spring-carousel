@@ -1,10 +1,36 @@
 import { ElementRef, useEffect, useId, useRef } from "react";
 import { Props } from "./types";
-import { useSpring } from "@react-spring/web";
+import { Controller, useSpring } from "@react-spring/web";
 import { useEventsModule } from "./useEventsModule";
 import { useDrag } from "@use-gesture/react";
 import { SlideActionType } from "./events";
 
+function isOutOfViewport(element: Element) {
+  const { left, right, top, bottom } = element.getBoundingClientRect();
+  const { innerWidth, innerHeight } = window;
+
+  if (left < 0 || top < 0) {
+    return {
+      isOut: true,
+      direction: "left",
+    };
+  }
+
+  if (
+    Math.floor(right) > Math.floor(innerWidth) ||
+    Math.floor(bottom) > Math.floor(innerHeight)
+  ) {
+    return {
+      isOut: true,
+      direction: "right",
+    };
+  }
+
+  return {
+    isOut: false,
+    direction: null,
+  };
+}
 function pFloat(v: number) {
   return parseFloat(v.toFixed(2));
 }
@@ -68,7 +94,9 @@ export function useSpringCarousel({
   }
   function getTotalScrollWidth() {
     return (
-      carouselTrackRef.current!.scrollWidth -
+      carouselTrackRef.current![
+        carouselAxis === "x" ? "scrollWidth" : "scrollHeight"
+      ] -
       carouselContainerRef.current!.getBoundingClientRect()[
         carouselAxis === "x" ? "width" : "height"
       ]
@@ -415,6 +443,61 @@ export function useSpringCarousel({
       slideToPrevItem("click", itemIndex);
     }
   }
+  type ThumbsContainerScrollProps = {
+    getContainer(): HTMLElement | null;
+    activeItem: number;
+  };
+  function handleThumbsContainerScroll({
+    getContainer,
+    activeItem,
+  }: ThumbsContainerScrollProps) {
+    const container = getContainer();
+
+    if (!(container instanceof HTMLElement)) {
+      console.warn(
+        `Container is not a valid html element: container is ${container}`
+      );
+      return;
+    }
+
+    const item = container.children[activeItem] as HTMLElement;
+
+    if (item) {
+      const availableScrollableSpace =
+        carouselAxis === "x"
+          ? container.scrollWidth - container.getBoundingClientRect().width
+          : container.scrollHeight - container.getBoundingClientRect().height;
+
+      const itemPosition = item.offsetLeft + item.offsetWidth / 2;
+      const to = itemPosition - container.clientWidth / 2;
+
+      const outOfViewport = isOutOfViewport(item);
+
+      if (outOfViewport.isOut) {
+        const totalScroll =
+          outOfViewport.direction === "left"
+            ? to < 0
+              ? 0
+              : to
+            : to > availableScrollableSpace
+              ? availableScrollableSpace
+              : to;
+
+        new Controller({
+          from: {
+            value: container[carouselAxis === "x" ? "scrollLeft" : "scrollTop"],
+          },
+          to: {
+            value: totalScroll,
+          },
+          onChange({ value }) {
+            container[carouselAxis === "x" ? "scrollLeft" : "scrollTop"] =
+              value.value;
+          },
+        });
+      }
+    }
+  }
 
   const bindDrag = useDrag(
     (state) => {
@@ -601,5 +684,6 @@ export function useSpringCarousel({
     slideToNextItem: () => slideToNextItem("click"),
     slideToPrevItem: () => slideToPrevItem("click"),
     slideToIem: (id: string | number) => handleSlideToItem(id),
+    handleThumbsContainerScroll,
   };
 }
