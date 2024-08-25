@@ -695,14 +695,18 @@ export function useSpringCarousel({
       enabled: enableGestures && slideType !== "freeScroll",
       axis: carouselAxis,
       rubberband: !withLoop,
-      bounds: () => {
-        return {
-          right: 0,
-          left: -getTotalScrollAvailableSpace(),
-          top: -getTotalScrollAvailableSpace(),
-          bottom: 0,
-        };
-      },
+      ...(!withLoop
+        ? {
+            bounds: () => {
+              return {
+                right: 0,
+                left: -getTotalScrollAvailableSpace(),
+                top: -getTotalScrollAvailableSpace(),
+                bottom: 0,
+              };
+            },
+          }
+        : {}),
       from: () => {
         return [spring.value.get(), spring.value.get()];
       },
