@@ -554,6 +554,18 @@ export function useSpringCarousel({
     }
   }
 
+  function getScrollHandlers() {
+    if (slideType === "freeScroll") {
+      return {
+        onWheel() {
+          spring.value.stop();
+          // setStartEndItemReachedOnFreeScroll()
+        },
+      };
+    }
+    return {};
+  }
+
   const bindDrag = useDrag(
     (state) => {
       const isDragging = state.dragging;
@@ -719,6 +731,7 @@ export function useSpringCarousel({
           className={`use-spring-carousel-track`}
           {...bindDrag()}
           ref={carouselTrackRef}
+          {...getScrollHandlers()}
         >
           {items.map((item, index) => {
             return (
