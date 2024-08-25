@@ -268,6 +268,14 @@ export function useSpringCarousel({
       });
     }
     if (slideType === "fluid") {
+      if (type === "prev") {
+        activeItem.current = newActiveItem ?? activeItem.current - 1;
+      }
+      if (type === "next") {
+        activeItem.current = newActiveItem ?? activeItem.current + 1;
+      }
+      total = -(activeItem.current * getScrollAmount());
+
       if (type === "next") {
         const nextItemWillExceed = Math.abs(total) > getTotalScrollWidth();
 
@@ -304,7 +312,6 @@ export function useSpringCarousel({
             startReached.current = false;
             endReached.current = false;
           }
-          activeItem.current = total;
         }
       }
       if (type === "prev") {
@@ -326,7 +333,6 @@ export function useSpringCarousel({
             startReached.current = false;
             endReached.current = true;
           }
-          activeItem.current = total;
         } else {
           if (nextItemWillExceed) {
             total = 0;
@@ -335,7 +341,11 @@ export function useSpringCarousel({
             startReached.current = false;
             endReached.current = false;
           }
-          activeItem.current = total;
+
+          if (startReached.current) {
+            activeItem.current = 0;
+            return;
+          }
         }
       }
 
