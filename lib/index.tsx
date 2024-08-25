@@ -472,7 +472,7 @@ export function useSpringCarousel({
     }
 
     if (
-      (withLoop && slideType === "fixed") ||
+      (slideType === "fixed" && withLoop) ||
       (slideType === "fixed" && !withLoop && !startReached.current)
     ) {
       const itemIndex = index ?? activeItem.current - 1;
@@ -933,5 +933,6 @@ export function useSpringCarousel({
       handleSlideToItem(id);
     },
     handleThumbsContainerScroll,
+    carouselId,
   };
 }
