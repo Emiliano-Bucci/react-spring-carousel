@@ -673,7 +673,6 @@ export function useSpringCarousel({
       }
     }
     function handleSetBasicCarouselPosition() {
-      scrollAmount.current = handleSetScrollAmount();
       if (
         slideType === "fixed" &&
         scrollAmountType === "group" &&
@@ -681,40 +680,47 @@ export function useSpringCarousel({
       ) {
         const totalGroups = (_items.length * 3) / itemsPerSlide;
         carouselTrackRef.current!.style[carouselAxis === "x" ? "left" : "top"] =
-          `-${pFloat((scrollAmount.current * totalGroups) / 3)}px`;
+          `-${pFloat((getScrollAmount() * totalGroups) / 3)}px`;
       } else {
         carouselTrackRef.current!.style[carouselAxis === "x" ? "left" : "top"] =
-          `-${pFloat((scrollAmount.current * items.length) / 3)}px`;
+          `-${pFloat((getScrollAmount() * items.length) / 3)}px`;
       }
     }
     function handleResize() {
+      handleSetScrollAmount();
+
       if (slideType === "fixed" && withLoop) {
         handleSetBasicCarouselPosition();
-        setSpring.start({
-          immediate: true,
-          value: -(activeItem.current * getScrollAmount()),
-        });
       }
+
+      setSpring.start({
+        immediate: true,
+        value: -(activeItem.current * getScrollAmount()),
+      });
     }
     function handleSetScrollAmount() {
       const firstItem = carouselTrackRef.current!.children[0] as HTMLElement;
+      let total = 0;
       if (
         slideType === "fixed" &&
         scrollAmountType === "group" &&
         itemsPerSlide > 1
       ) {
-        return pFloat(
+        total = pFloat(
           carouselTrackRef.current!.getBoundingClientRect()[
             carouselAxis === "x" ? "width" : "height"
           ]
         );
       }
 
-      return pFloat(
+      total = pFloat(
         firstItem.getBoundingClientRect()[
           carouselAxis === "x" ? "width" : "height"
         ]
       );
+
+      scrollAmount.current = total;
+      return total;
     }
     function initCarousel() {
       /**
@@ -748,18 +754,12 @@ export function useSpringCarousel({
       /**
        * Real carousel initialization
        */
-      if (
-        (slideType === "fluid" && _scrollAmount === undefined) ||
-        (slideType === "freeScroll" && _scrollAmount === undefined) ||
-        slideType === "fixed"
-      ) {
-        scrollAmount.current = handleSetScrollAmount();
-      }
+      handleSetScrollAmount();
 
       if (withLoop) {
         /**
          * For loop option we set the initial
-         * position of the carousel in the middle
+         * position of the carousel in the middle (having repeated items before and after)
          */
         handleSetBasicCarouselPosition();
       }
@@ -768,6 +768,7 @@ export function useSpringCarousel({
        * Set drag treshold based on scroll amount
        */
       dragTreshold.current = getScrollAmount() / 4;
+
       /**
        * Initialize carousel
        */
