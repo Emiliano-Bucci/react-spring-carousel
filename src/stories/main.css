@@ -29,7 +29,7 @@ html:root {
 }
 
 .wrapper .carousel-container .use-spring-carousel-item {
-  /* min-width: 350px; */
+  min-width: 350px;
 }
 
 .thumbs {

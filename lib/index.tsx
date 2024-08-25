@@ -458,10 +458,7 @@ export function useSpringCarousel({
         newActiveItem: itemIndex,
       });
     }
-    if (
-      (slideType === "fluid" && !endReached.current) ||
-      slideType === "freeScroll"
-    ) {
+    if (slideType === "fluid" || slideType === "freeScroll") {
       slideToItemValue({
         type: "next",
         actionType,
