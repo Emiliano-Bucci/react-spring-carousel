@@ -114,18 +114,16 @@ export function useSpringCarousel({
   }
 
   type SlideToItemProps = {
-    total: number;
     type: "prev" | "next";
     actionType: SlideActionType;
     newActiveItem?: number;
   };
   function slideToItemValue({
-    total: _total,
     type,
     actionType,
     newActiveItem,
   }: SlideToItemProps) {
-    let total = _total;
+    let total = 0;
     let from = spring.value.get();
 
     startReached.current = false;
@@ -144,13 +142,15 @@ export function useSpringCarousel({
       if (withLoop && scrollAmountType === "group" && type === "next") {
         const totalGroups = _items.length / itemsPerSlide;
         const nextGroupIsLastGroup =
-          Math.round(totalGroups) - 1 === activeItem.current;
+          Math.ceil(totalGroups) - 1 === activeItem.current;
         const nextGroupIsFirstGroup =
-          Math.round(totalGroups) === activeItem.current;
+          Math.ceil(totalGroups) === activeItem.current;
 
         if (nextGroupIsLastGroup) {
           endReached.current = true;
         }
+
+        total = -(activeItem.current * getScrollAmount());
 
         if (nextGroupIsFirstGroup) {
           activeItem.current = 0;
@@ -164,7 +164,14 @@ export function useSpringCarousel({
       }
       if (withLoop && scrollAmountType === "group" && type === "prev") {
         const totalGroups = _items.length / itemsPerSlide;
+        const isFirstGroup = activeItem.current === 0;
         const nextGroupIsRepeatedLastGroup = activeItem.current === -1;
+
+        total = -(activeItem.current * getScrollAmount());
+
+        if (isFirstGroup) {
+          startReached.current = true;
+        }
 
         if (nextGroupIsRepeatedLastGroup) {
           startReached.current = false;
@@ -172,6 +179,7 @@ export function useSpringCarousel({
           activeItem.current = totalGroups - 1;
 
           from = spring.value.get() - getScrollAmount() * totalGroups;
+          total = -getScrollAmount() * totalGroups + getScrollAmount();
         }
       }
       if (!withLoop && scrollAmountType === "group") {
@@ -419,22 +427,19 @@ export function useSpringCarousel({
     if (withLoop && slideType === "fixed") {
       const itemIndex = index ?? activeItem.current + 1;
       slideToItemValue({
-        total: -(itemIndex * getScrollAmount()),
         type: "next",
         actionType,
-        newActiveItem: index,
+        newActiveItem: itemIndex,
       });
     } else if (slideType === "fixed" && !endReached.current) {
       const itemIndex = index ?? activeItem.current + 1;
       slideToItemValue({
-        total: -(itemIndex * getScrollAmount()),
         type: "next",
         actionType,
-        newActiveItem: index,
+        newActiveItem: itemIndex,
       });
     } else if (slideType === "fluid" || slideType === "freeScroll") {
       slideToItemValue({
-        total: activeItem.current - getScrollAmount(),
         type: "next",
         actionType,
       });
@@ -444,22 +449,19 @@ export function useSpringCarousel({
     if (withLoop && slideType === "fixed") {
       const itemIndex = index ?? activeItem.current - 1;
       slideToItemValue({
-        total: -(itemIndex * getScrollAmount()),
         type: "prev",
         actionType,
-        newActiveItem: index,
+        newActiveItem: itemIndex,
       });
     } else if (slideType === "fixed" && !startReached.current) {
       const itemIndex = index ?? activeItem.current - 1;
       slideToItemValue({
-        total: -(itemIndex * getScrollAmount()),
         type: "prev",
         actionType,
-        newActiveItem: index,
+        newActiveItem: itemIndex,
       });
     } else if (slideType === "fluid" || slideType === "freeScroll") {
       slideToItemValue({
-        total: activeItem.current + getScrollAmount(),
         type: "prev",
         actionType,
       });

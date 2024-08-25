@@ -29,7 +29,9 @@ export function Main() {
     handleThumbsContainerScroll,
   } = useSpringCarousel({
     itemsPerSlide: 3,
-    items: Array(10)
+    withLoop: true,
+    scrollAmountType: "group",
+    items: Array(12)
       .fill(0)
       .map((_, i) => ({
         id: `item-${i}`,
@@ -44,7 +46,7 @@ export function Main() {
               padding: "24px",
             }}
           >
-            Item {i}
+            Item {i + 1}
           </div>
         ),
       })),
