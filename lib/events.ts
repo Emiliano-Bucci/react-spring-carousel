@@ -1,6 +1,12 @@
+import { FullGestureState } from "@use-gesture/react";
+
 export type SlideActionType = "drag" | "click";
 export type SlideDirection = "prev" | "next";
 
+export type OnDrag = Omit<FullGestureState<"drag">, "event"> & {
+  eventName: "onDrag";
+  slideActionType: SlideActionType;
+};
 type OnSlideStartChange = {
   eventName: "onSlideStartChange";
   slideDirection: SlideDirection;
@@ -24,7 +30,10 @@ type OnSlideChangeComplete = {
   };
 };
 
-export type SpringCarouselEvents = OnSlideStartChange | OnSlideChangeComplete;
+export type SpringCarouselEvents =
+  | OnSlideStartChange
+  | OnSlideChangeComplete
+  | OnDrag;
 export type SpringCarouselEventsEventHandler = (
   props: SpringCarouselEvents
 ) => void;

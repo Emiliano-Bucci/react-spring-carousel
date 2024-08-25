@@ -17,6 +17,7 @@ export function useSpringCarousel({
   withLoop = false,
   enableGestures = true,
   carouselAxis = "x",
+  slideWhenDragThresholdIsReached = true,
 }: Props) {
   const items = withLoop
     ? [
@@ -339,12 +340,18 @@ export function useSpringCarousel({
 
       // const dragDirection = direction > 0 ? "next" : "prev";
 
-      const prevItemTreshold = currentMovement > dragTreshold.current;
-      const nextItemTreshold = currentMovement < -dragTreshold.current;
+      const prevItemTresholdReached = currentMovement > dragTreshold.current;
+      const nextItemTresholdReached = currentMovement < -dragTreshold.current;
 
       const velocity = state.velocity;
 
       if (isDragging) {
+        emitEvent({
+          ...state,
+          eventName: "onDrag",
+          slideActionType: "drag",
+        });
+
         setSpring.start({
           x: movement,
           y: 0,
@@ -353,12 +360,19 @@ export function useSpringCarousel({
             velocity: velocity,
           },
         });
+
+        if (
+          slideWhenDragThresholdIsReached &&
+          (prevItemTresholdReached || nextItemTresholdReached)
+        ) {
+          state.cancel();
+        }
       }
 
       if (state.last) {
-        if (prevItemTreshold) {
+        if (prevItemTresholdReached) {
           slideToPrevItem("drag");
-        } else if (nextItemTreshold) {
+        } else if (nextItemTresholdReached) {
           slideToNextItem("drag");
         } else {
           setSpring.start({

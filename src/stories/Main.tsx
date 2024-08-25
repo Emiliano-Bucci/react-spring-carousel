@@ -49,7 +49,7 @@ export function Main() {
   });
 
   useListenToCustomEvent((ev) => {
-    console.table(ev);
+    // console.table(ev);
   });
 
   return (

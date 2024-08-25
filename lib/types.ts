@@ -24,6 +24,7 @@ export type Props = {
   withLoop?: boolean;
   enableGestures?: boolean;
   carouselAxis?: "x" | "y";
+  slideWhenDragThresholdIsReached?: boolean;
 } & (FixedSlideTypeProps | FluidSlideTypeProps);
 
 export * from "./events";
