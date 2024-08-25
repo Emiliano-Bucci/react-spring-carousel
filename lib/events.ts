@@ -8,8 +8,8 @@ type OnSlideStartChange = {
   nextItem: {
     index: number;
     id: string;
-    startReached: boolean;
-    endReached: boolean;
+    startReached: boolean | undefined;
+    endReached: boolean | undefined;
   };
 };
 type OnSlideChangeComplete = {
@@ -19,8 +19,8 @@ type OnSlideChangeComplete = {
   currentItem: {
     index: number;
     id: string;
-    startReached: boolean;
-    endReached: boolean;
+    startReached: boolean | undefined;
+    endReached: boolean | undefined;
   };
 };
 

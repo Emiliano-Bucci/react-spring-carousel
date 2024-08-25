@@ -4,6 +4,10 @@
   height: 100%;
 }
 
+.wrapper button {
+  border: none;
+}
+
 .carousel-container {
   display: flex;
   flex: 1;
@@ -11,5 +15,5 @@
 }
 
 .wrapper .carousel-container .use-spring-carousel-item {
-  min-width: 300px;
+  min-width: 350px;
 }

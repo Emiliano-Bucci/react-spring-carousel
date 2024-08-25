@@ -21,6 +21,7 @@ export type Props = {
   init?: boolean;
   slideType?: SlideType;
   items: Item[];
+  withLoop?: boolean;
 } & (FixedSlideTypeProps | FluidSlideTypeProps);
 
 export * from "./events";
