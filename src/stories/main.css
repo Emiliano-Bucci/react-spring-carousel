@@ -1,5 +1,8 @@
 html:root {
   --react-spring-carouse-item-gutter: 24px;
+  --react-spring-carousel-start-end-gutter: var(
+    --react-spring-carouse-item-gutter
+  );
 }
 
 .container {
@@ -26,7 +29,7 @@ html:root {
 }
 
 .wrapper .carousel-container .use-spring-carousel-item {
-  min-width: 350px;
+  /* min-width: 350px; */
 }
 
 .thumbs {

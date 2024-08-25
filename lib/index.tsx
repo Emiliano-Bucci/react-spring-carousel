@@ -589,16 +589,26 @@ export function useSpringCarousel({
   }
 
   function getGutterCssVariable() {
-    let total = 0;
+    let totalGutterCssVar = 0;
+    let totalStartEndGutterCssVar = 0;
+
+    const startEndGutterCssVar = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue("--react-spring-carouse-item-gutter");
     const gutterCssVar = getComputedStyle(
       document.documentElement
     ).getPropertyValue("--react-spring-carouse-item-gutter");
 
     if (gutterCssVar.includes("px")) {
-      total = Number(gutterCssVar.replace("px", ""));
+      totalGutterCssVar = Number(gutterCssVar.replace("px", ""));
+    }
+    if (startEndGutterCssVar.includes("px")) {
+      totalStartEndGutterCssVar = Number(
+        startEndGutterCssVar.replace("px", "")
+      );
     }
 
-    return total;
+    return { totalGutterCssVar, totalStartEndGutterCssVar };
   }
   function getScrollHandlers() {
     if (slideType === "freeScroll") {
@@ -759,9 +769,9 @@ export function useSpringCarousel({
         ]
       );
 
-      let gutter = getGutterCssVariable();
+      let { totalGutterCssVar } = getGutterCssVariable();
 
-      total += gutter;
+      total += totalGutterCssVar;
       scrollAmount.current = total;
 
       return total;
@@ -833,7 +843,7 @@ export function useSpringCarousel({
     } else {
       carouselIsInitialized.current = false;
     }
-  }, [scrollAmount, init, slideType, withLoop]);
+  }, [scrollAmount, init, slideType, withLoop, carouselAxis]);
 
   const carouselFragment = (
     <>
@@ -843,6 +853,7 @@ export function useSpringCarousel({
           __html: `
             :root {
               --react-spring-carouse-item-gutter: 0px;
+              --react-spring-carousel-start-end-gutter: 0px;
             }
             .carousel-${carouselId} {
               display: flex;
@@ -853,11 +864,19 @@ export function useSpringCarousel({
             .carousel-${carouselId} .use-spring-carousel-track {
               position: relative;
               display: flex;
-              width: 100%;
+              width: calc(100% - var(--react-spring-carousel-start-end-gutter) * 2);
+              padding-left: var(--react-spring-carousel-start-end-gutter);
               touch-action: ${!enableGestures ? "auto" : carouselAxis === "x" ? "pan-y" : "pan-x"};
               flex-direction: ${carouselAxis === "x" ? "row" : "column"};
               overflow-x: ${slideType === "freeScroll" && carouselAxis === "x" ? "auto" : "initial"};
               overflow-y: ${slideType === "freeScroll" && carouselAxis === "y" ? "auto" : "initial"};
+            }
+            .carousel-${carouselId} .use-spring-carousel-track::after {
+              content: "";
+              visibility: hidden;
+              display: block;
+              width: var(--react-spring-carousel-start-end-gutter);
+              flex-shrink: 0;
             }
             .carousel-${carouselId} .use-spring-carousel-item {
               position: relative;
