@@ -11,10 +11,14 @@ type SlideType = "fixed" | "fluid";
 type FixedSlideTypeProps = {
   slideType?: "fixed";
   scrollAmount?: never;
+  itemsPerSlide?: number;
+  scrollAmountType?: "group" | "slide";
 };
 type FluidSlideTypeProps = {
   slideType?: "fluid";
   scrollAmount?: number;
+  itemsPerSlide?: never;
+  scrollAmountType?: never;
 };
 
 export type Props = {

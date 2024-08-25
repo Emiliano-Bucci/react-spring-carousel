@@ -28,7 +28,9 @@ export function Main() {
   } = useSpringCarousel({
     withLoop: true,
     // slideType: "fluid",
-    items: Array(5)
+    itemsPerSlide: 5,
+    scrollAmountType: "group",
+    items: Array(25)
       .fill(0)
       .map((_, i) => ({
         id: `item-${i}`,

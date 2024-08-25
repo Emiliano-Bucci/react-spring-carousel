@@ -18,6 +18,8 @@ export function useSpringCarousel({
   enableGestures = true,
   carouselAxis = "x",
   slideWhenDragThresholdIsReached = true,
+  itemsPerSlide = 1,
+  scrollAmountType = "slide",
 }: Props) {
   const items = withLoop
     ? [
@@ -55,6 +57,9 @@ export function useSpringCarousel({
 
   const { useListenToCustomEvent, emitEvent } = useEventsModule();
 
+  /**
+   * Internal utility helpers
+   */
   function getScrollAmount() {
     return pFloat(scrollAmount.current ?? 0);
   }
@@ -64,6 +69,7 @@ export function useSpringCarousel({
       carouselContainerRef.current!.getBoundingClientRect().width
     );
   }
+
   type SlideToItemProps = {
     total: number;
     type: "prev" | "next";
@@ -99,47 +105,99 @@ export function useSpringCarousel({
           startReached.current = false;
           endReached.current = false;
         }
+
+        if (scrollAmountType === "group") {
+          const totalGroups = _items.length / itemsPerSlide;
+          const lastGroupIsNotFilled = 2 % totalGroups !== 0;
+          const nextGroupIsLastGroup =
+            Math.floor(totalGroups) === activeItem.current;
+
+          if (nextGroupIsLastGroup) {
+            endReached.current = true;
+            if (lastGroupIsNotFilled) {
+              total = -getTotalScrollWidth();
+            }
+          }
+        }
       }
 
       if (withLoop) {
         if (type === "next") {
-          const nextItemIsRepeatedItem =
-            items[_items.length + activeItem.current].id.includes(
-              "repeated-item"
-            );
+          if (scrollAmountType === "group") {
+            const totalGroups = _items.length / itemsPerSlide;
+            const nextGroupIsLastGroup =
+              Math.round(totalGroups) - 1 === activeItem.current;
+            const nextGroupIsFirstGroup =
+              Math.round(totalGroups) === activeItem.current;
 
-          if (_items[activeItem.current]?.id === _items[_items.length - 1].id) {
-            endReached.current = true;
-          }
+            if (nextGroupIsLastGroup) {
+              endReached.current = true;
+            }
 
-          if (nextItemIsRepeatedItem) {
-            activeItem.current = 0;
+            if (nextGroupIsFirstGroup) {
+              activeItem.current = 0;
 
-            from = spring.x.get() + getScrollAmount() * _items.length;
-            total = 0;
+              from = spring.x.get() + getScrollAmount() * totalGroups;
+              total = 0;
 
-            endReached.current = false;
-            startReached.current = true;
+              endReached.current = false;
+              startReached.current = true;
+            }
+          } else {
+            const nextItemIsRepeatedItem =
+              items[_items.length + activeItem.current].id.includes(
+                "repeated-item"
+              );
+
+            if (
+              _items[activeItem.current]?.id === _items[_items.length - 1].id
+            ) {
+              endReached.current = true;
+            }
+
+            if (nextItemIsRepeatedItem) {
+              activeItem.current = 0;
+
+              from = spring.x.get() + getScrollAmount() * _items.length;
+              total = 0;
+
+              endReached.current = false;
+              startReached.current = true;
+            }
           }
         }
         if (type === "prev") {
-          const currentItemIndex = items.findIndex(
-            (i) => i.id === _items[currentActiveItemIndex].id
-          );
-          const nextItemIsRepeatedItem =
-            items[currentItemIndex - 1].id.includes("repeated-item");
+          if (scrollAmountType === "group") {
+            const totalGroups = _items.length / itemsPerSlide;
+            const nextGroupIsRepeatedLastGroup = activeItem.current === -1;
 
-          if (_items[activeItem.current]?.id === _items[0].id) {
-            startReached.current = true;
-          }
+            if (nextGroupIsRepeatedLastGroup) {
+              startReached.current = false;
+              endReached.current = true;
+              activeItem.current = totalGroups - 1;
 
-          if (nextItemIsRepeatedItem) {
-            startReached.current = false;
-            endReached.current = true;
-            activeItem.current = _items.length - 1;
+              from = spring.x.get() - getScrollAmount() * totalGroups;
+              total = -(getScrollAmount() * totalGroups - getScrollAmount());
+            }
+          } else {
+            const currentItemIndex = items.findIndex(
+              (i) => i.id === _items[currentActiveItemIndex].id
+            );
+            const nextItemIsRepeatedItem =
+              items[currentItemIndex - 1].id.includes("repeated-item");
 
-            from = spring.x.get() - getScrollAmount() * _items.length;
-            total = -(getScrollAmount() * _items.length - getScrollAmount());
+            if (_items[activeItem.current]?.id === _items[0].id) {
+              startReached.current = true;
+            }
+
+            if (nextItemIsRepeatedItem) {
+              startReached.current = false;
+              endReached.current = true;
+              activeItem.current = _items.length - 1;
+
+              from = spring.x.get() - getScrollAmount() * _items.length;
+              total = -(getScrollAmount() * _items.length - getScrollAmount());
+            }
           }
         }
       }
@@ -329,6 +387,12 @@ export function useSpringCarousel({
       });
     }
   }
+  function getCarouselItemWidth() {
+    if (itemsPerSlide > 1) {
+      return `calc(100% / ${itemsPerSlide}) !important`;
+    }
+    return "100% !important";
+  }
 
   const bindDrag = useDrag(
     (state) => {
@@ -395,6 +459,14 @@ export function useSpringCarousel({
   );
 
   useEffect(() => {
+    function handleSetScrollAmount() {
+      const firstItem = carouselTrackRef.current!.children[0] as HTMLElement;
+      if (slideType === "fixed" && scrollAmountType === "group") {
+        return pFloat(carouselTrackRef.current!.getBoundingClientRect().width);
+      }
+
+      return pFloat(firstItem.getBoundingClientRect().width);
+    }
     function initCarousel() {
       /**
        * Initial checks
@@ -412,8 +484,7 @@ export function useSpringCarousel({
         (slideType === "fluid" && scrollAmount === undefined) ||
         slideType === "fixed"
       ) {
-        const firstItem = carouselTrackRef.current!.children[0] as HTMLElement;
-        scrollAmount.current = pFloat(firstItem.getBoundingClientRect().width);
+        scrollAmount.current = handleSetScrollAmount();
       }
 
       if (withLoop) {
@@ -421,13 +492,18 @@ export function useSpringCarousel({
          * For loop option we set the initial
          * position of the carousel in the middle
          */
-        const firstItem = carouselTrackRef.current!.children[0] as HTMLElement;
-        scrollAmount.current = firstItem.getBoundingClientRect().width;
-        carouselTrackRef.current!.style.left = `-${pFloat((scrollAmount.current * items.length) / 3)}px`;
+        scrollAmount.current = handleSetScrollAmount();
+
+        if (slideType === "fixed" && scrollAmountType === "group") {
+          const totalGroups = (_items.length * 3) / itemsPerSlide;
+          carouselTrackRef.current!.style.left = `-${pFloat((scrollAmount.current * totalGroups) / 3)}px`;
+        } else {
+          carouselTrackRef.current!.style.left = `-${pFloat((scrollAmount.current * items.length) / 3)}px`;
+        }
       }
 
       /**
-       * Set drag treshold based on item width
+       * Set drag treshold based on scroll amount
        */
       dragTreshold.current = getScrollAmount() / 4;
     }
@@ -459,7 +535,7 @@ export function useSpringCarousel({
               position: relative;
               display: flex;
               flex: 1;
-              min-width: ${slideType === "fixed" ? "100% !important" : "auto"};
+              min-width: ${slideType === "fixed" ? getCarouselItemWidth() : "auto"};
             }
           `.trim(),
         }}
