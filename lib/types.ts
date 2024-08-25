@@ -22,6 +22,8 @@ export type Props = {
   slideType?: SlideType;
   items: Item[];
   withLoop?: boolean;
+  enableGestures?: boolean;
+  carouselAxis?: "x" | "y";
 } & (FixedSlideTypeProps | FluidSlideTypeProps);
 
 export * from "./events";

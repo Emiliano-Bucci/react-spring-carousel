@@ -1,10 +1,10 @@
-export type SlideMode = "drag" | "click";
+export type SlideActionType = "drag" | "click";
 export type SlideDirection = "prev" | "next";
 
 type OnSlideStartChange = {
   eventName: "onSlideStartChange";
-  slideActionType: SlideDirection;
-  slideMode: SlideMode;
+  slideDirection: SlideDirection;
+  sliceActionType: SlideActionType;
   nextItem: {
     index: number;
     id: string;
@@ -14,8 +14,8 @@ type OnSlideStartChange = {
 };
 type OnSlideChangeComplete = {
   eventName: "onSlideChangeComplete";
-  slideActionType: SlideDirection;
-  slideMode: SlideMode;
+  slideDirection: SlideDirection;
+  sliceActionType: SlideActionType;
   currentItem: {
     index: number;
     id: string;
