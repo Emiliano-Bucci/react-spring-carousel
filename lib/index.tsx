@@ -74,7 +74,7 @@ export function useSpringCarousel({
   function getScrollAmount() {
     return pFloat(scrollAmount.current ?? 0);
   }
-  function getTotalScrollWidth() {
+  function getTotalScrollAvailableSpace() {
     return (
       carouselTrackRef.current![
         carouselAxis === "x" ? "scrollWidth" : "scrollHeight"
@@ -180,7 +180,7 @@ export function useSpringCarousel({
         if (nextGroupIsLastGroup) {
           endReached.current = true;
           if (lastGroupIsNotFilled) {
-            total = -getTotalScrollWidth();
+            total = -getTotalScrollAvailableSpace();
           }
         }
       }
@@ -254,9 +254,12 @@ export function useSpringCarousel({
 
         total = -(activeItem.current * getScrollAmount());
 
-        if (type === "next" && Math.abs(total) > getTotalScrollWidth()) {
+        if (
+          type === "next" &&
+          Math.abs(total) > getTotalScrollAvailableSpace()
+        ) {
           endReached.current = true;
-          total = -getTotalScrollWidth();
+          total = -getTotalScrollAvailableSpace();
         }
       }
 
@@ -302,10 +305,11 @@ export function useSpringCarousel({
           }
         }
         if (!withLoop) {
-          const nextItemWillExceed = Math.abs(total) > getTotalScrollWidth();
+          const nextItemWillExceed =
+            Math.abs(total) > getTotalScrollAvailableSpace();
           if (nextItemWillExceed) {
             endReached.current = true;
-            total = -getTotalScrollWidth();
+            total = -getTotalScrollAvailableSpace();
           } else {
             startReached.current = false;
             endReached.current = false;
@@ -622,20 +626,10 @@ export function useSpringCarousel({
 
       const prevItemTresholdReached = currentMovement > dragTreshold.current;
       const nextItemTresholdReached = currentMovement < -dragTreshold.current;
-      const direction = state.direction[carouselAxis === "x" ? 0 : 1];
 
       const velocity = state.velocity;
 
-      console.log({ movement });
-
       if (isDragging) {
-        // if (
-        //   (startReached.current && !withLoop && direction > 0) ||
-        //   (endReached.current && !withLoop && direction < 0)
-        // ) {
-        //   state.cancel();
-        //   return;
-        // }
         emitEvent({
           ...state,
           eventName: "onDrag",
@@ -676,6 +670,15 @@ export function useSpringCarousel({
     {
       enabled: enableGestures && slideType !== "freeScroll",
       axis: carouselAxis,
+      rubberband: !withLoop,
+      bounds: () => {
+        return {
+          right: 0,
+          left: -getTotalScrollAvailableSpace(),
+          top: -getTotalScrollAvailableSpace(),
+          bottom: 0,
+        };
+      },
       from: () => {
         return [spring.value.get(), spring.value.get()];
       },
