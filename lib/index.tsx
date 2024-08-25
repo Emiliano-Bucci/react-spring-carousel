@@ -490,8 +490,9 @@ export function useSpringCarousel({
   }
   function getCarouselItemWidth() {
     if (itemsPerSlide > 1) {
-      return `calc(100% / ${itemsPerSlide} - var(--react-spring-carouse-item-gutter)) !important`;
+      return `calc(100% / ${itemsPerSlide} - var(--react-spring-carouse-item-gutter) * ${(itemsPerSlide - 1) / itemsPerSlide}) !important`;
     }
+
     return "100% !important";
   }
   function handleSlideToItem(id: string | number) {
@@ -841,19 +842,21 @@ export function useSpringCarousel({
             .carousel-${carouselId} .use-spring-carousel-item {
               position: relative;
               display: flex;
-              flex: 1;
-              min-width: ${slideType === "fixed" && carouselAxis === "x" ? getCarouselItemWidth() : "auto"};
-              min-height: ${slideType === "fixed" && carouselAxis === "y" ? getCarouselItemWidth() : "auto"};
+              flex: 1 0 ${slideType === "fixed" ? getCarouselItemWidth() : "auto"};
             }
-              .carousel-${carouselId} .use-spring-carousel-item:not(:last-child) {
-                margin-right: var(--react-spring-carouse-item-gutter);
-              }
-          `.trim(),
+            .carousel-${carouselId}[data-carousel-direction=x] .use-spring-carousel-item:not(:last-child) {
+              margin-right: var(--react-spring-carouse-item-gutter);
+            }
+            .carousel-${carouselId}[data-carousel-direction=y] .use-spring-carousel-item:not(:last-child) {
+              margin-bottom: var(--react-spring-carouse-item-gutter);
+            }
+              `.trim(),
         }}
       />
       <div
         className={`use-spring-carousel-container carousel-${carouselId}`}
         ref={carouselContainerRef}
+        data-carousel-direction={carouselAxis}
       >
         <div
           className={`use-spring-carousel-track`}
