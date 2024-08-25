@@ -107,9 +107,9 @@ export function useSpringCarousel({
     startReached.current = false;
     endReached.current = false;
 
-    const currentActiveItemIndex = activeItem.current;
-
     if (slideType === "fixed") {
+      const currentActiveItemIndex = activeItem.current;
+
       if (type === "prev") {
         activeItem.current = activeItem.current - 1;
       }
@@ -187,6 +187,10 @@ export function useSpringCarousel({
       if (type === "next") {
         const nextItemWillExceed = Math.abs(total) > getTotalScrollWidth();
 
+        if (withLoop) {
+          console.log("32131");
+          activeItem.current = total;
+        }
         if (!withLoop) {
           if (nextItemWillExceed) {
             endReached.current = true;
@@ -195,6 +199,7 @@ export function useSpringCarousel({
             startReached.current = false;
             endReached.current = false;
           }
+          activeItem.current = total;
         }
       }
       if (type === "prev") {
@@ -208,6 +213,7 @@ export function useSpringCarousel({
             startReached.current = false;
             endReached.current = false;
           }
+          activeItem.current = total;
         }
       }
 
@@ -250,6 +256,19 @@ export function useSpringCarousel({
               currentItem: {
                 index: activeItem.current,
                 id: items[activeItem.current].id,
+                startReached: startReached.current,
+                endReached: endReached.current,
+              },
+            });
+          }
+          if (slideType === "fluid") {
+            emitEvent({
+              eventName: "onSlideChangeComplete",
+              slideMode: "click",
+              slideActionType: type,
+              currentItem: {
+                index: 0,
+                id: "",
                 startReached: startReached.current,
                 endReached: endReached.current,
               },
@@ -302,16 +321,13 @@ export function useSpringCarousel({
       }
 
       if (withLoop) {
-        if (slideType === "fixed") {
-          /**
-           * For loop and fixed options we
-           * set the initial position of the carousel in the middle
-           */
-          const firstItem = carouselTrackRef.current!
-            .children[0] as HTMLElement;
-          scrollAmount = firstItem.getBoundingClientRect().width;
-          carouselTrackRef.current!.style.left = `-${pFloat((scrollAmount * items.length) / 3)}px`;
-        }
+        /**
+         * For loop option we set the initial
+         * position of the carousel in the middle
+         */
+        const firstItem = carouselTrackRef.current!.children[0] as HTMLElement;
+        scrollAmount = firstItem.getBoundingClientRect().width;
+        carouselTrackRef.current!.style.left = `-${pFloat((scrollAmount * items.length) / 3)}px`;
       }
     }
 
