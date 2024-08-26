@@ -278,6 +278,7 @@ export function useSpringCarousel({
 
         total = -(activeItem.current * getScrollAmount());
       }
+
       if (
         withLoop &&
         type === "prev" &&
@@ -727,7 +728,9 @@ export function useSpringCarousel({
       }
     }
     function handleSetBasicCarouselPosition() {
-      if (slideType === "fixed" && !withLoop) return;
+      if ((slideType === "fixed" && !withLoop) || slideType === "freeScroll") {
+        return;
+      }
       if (
         slideType === "fixed" &&
         scrollAmountType === "group" &&

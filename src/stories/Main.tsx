@@ -27,8 +27,7 @@ export function Main() {
     useListenToCustomEvent,
     carouselId,
   } = useSpringCarousel({
-    withLoop: true,
-    slideType: "fluid",
+    slideType: "freeScroll",
     items: Array(10)
       .fill(0)
       .map((_, i) => ({
