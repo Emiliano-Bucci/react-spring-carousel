@@ -597,9 +597,10 @@ export function useSpringCarousel({
 
     if (item) {
       const availableScrollableSpace =
-        carouselAxis === "x"
-          ? container.scrollWidth - container.getBoundingClientRect().width
-          : container.scrollHeight - container.getBoundingClientRect().height;
+        container[carouselAxis === "x" ? "scrollWidth" : "scrollHeight"] -
+        container.getBoundingClientRect()[
+          carouselAxis === "x" ? "width" : "height"
+        ];
 
       const itemPosition = item.offsetLeft + item.offsetWidth / 2;
       const to = itemPosition - container.clientWidth / 2;
