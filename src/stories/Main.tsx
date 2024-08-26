@@ -25,8 +25,8 @@ export function Main() {
     slideToPrevItem,
     slideToNextItem,
     useListenToCustomEvent,
-    carouselId,
   } = useSpringCarousel({
+    fadeIn: true,
     items: Array(10)
       .fill(0)
       .map((_, i) => ({
@@ -63,7 +63,7 @@ export function Main() {
           Prev
         </button>
         <div className="carousel-container">
-          <style>
+          {/* <style>
             {`html:root {
                 --${carouselId}-react-spring-carousel-item-gutter: 10px;
                 --${carouselId}-react-spring-carousel-start-end-gutter: var(
@@ -71,7 +71,7 @@ export function Main() {
                 );
               }
               `}
-          </style>
+          </style> */}
           {carouselFragment}
         </div>
         <button

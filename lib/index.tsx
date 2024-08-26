@@ -19,6 +19,7 @@ export function useSpringCarousel({
   scrollAmountType: _scrollAmountType,
   gutter = 0,
   startEndGutter = 0,
+  fadeIn = false,
 }: Props) {
   const carouselIsInitialized = useRef(false);
   const errorMessages = useRef<string[]>([]);
@@ -916,6 +917,21 @@ export function useSpringCarousel({
             .carousel-${carouselId}[data-carousel-direction=y] .use-spring-carousel-item:not(:last-child) {
               margin-bottom: var(--${carouselId}-react-spring-carousel-item-gutter);
             }
+            ${
+              fadeIn
+                ? `.carousel-${carouselId} .use-spring-carousel-item {
+                  position: absolute;
+                  top: 0;
+                  left: 0;
+                  width: 100%;
+                  height: 100%;
+                  opacity: 0;
+                }
+                .carousel-${carouselId} .use-spring-carousel-item:first-child {
+                  opacity: 1;
+                }`.trim()
+                : ""
+            };
               `.trim(),
         }}
       />

@@ -38,6 +38,7 @@ export type Props = {
   slideWhenDragThresholdIsReached?: boolean;
   gutter?: number;
   startEndGutter?: number;
+  fadeIn?: boolean;
 } & (FixedSlideTypeProps | FluidSlideTypeProps | FreeScrollSlideTypeProps);
 
 export * from "./events";
