@@ -25,6 +25,7 @@ export function Main() {
     slideToPrevItem,
     slideToNextItem,
     useListenToCustomEvent,
+    carouselId,
   } = useSpringCarousel({
     withLoop: true,
     slideType: "fluid",
@@ -63,10 +64,24 @@ export function Main() {
         >
           Prev
         </button>
-        <div className="carousel-container">{carouselFragment}</div>
+        <div className="carousel-container">
+          <style>
+            {`html:root {
+                --${carouselId}-react-spring-carouse-item-gutter: 90px;
+                --${carouselId}-react-spring-carousel-start-end-gutter: var(
+                  --react-spring-carouse-item-gutter
+                );
+              }
+              @media all and (max-width: 1200px) {
+                html:root {
+                  --${carouselId}-react-spring-carouse-item-gutter: 5px;
+                }
+              }`}
+          </style>
+          {carouselFragment}
+        </div>
         <button
           onClick={() => {
-            // slideToIem(3);
             slideToNextItem();
           }}
         >

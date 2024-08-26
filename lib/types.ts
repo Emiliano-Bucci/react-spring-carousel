@@ -36,6 +36,7 @@ export type Props = {
   enableGestures?: boolean;
   carouselAxis?: "x" | "y";
   slideWhenDragThresholdIsReached?: boolean;
+  gutter?: number;
 } & (FixedSlideTypeProps | FluidSlideTypeProps | FreeScrollSlideTypeProps);
 
 export * from "./events";

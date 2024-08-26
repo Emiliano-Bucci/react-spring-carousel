@@ -17,6 +17,7 @@ export function useSpringCarousel({
   slideWhenDragThresholdIsReached = true,
   itemsPerSlide = 1,
   scrollAmountType = "slide",
+  gutter = 0,
 }: Props) {
   const carouselIsInitialized = useRef(false);
   const errorMessages = useRef<string[]>([]);
@@ -489,11 +490,10 @@ export function useSpringCarousel({
       });
     }
   }
-  function getCarouselItemWidth() {
+  function getCarouselItemDimension() {
     if (itemsPerSlide > 1) {
-      return `calc(100% / ${itemsPerSlide} - var(--react-spring-carouse-item-gutter) / ${itemsPerSlide} * ${itemsPerSlide - 1}) !important`;
+      return `calc(100% / ${itemsPerSlide} - var(--${carouselId}-react-spring-carouse-item-gutter) / ${itemsPerSlide} * ${itemsPerSlide - 1}) !important`;
     }
-
     return "100% !important";
   }
   function handleSlideToItem(id: string | number) {
@@ -591,10 +591,10 @@ export function useSpringCarousel({
 
     const startEndGutterCssVar = getComputedStyle(
       document.documentElement
-    ).getPropertyValue("--react-spring-carouse-item-gutter");
+    ).getPropertyValue(`--${carouselId}-react-spring-carouse-item-gutter`);
     const gutterCssVar = getComputedStyle(
       document.documentElement
-    ).getPropertyValue("--react-spring-carouse-item-gutter");
+    ).getPropertyValue(`--${carouselId}-react-spring-carouse-item-gutter`);
 
     if (gutterCssVar.includes("px")) {
       totalGutterCssVar = Number(gutterCssVar.replace("px", ""));
@@ -740,9 +740,7 @@ export function useSpringCarousel({
     function handleResize() {
       handleSetScrollAmount();
 
-      if (slideType === "fixed" && withLoop) {
-        handleSetBasicCarouselPosition();
-      }
+      handleSetBasicCarouselPosition();
 
       setSpring.start({
         immediate: true,
@@ -853,8 +851,8 @@ export function useSpringCarousel({
         dangerouslySetInnerHTML={{
           __html: `
             :root {
-              --react-spring-carouse-item-gutter: 0px;
-              --react-spring-carousel-start-end-gutter: 0px;
+              --${carouselId}-react-spring-carouse-item-gutter: ${gutter}px;
+              --${carouselId}-react-spring-carousel-start-end-gutter: ${gutter}px;
             }
             .carousel-${carouselId} {
               display: flex;
@@ -882,13 +880,13 @@ export function useSpringCarousel({
             .carousel-${carouselId} .use-spring-carousel-item {
               position: relative;
               display: flex;
-              flex: 1 0 ${slideType === "fixed" ? getCarouselItemWidth() : "auto"};
+              flex: 1 0 ${slideType === "fixed" ? getCarouselItemDimension() : "auto"};
             }
             .carousel-${carouselId}[data-carousel-direction=x] .use-spring-carousel-item:not(:last-child) {
-              margin-right: var(--react-spring-carouse-item-gutter);
+              margin-right: var(--${carouselId}-react-spring-carouse-item-gutter);
             }
             .carousel-${carouselId}[data-carousel-direction=y] .use-spring-carousel-item:not(:last-child) {
-              margin-bottom: var(--react-spring-carouse-item-gutter);
+              margin-bottom: var(--${carouselId}-react-spring-carouse-item-gutter);
             }
               `.trim(),
         }}
