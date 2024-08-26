@@ -29,8 +29,6 @@ export function Main() {
   } = useSpringCarousel({
     // withLoop: true,
     slideType: "fluid",
-    scrollAmountType: "group",
-    itemsPerSlide: 2,
     items: Array(10)
       .fill(0)
       .map((_, i) => ({
@@ -69,7 +67,7 @@ export function Main() {
         <div className="carousel-container">
           <style>
             {`html:root {
-                --${carouselId}-react-spring-carousel-item-gutter: 90px;
+                --${carouselId}-react-spring-carousel-item-gutter: 10px;
                 --${carouselId}-react-spring-carousel-start-end-gutter: var(
                   --${carouselId}-react-spring-carousel-item-gutter
                 );

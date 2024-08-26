@@ -4,7 +4,7 @@ import { Controller, useSpring } from "@react-spring/web";
 import { useEventsModule } from "./useEventsModule";
 import { useDrag } from "@use-gesture/react";
 import { SlideActionType } from "./events";
-import { isOutOfViewport, pFloat, logWarn, logError } from "./utils";
+import { isOutOfViewport, pFloat, logWarn } from "./utils";
 
 export function useSpringCarousel({
   init = true,
@@ -15,14 +15,16 @@ export function useSpringCarousel({
   enableGestures = true,
   carouselAxis = "x",
   slideWhenDragThresholdIsReached = true,
-  itemsPerSlide = 1,
-  scrollAmountType = "slide",
+  itemsPerSlide: _itemsPerSlide,
+  scrollAmountType,
   gutter = 0,
   startEndGutter = 0,
 }: Props) {
   const carouselIsInitialized = useRef(false);
   const errorMessages = useRef<string[]>([]);
   const windowIsHidden = useRef(false);
+
+  const itemsPerSlide = _itemsPerSlide ?? 1;
 
   const items = withLoop
     ? [
@@ -816,6 +818,11 @@ export function useSpringCarousel({
       if (slideType === "fluid" && scrollAmountType !== undefined) {
         errorMessages.current.push(
           `scrollAmountType="group" is not available for slideType="fluid"; please change one of them.`
+        );
+      }
+      if (slideType === "fluid" && _itemsPerSlide !== undefined) {
+        errorMessages.current.push(
+          `itemsPerSlide=${_itemsPerSlide} is not available for slideType="fluid"; please change one of them.`
         );
       }
 
