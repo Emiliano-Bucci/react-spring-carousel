@@ -16,7 +16,7 @@ export function useSpringCarousel({
   carouselAxis = "x",
   slideWhenDragThresholdIsReached = true,
   itemsPerSlide: _itemsPerSlide,
-  scrollAmountType,
+  scrollAmountType: _scrollAmountType,
   gutter = 0,
   startEndGutter = 0,
 }: Props) {
@@ -25,6 +25,7 @@ export function useSpringCarousel({
   const windowIsHidden = useRef(false);
 
   const itemsPerSlide = _itemsPerSlide ?? 1;
+  const scrollAmountType = _scrollAmountType ?? "slide";
 
   const items = withLoop
     ? [
@@ -57,9 +58,9 @@ export function useSpringCarousel({
     onChange({ value }) {
       if (slideType === "fixed" || slideType === "fluid") {
         if (carouselAxis === "x") {
-          carouselTrackRef.current!.style.transform = `translateX(${value.value}px)`;
+          carouselTrackRef.current!.style.transform = `translate3d(${value.value}px, 0px, 0px)`;
         } else {
-          carouselTrackRef.current!.style.transform = `translateY(${value.value}px)`;
+          carouselTrackRef.current!.style.transform = `translate3d(${value.value}px, 0px, 0px)`;
         }
       }
       if (slideType === "freeScroll") {
@@ -815,7 +816,7 @@ export function useSpringCarousel({
         const errorMessage = `When using scrollAmountType='group' and itemsPerSlide={number>1} make sure that itemsPerSlides is divisible by the total quantity of items otherwise the carousel won't initialize.`;
         errorMessages.current.push(errorMessage);
       }
-      if (slideType === "fluid" && scrollAmountType !== undefined) {
+      if (slideType === "fluid" && _scrollAmountType !== undefined) {
         errorMessages.current.push(
           `scrollAmountType="group" is not available for slideType="fluid"; please change one of them.`
         );
