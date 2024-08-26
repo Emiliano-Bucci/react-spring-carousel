@@ -370,16 +370,12 @@ export function useSpringCarousel({
         }
       }
       if (type === "next" && !withLoop) {
-        const nextItemIsLastItem =
-          _items[activeItem.current + 1]?.id === _items[_items.length - 1].id;
         const nextItemWillExceed =
           Math.abs(total) > getTotalScrollAvailableSpace();
 
-        if (nextItemIsLastItem) {
+        if (nextItemWillExceed) {
           endReached.current = true;
-          if (nextItemWillExceed) {
-            total = -getTotalScrollAvailableSpace();
-          }
+          total = -getTotalScrollAvailableSpace();
         } else if (nextItemWillExceed) {
           endReached.current = true;
           total = -getTotalScrollAvailableSpace();
@@ -388,7 +384,15 @@ export function useSpringCarousel({
           endReached.current = false;
         }
       }
-      if (type === "prev") {
+      if (type === "prev" && !withLoop) {
+        const currentItemIsFirstItem =
+          _items[activeItem.current]?.id === _items[0].id;
+
+        if (currentItemIsFirstItem) {
+          startReached.current = true;
+        }
+      }
+      if (type === "prev" && withLoop) {
         const currentItemIsFirstItem =
           _items[activeItem.current]?.id === _items[0].id;
         const nextItemIsRepeatedItem =
@@ -400,29 +404,13 @@ export function useSpringCarousel({
           startReached.current = true;
         }
 
-        if (withLoop && nextItemIsRepeatedItem) {
+        if (nextItemIsRepeatedItem) {
           activeItem.current = _items.length - 1;
           from = spring.value.get() - getScrollAmount() * _items.length;
           total = -(getScrollAmount() * _items.length - getScrollAmount());
 
           startReached.current = false;
           endReached.current = true;
-        }
-
-        if (!withLoop) {
-          const nextItemWillExceed = total > 0;
-          if (nextItemWillExceed) {
-            total = 0;
-            startReached.current = true;
-          } else {
-            startReached.current = false;
-            endReached.current = false;
-          }
-
-          if (startReached.current) {
-            activeItem.current = 0;
-            return;
-          }
         }
       }
 
@@ -524,7 +512,11 @@ export function useSpringCarousel({
         newActiveItem: itemIndex,
       });
     }
-    if (slideType === "fluid" || slideType === "freeScroll") {
+    if (
+      (slideType === "fluid" && withLoop) ||
+      (slideType === "fluid" && !withLoop && !endReached.current) ||
+      slideType === "freeScroll"
+    ) {
       slideToItemValue({
         type: "next",
         actionType,
@@ -548,7 +540,11 @@ export function useSpringCarousel({
         newActiveItem: itemIndex,
       });
     }
-    if (slideType === "fluid" || slideType === "freeScroll") {
+    if (
+      (slideType === "fluid" && withLoop) ||
+      (slideType === "fluid" && !withLoop && !startReached.current) ||
+      slideType === "freeScroll"
+    ) {
       slideToItemValue({
         type: "prev",
         actionType,
