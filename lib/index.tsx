@@ -87,8 +87,7 @@ export function useSpringCarousel({
     );
   }
   function handleAppNotInitialized() {
-    logWarn("It seems that the carousel isn't initialized yet.");
-    console.log("The carousel register the following errors:");
+    logWarn("The carousel can't be initialized. List of errors:");
     console.table(errorMessages.current);
   }
   function getScrollHandlers() {
@@ -788,6 +787,7 @@ export function useSpringCarousel({
       return total;
     }
     function initCarousel() {
+      errorMessages.current = [];
       /**
        * Initial checks
        */
@@ -811,8 +811,16 @@ export function useSpringCarousel({
         _items.length % itemsPerSlide !== 0
       ) {
         const errorMessage = `When using scrollAmountType='group' and itemsPerSlide={number>1} make sure that itemsPerSlides is divisible by the total quantity of items otherwise the carousel won't initialize.`;
-        logError(errorMessage);
         errorMessages.current.push(errorMessage);
+      }
+      if (slideType === "fluid" && scrollAmountType !== undefined) {
+        errorMessages.current.push(
+          `scrollAmountType="group" is not available for slideType="fluid"; please change one of them.`
+        );
+      }
+
+      if (errorMessages.current.length > 0) {
+        handleAppNotInitialized();
         return;
       }
 
