@@ -18,6 +18,7 @@ export function useSpringCarousel({
   itemsPerSlide = 1,
   scrollAmountType = "slide",
   gutter = 0,
+  startEndGutter = 0,
 }: Props) {
   const carouselIsInitialized = useRef(false);
   const errorMessages = useRef<string[]>([]);
@@ -852,7 +853,7 @@ export function useSpringCarousel({
           __html: `
             :root {
               --${carouselId}-react-spring-carouse-item-gutter: ${gutter}px;
-              --${carouselId}-react-spring-carousel-start-end-gutter: ${gutter}px;
+              --${carouselId}-react-spring-carousel-start-end-gutter: ${startEndGutter}px;
             }
             .carousel-${carouselId} {
               display: flex;
