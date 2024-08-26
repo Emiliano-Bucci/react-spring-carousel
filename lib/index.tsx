@@ -493,9 +493,9 @@ export function useSpringCarousel({
   }
   function getCarouselItemDimension() {
     if (itemsPerSlide > 1) {
-      return `calc(100% / ${itemsPerSlide} - var(--${carouselId}-react-spring-carouse-item-gutter) / ${itemsPerSlide} * ${itemsPerSlide - 1}) !important`;
+      return `calc(100% / ${itemsPerSlide} - var(--${carouselId}-react-spring-carousel-item-gutter) / ${itemsPerSlide} * ${itemsPerSlide - 1}) !important`;
     }
-    return "100% !important";
+    return `100% !important`;
   }
   function handleSlideToItem(id: string | number) {
     let itemIndex = 0;
@@ -592,10 +592,10 @@ export function useSpringCarousel({
 
     const startEndGutterCssVar = getComputedStyle(
       document.documentElement
-    ).getPropertyValue(`--${carouselId}-react-spring-carouse-item-gutter`);
+    ).getPropertyValue(`--${carouselId}-react-spring-carousel-item-gutter`);
     const gutterCssVar = getComputedStyle(
       document.documentElement
-    ).getPropertyValue(`--${carouselId}-react-spring-carouse-item-gutter`);
+    ).getPropertyValue(`--${carouselId}-react-spring-carousel-item-gutter`);
 
     if (gutterCssVar.includes("px")) {
       totalGutterCssVar = Number(gutterCssVar.replace("px", ""));
@@ -725,6 +725,7 @@ export function useSpringCarousel({
       }
     }
     function handleSetBasicCarouselPosition() {
+      if (slideType === "fixed" && !withLoop) return;
       if (
         slideType === "fixed" &&
         scrollAmountType === "group" &&
@@ -740,7 +741,6 @@ export function useSpringCarousel({
     }
     function handleResize() {
       handleSetScrollAmount();
-
       handleSetBasicCarouselPosition();
 
       setSpring.start({
@@ -852,7 +852,7 @@ export function useSpringCarousel({
         dangerouslySetInnerHTML={{
           __html: `
             :root {
-              --${carouselId}-react-spring-carouse-item-gutter: ${gutter}px;
+              --${carouselId}-react-spring-carousel-item-gutter: ${gutter}px;
               --${carouselId}-react-spring-carousel-start-end-gutter: ${startEndGutter}px;
             }
             .carousel-${carouselId} {
@@ -864,8 +864,8 @@ export function useSpringCarousel({
             .carousel-${carouselId} .use-spring-carousel-track {
               position: relative;
               display: flex;
-              width: calc(100% - var(--react-spring-carousel-start-end-gutter) * 2);
-              padding-left: var(--react-spring-carousel-start-end-gutter);
+              width: calc(100% - var(--${carouselId}-react-spring-carousel-start-end-gutter) * 2);
+              padding-left: var(--${carouselId}-react-spring-carousel-start-end-gutter);
               touch-action: ${!enableGestures ? "auto" : carouselAxis === "x" ? "pan-y" : "pan-x"};
               flex-direction: ${carouselAxis === "x" ? "row" : "column"};
               overflow-x: ${slideType === "freeScroll" && carouselAxis === "x" ? "auto" : "initial"};
@@ -875,7 +875,7 @@ export function useSpringCarousel({
               content: "";
               visibility: hidden;
               display: block;
-              width: var(--react-spring-carousel-start-end-gutter);
+              width: var(--${carouselId}-react-spring-carousel-start-end-gutter);
               flex-shrink: 0;
             }
             .carousel-${carouselId} .use-spring-carousel-item {
@@ -884,10 +884,10 @@ export function useSpringCarousel({
               flex: 1 0 ${slideType === "fixed" ? getCarouselItemDimension() : "auto"};
             }
             .carousel-${carouselId}[data-carousel-direction=x] .use-spring-carousel-item:not(:last-child) {
-              margin-right: var(--${carouselId}-react-spring-carouse-item-gutter);
+              margin-right: var(--${carouselId}-react-spring-carousel-item-gutter);
             }
             .carousel-${carouselId}[data-carousel-direction=y] .use-spring-carousel-item:not(:last-child) {
-              margin-bottom: var(--${carouselId}-react-spring-carouse-item-gutter);
+              margin-bottom: var(--${carouselId}-react-spring-carousel-item-gutter);
             }
               `.trim(),
         }}

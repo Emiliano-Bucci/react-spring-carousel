@@ -27,8 +27,10 @@ export function Main() {
     useListenToCustomEvent,
     carouselId,
   } = useSpringCarousel({
-    withLoop: true,
-    slideType: "fluid",
+    // withLoop: true,
+    // slideType: "fluid",
+    scrollAmountType: "group",
+    itemsPerSlide: 2,
     items: Array(10)
       .fill(0)
       .map((_, i) => ({
@@ -67,16 +69,12 @@ export function Main() {
         <div className="carousel-container">
           <style>
             {`html:root {
-                --${carouselId}-react-spring-carouse-item-gutter: 90px;
+                --${carouselId}-react-spring-carousel-item-gutter: 90px;
                 --${carouselId}-react-spring-carousel-start-end-gutter: var(
-                  --react-spring-carouse-item-gutter
+                  --${carouselId}-react-spring-carousel-item-gutter
                 );
               }
-              @media all and (max-width: 1200px) {
-                html:root {
-                  --${carouselId}-react-spring-carouse-item-gutter: 5px;
-                }
-              }`}
+              `}
           </style>
           {carouselFragment}
         </div>
