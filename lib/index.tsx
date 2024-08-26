@@ -91,6 +91,63 @@ export function useSpringCarousel({
     console.log("The carousel register the following errors:");
     console.table(errorMessages.current);
   }
+  function getScrollHandlers() {
+    if (slideType === "freeScroll") {
+      return {
+        onWheel() {
+          spring.value.stop();
+          // setStartEndItemReachedOnFreeScroll()
+        },
+        onScroll(e: React.UIEvent<HTMLDivElement, UIEvent>) {
+          const target = e.currentTarget;
+          const scrollValue =
+            carouselAxis === "x" ? target.scrollLeft : target.scrollTop;
+          const availableScrollSpace =
+            carouselAxis === "x"
+              ? target.scrollWidth - target.clientWidth
+              : target.scrollHeight - target.clientHeight;
+
+          if (scrollValue === 0) {
+            startReached.current = true;
+          } else if (scrollValue === availableScrollSpace) {
+            endReached.current = true;
+          } else {
+            startReached.current = false;
+            endReached.current = false;
+          }
+        },
+      };
+    }
+    return {};
+  }
+  function getGutterCssVariable() {
+    let totalGutterCssVar = 0;
+    let totalStartEndGutterCssVar = 0;
+
+    const startEndGutterCssVar = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue(`--${carouselId}-react-spring-carousel-item-gutter`);
+    const gutterCssVar = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue(`--${carouselId}-react-spring-carousel-item-gutter`);
+
+    if (gutterCssVar.includes("px")) {
+      totalGutterCssVar = Number(gutterCssVar.replace("px", ""));
+    }
+    if (startEndGutterCssVar.includes("px")) {
+      totalStartEndGutterCssVar = Number(
+        startEndGutterCssVar.replace("px", "")
+      );
+    }
+
+    return { totalGutterCssVar, totalStartEndGutterCssVar };
+  }
+  function getCarouselItemDimension() {
+    if (itemsPerSlide > 1) {
+      return `calc(100% / ${itemsPerSlide} - var(--${carouselId}-react-spring-carousel-item-gutter) / ${itemsPerSlide} * ${itemsPerSlide - 1}) !important`;
+    }
+    return `100% !important`;
+  }
 
   type SlideToItemProps = {
     type: "prev" | "next";
@@ -178,6 +235,8 @@ export function useSpringCarousel({
         const lastGroupIsNotFilled = 2 % totalGroups !== 0;
         const nextGroupIsLastGroup =
           Math.floor(totalGroups) === activeItem.current;
+
+        total = -(activeItem.current * getScrollAmount());
 
         if (nextGroupIsLastGroup) {
           endReached.current = true;
@@ -491,12 +550,6 @@ export function useSpringCarousel({
       });
     }
   }
-  function getCarouselItemDimension() {
-    if (itemsPerSlide > 1) {
-      return `calc(100% / ${itemsPerSlide} - var(--${carouselId}-react-spring-carousel-item-gutter) / ${itemsPerSlide} * ${itemsPerSlide - 1}) !important`;
-    }
-    return `100% !important`;
-  }
   function handleSlideToItem(id: string | number) {
     let itemIndex = 0;
     if (typeof id === "string") {
@@ -584,58 +637,6 @@ export function useSpringCarousel({
         });
       }
     }
-  }
-
-  function getGutterCssVariable() {
-    let totalGutterCssVar = 0;
-    let totalStartEndGutterCssVar = 0;
-
-    const startEndGutterCssVar = getComputedStyle(
-      document.documentElement
-    ).getPropertyValue(`--${carouselId}-react-spring-carousel-item-gutter`);
-    const gutterCssVar = getComputedStyle(
-      document.documentElement
-    ).getPropertyValue(`--${carouselId}-react-spring-carousel-item-gutter`);
-
-    if (gutterCssVar.includes("px")) {
-      totalGutterCssVar = Number(gutterCssVar.replace("px", ""));
-    }
-    if (startEndGutterCssVar.includes("px")) {
-      totalStartEndGutterCssVar = Number(
-        startEndGutterCssVar.replace("px", "")
-      );
-    }
-
-    return { totalGutterCssVar, totalStartEndGutterCssVar };
-  }
-  function getScrollHandlers() {
-    if (slideType === "freeScroll") {
-      return {
-        onWheel() {
-          spring.value.stop();
-          // setStartEndItemReachedOnFreeScroll()
-        },
-        onScroll(e: React.UIEvent<HTMLDivElement, UIEvent>) {
-          const target = e.currentTarget;
-          const scrollValue =
-            carouselAxis === "x" ? target.scrollLeft : target.scrollTop;
-          const availableScrollSpace =
-            carouselAxis === "x"
-              ? target.scrollWidth - target.clientWidth
-              : target.scrollHeight - target.clientHeight;
-
-          if (scrollValue === 0) {
-            startReached.current = true;
-          } else if (scrollValue === availableScrollSpace) {
-            endReached.current = true;
-          } else {
-            startReached.current = false;
-            endReached.current = false;
-          }
-        },
-      };
-    }
-    return {};
   }
 
   const bindDrag = useDrag(
@@ -751,27 +752,33 @@ export function useSpringCarousel({
     function handleSetScrollAmount() {
       const firstItem = carouselTrackRef.current!.children[0] as HTMLElement;
       let total = 0;
-      if (
+
+      const isFixedGroup =
         slideType === "fixed" &&
         scrollAmountType === "group" &&
-        itemsPerSlide > 1
-      ) {
+        itemsPerSlide > 1;
+
+      if (isFixedGroup) {
         total = pFloat(
           carouselTrackRef.current!.getBoundingClientRect()[
             carouselAxis === "x" ? "width" : "height"
           ]
         );
+      } else {
+        total = pFloat(
+          firstItem.getBoundingClientRect()[
+            carouselAxis === "x" ? "width" : "height"
+          ]
+        );
       }
 
-      total = pFloat(
-        firstItem.getBoundingClientRect()[
-          carouselAxis === "x" ? "width" : "height"
-        ]
-      );
-
-      let { totalGutterCssVar } = getGutterCssVariable();
+      let { totalGutterCssVar, totalStartEndGutterCssVar } =
+        getGutterCssVariable();
 
       total += totalGutterCssVar;
+      if (isFixedGroup) {
+        total -= totalStartEndGutterCssVar;
+      }
       scrollAmount.current = total;
 
       return total;
