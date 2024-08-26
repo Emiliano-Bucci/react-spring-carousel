@@ -234,10 +234,14 @@ export function useSpringCarousel({
         const totalGroups = _items.length / itemsPerSlide;
         const lastGroupIsNotFilled = 2 % totalGroups !== 0;
         const nextGroupIsLastGroup =
-          Math.floor(totalGroups) === activeItem.current;
+          Math.ceil(totalGroups - 1) === activeItem.current;
+        const nextGroupIsFirstGroup = activeItem.current === 0;
 
         total = -(activeItem.current * getScrollAmount());
 
+        if (nextGroupIsFirstGroup) {
+          startReached.current = true;
+        }
         if (nextGroupIsLastGroup) {
           endReached.current = true;
           if (lastGroupIsNotFilled) {
