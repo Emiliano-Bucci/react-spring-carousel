@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import {
   SpringCarouselEventsEventHandler,
   SpringCarouselEvents,
-} from "./events";
+} from "./types/events";
 
 const eventLabel = "RSC::Event";
 

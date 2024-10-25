@@ -1,9 +1,8 @@
 import { ElementRef, useEffect, useId, useRef } from "react";
-import { Props } from "./types";
 import { Controller, useSpring } from "@react-spring/web";
 import { useEventsModule } from "./useEventsModule";
 import { useDrag } from "@use-gesture/react";
-import { SlideActionType } from "./events";
+import { SlideActionType, Props } from "./types";
 import { isOutOfViewport, pFloat, logWarn } from "./utils";
 
 export function useSpringCarousel({

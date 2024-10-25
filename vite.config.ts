@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     dts({
-      include: ["lib"],
+      include: ["lib/types/"],
       rollupTypes: true,
       tsconfigPath: resolve(__dirname, "tsconfig.app.json"),
     }),
