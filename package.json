@@ -1,16 +1,18 @@
 {
   "name": "react-spring-carousel",
-  "version": "3.0.0-beta-1.0.1",
+  "version": "3.0.0-beta-1.0.2",
   "type": "module",
-  "main": "./dist/index.react-spring-carousel.js",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist/*"
   ],
   "exports": {
     ".": {
-      "import": "./dist/react-spring-carousel.js",
-      "module": "./dist/react-spring-carousel.js",
+      "import": "./dist/index.es.js",
+      "module": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js",
       "types": "./dist/index.d.ts"
     }
   },
