@@ -6,18 +6,24 @@ export default defineConfig({
   plugins: [
     react(),
     dts({
-      outDir: "./dist/types",
-      tsconfigPath: "./tsconfig.app.json",
       rollupTypes: true,
+      tsconfigPath: "./tsconfig.app.json",
     }),
   ],
   build: {
     lib: {
       entry: ["lib/index.tsx"],
-      formats: ["es", "cjs"],
+      name: "react-spring-carousel",
       fileName: (format) => `index.${format}.js`,
     },
     rollupOptions: {
+      output: {
+        globals: {
+          react: "React",
+          "react/jsx-runtime": "react/jsx-runtime",
+          "@react-spring/web": "@react-spring/web",
+        },
+      },
       external: [
         "react",
         "react-dom",

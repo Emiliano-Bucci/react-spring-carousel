@@ -3,19 +3,19 @@
   "version": "3.0.0-beta-1.0.37",
   "type": "module",
   "license": "MIT",
-  "main": "./dist/index.cjs.js",
+  "main": "./dist/index.umd.js",
   "module": "./dist/index.es.js",
-  "types": "./dist/types/index.d.ts",
+  "types": "./dist/index.d.ts",
   "files": [
-    "dist/*"
+    "dist"
   ],
   "exports": {
     ".": {
       "import": "./dist/index.es.js",
-      "module": "./dist/index.es.js",
-      "require": "./dist/index.cjs.js",
-      "types": "./dist/types/index.d.ts"
-    }
+      "require": "./dist/index.umd.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./dist/style.css": "./dist/style.css"
   },
   "scripts": {
     "dev": "vite",
@@ -45,7 +45,7 @@
     "@storybook/react": "^8.2.9",
     "@storybook/react-vite": "^8.2.9",
     "@storybook/test": "^8.2.9",
-    "@types/node": "^22.5.0",
+    "@types/node": "^22.7.9",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
