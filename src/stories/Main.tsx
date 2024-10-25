@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import { useSpringCarousel } from "../../lib";
 import "./main.css";
@@ -26,7 +26,6 @@ export function Main() {
     slideToNextItem,
     useListenToCustomEvent,
   } = useSpringCarousel({
-    fadeIn: true,
     items: Array(10)
       .fill(0)
       .map((_, i) => ({
@@ -46,10 +45,15 @@ export function Main() {
           </div>
         ),
       })),
+    slideType: "freeScroll",
+    gutter: 16,
+    enableGestures: false,
   });
 
   useListenToCustomEvent((ev) => {
-    console.log(ev);
+    if (ev.eventName === "onSlideStartChange") {
+      console.log(ev);
+    }
   });
 
   return (
