@@ -1,15 +1,27 @@
 {
   "name": "react-spring-carousel",
-  "private": true,
-  "version": "0.0.0",
+  "version": "3.0.0-beta-1.0.0",
   "type": "module",
+  "main": "./dist/index.react-spring-carousel.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "module": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "release:beta": "git push && npm run build && npm publish --tag beta"
   },
   "dependencies": {
     "@use-gesture/react": "^10.2.26"
