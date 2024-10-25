@@ -1,10 +1,10 @@
 {
   "name": "react-spring-carousel",
-  "version": "3.0.0-beta-1.0.32",
+  "version": "3.0.0-beta-1.0.33",
   "type": "module",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/types/index.d.ts",
   "files": [
     "dist/*"
   ],
@@ -13,7 +13,7 @@
       "import": "./dist/index.es.js",
       "module": "./dist/index.es.js",
       "require": "./dist/index.cjs.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/types/index.d.ts"
     }
   },
   "scripts": {
@@ -57,8 +57,7 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1",
-    "vite-plugin-dts": "^4.0.3",
-    "vite-tsconfig-paths": "^5.0.1"
+    "vite-plugin-dts": "^4.0.3"
   },
   "eslintConfig": {
     "extends": [
