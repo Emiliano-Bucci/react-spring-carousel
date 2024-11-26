@@ -26,7 +26,7 @@ export function Main() {
     slideToNextItem,
     useListenToCustomEvent,
   } = useSpringCarousel({
-    items: Array(10)
+    items: Array(2)
       .fill(0)
       .map((_, i) => ({
         id: `item-${i}`,
@@ -45,9 +45,6 @@ export function Main() {
           </div>
         ),
       })),
-    slideType: "freeScroll",
-    gutter: 16,
-    enableGestures: false,
   });
 
   useListenToCustomEvent((ev) => {

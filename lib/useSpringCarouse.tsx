@@ -146,7 +146,9 @@ export function useSpringCarousel({
   }
   function getCarouselItemDimension() {
     if (itemsPerSlide > 1) {
-      return `calc(100% / ${itemsPerSlide} - var(--${carouselId}-react-spring-carousel-item-gutter) / ${itemsPerSlide} * ${itemsPerSlide - 1}) !important`;
+      return `calc(100% / ${itemsPerSlide} - var(--${carouselId}-react-spring-carousel-item-gutter) / ${itemsPerSlide} * ${
+        itemsPerSlide - 1
+      }) !important`;
     }
     return `100% !important`;
   }
@@ -536,6 +538,7 @@ export function useSpringCarousel({
     }
 
     if (
+      actionType === "drag" ||
       (slideType === "fixed" && withLoop) ||
       (slideType === "fixed" && !withLoop && !endReached.current)
     ) {
@@ -564,6 +567,7 @@ export function useSpringCarousel({
     }
 
     if (
+      actionType === "drag" ||
       (slideType === "fixed" && withLoop) ||
       (slideType === "fixed" && !withLoop && !startReached.current)
     ) {
@@ -647,8 +651,8 @@ export function useSpringCarousel({
               ? 0
               : to
             : to > availableScrollableSpace
-              ? availableScrollableSpace
-              : to;
+            ? availableScrollableSpace
+            : to;
 
         const fromValue =
           container[carouselAxis === "x" ? "scrollLeft" : "scrollTop"];
@@ -710,11 +714,17 @@ export function useSpringCarousel({
           slideWhenDragThresholdIsReached &&
           (prevItemTresholdReached || nextItemTresholdReached)
         ) {
+          console.log("cancel", {
+            slideWhenDragThresholdIsReached,
+            prevItemTresholdReached,
+            nextItemTresholdReached,
+          });
           state.cancel();
         }
       }
 
       if (state.last) {
+        console.log("last");
         if (prevItemTresholdReached) {
           slideToPrevItem("drag");
         } else if (nextItemTresholdReached) {
@@ -771,11 +781,13 @@ export function useSpringCarousel({
         itemsPerSlide > 1
       ) {
         const totalGroups = (_items.length * 3) / itemsPerSlide;
-        carouselTrackRef.current!.style[carouselAxis === "x" ? "left" : "top"] =
-          `-${pFloat((getScrollAmount() * totalGroups) / 3)}px`;
+        carouselTrackRef.current!.style[
+          carouselAxis === "x" ? "left" : "top"
+        ] = `-${pFloat((getScrollAmount() * totalGroups) / 3)}px`;
       } else {
-        carouselTrackRef.current!.style[carouselAxis === "x" ? "left" : "top"] =
-          `-${pFloat((getScrollAmount() * items.length) / 3)}px`;
+        carouselTrackRef.current!.style[
+          carouselAxis === "x" ? "left" : "top"
+        ] = `-${pFloat((getScrollAmount() * items.length) / 3)}px`;
       }
     }
     function handleResize() {
@@ -925,10 +937,24 @@ export function useSpringCarousel({
               display: flex;
               width: calc(100% - var(--${carouselId}-react-spring-carousel-start-end-gutter) * 2);
               padding-left: var(--${carouselId}-react-spring-carousel-start-end-gutter);
-              touch-action: ${!enableGestures ? "auto" : carouselAxis === "x" ? "pan-y" : "pan-x"};
+              touch-action: ${
+                !enableGestures
+                  ? "auto"
+                  : carouselAxis === "x"
+                  ? "pan-y"
+                  : "pan-x"
+              };
               flex-direction: ${carouselAxis === "x" ? "row" : "column"};
-              overflow-x: ${slideType === "freeScroll" && carouselAxis === "x" ? "auto" : "initial"};
-              overflow-y: ${slideType === "freeScroll" && carouselAxis === "y" ? "auto" : "initial"};
+              overflow-x: ${
+                slideType === "freeScroll" && carouselAxis === "x"
+                  ? "auto"
+                  : "initial"
+              };
+              overflow-y: ${
+                slideType === "freeScroll" && carouselAxis === "y"
+                  ? "auto"
+                  : "initial"
+              };
             }
             .carousel-${carouselId} .use-spring-carousel-track::after {
               content: "";
@@ -940,7 +966,9 @@ export function useSpringCarousel({
             .carousel-${carouselId} .use-spring-carousel-item {
               position: relative;
               display: flex;
-              flex: 1 0 ${slideType === "fixed" ? getCarouselItemDimension() : "auto"};
+              flex: 1 0 ${
+                slideType === "fixed" ? getCarouselItemDimension() : "auto"
+              };
             }
             .carousel-${carouselId}[data-carousel-direction=x] .use-spring-carousel-item:not(:last-child) {
               margin-right: var(--${carouselId}-react-spring-carousel-item-gutter);
