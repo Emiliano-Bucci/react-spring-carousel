@@ -77,7 +77,9 @@ export function useSpringCarousel({
    * Internal utility helpers
    */
   function getScrollAmount() {
-    return pFloat(scrollAmount.current ?? 0);
+    const { totalStartEndGutterCssVar } = getGutterCssVariable();
+
+    return pFloat(scrollAmount.current ?? 0 - totalStartEndGutterCssVar);
   }
   function getTotalScrollAvailableSpace() {
     return (
@@ -168,6 +170,8 @@ export function useSpringCarousel({
 
     startReached.current = false;
     endReached.current = false;
+
+    console.log(getScrollAmount());
 
     if (slideType === "fixed") {
       const currentActiveItemIndex = activeItem.current;
@@ -769,6 +773,7 @@ export function useSpringCarousel({
       if ((slideType === "fixed" && !withLoop) || slideType === "freeScroll") {
         return;
       }
+
       if (
         slideType === "fixed" &&
         scrollAmountType === "group" &&
@@ -777,11 +782,15 @@ export function useSpringCarousel({
         const totalGroups = (_items.length * 3) / itemsPerSlide;
         carouselTrackRef.current!.style[
           carouselAxis === "x" ? "left" : "top"
-        ] = `-${pFloat((getScrollAmount() * totalGroups) / 3)}px`;
+        ] = `calc(-${pFloat(
+          (getScrollAmount() * totalGroups) / 3
+        )}px + var(--${carouselId}-react-spring-carousel-start-end-gutter))`;
       } else {
         carouselTrackRef.current!.style[
           carouselAxis === "x" ? "left" : "top"
-        ] = `-${pFloat((getScrollAmount() * items.length) / 3)}px`;
+        ] = `calc(-${pFloat(
+          (getScrollAmount() * items.length) / 3
+        )}px + var(--${carouselId}-react-spring-carousel-start-end-gutter))`;
       }
     }
     function handleResize() {
@@ -894,7 +903,22 @@ export function useSpringCarousel({
       carouselIsInitialized.current = true;
     }
 
-    if (init) {
+    if (typeof init === "function") {
+      init().then((res) => {
+        if (res) {
+          initCarousel();
+          window.addEventListener("resize", handleResize);
+          document.addEventListener("visibilitychange", handleVisibilityChange);
+          return () => {
+            document.removeEventListener(
+              "visibilitychange",
+              handleVisibilityChange
+            );
+            window.removeEventListener("resize", handleResize);
+          };
+        }
+      });
+    } else if (init) {
       initCarousel();
       window.addEventListener("resize", handleResize);
       document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -930,7 +954,6 @@ export function useSpringCarousel({
               position: relative;
               display: flex;
               width: calc(100% - var(--${carouselId}-react-spring-carousel-start-end-gutter) * 2);
-              padding-left: var(--${carouselId}-react-spring-carousel-start-end-gutter);
               touch-action: ${
                 !enableGestures
                   ? "auto"

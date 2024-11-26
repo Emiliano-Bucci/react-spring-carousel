@@ -19,6 +19,12 @@ function generateRGBA(index: number) {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
+function handleInit(): Promise<boolean> {
+  return new Promise((ok) => {
+    ok(true);
+  });
+}
+
 export function Main() {
   const {
     carouselFragment,
@@ -26,6 +32,10 @@ export function Main() {
     slideToNextItem,
     useListenToCustomEvent,
   } = useSpringCarousel({
+    withLoop: true,
+    startEndGutter: 40,
+    gutter: 40,
+    init: () => handleInit(),
     items: Array(2)
       .fill(0)
       .map((_, i) => ({
@@ -55,16 +65,8 @@ export function Main() {
 
   return (
     <div className="container">
-      <div className="wrapper">
-        <button
-          onClick={() => {
-            slideToPrevItem();
-          }}
-        >
-          Prev
-        </button>
-        <div className="carousel-container">
-          {/* <style>
+      <div className="carousel-container">
+        {/* <style>
             {`html:root {
                 --${carouselId}-react-spring-carousel-item-gutter: 10px;
                 --${carouselId}-react-spring-carousel-start-end-gutter: var(
@@ -73,15 +75,7 @@ export function Main() {
               }
               `}
           </style> */}
-          {carouselFragment}
-        </div>
-        <button
-          onClick={() => {
-            slideToNextItem();
-          }}
-        >
-          Next
-        </button>
+        {carouselFragment}
       </div>
     </div>
   );

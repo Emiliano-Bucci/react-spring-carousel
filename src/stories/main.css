@@ -19,6 +19,7 @@
   display: flex;
   flex: 1;
   overflow: hidden;
+  max-width: 560px;
 }
 
 .wrapper .carousel-container .use-spring-carousel-item {

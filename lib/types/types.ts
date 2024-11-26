@@ -29,7 +29,7 @@ type FreeScrollSlideTypeProps = {
 };
 
 export type Props = {
-  init?: boolean;
+  init?: boolean | (() => Promise<boolean>);
   slideType?: SlideType;
   items: Item[];
   withLoop?: boolean;
