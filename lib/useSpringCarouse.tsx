@@ -159,19 +159,19 @@ export function useSpringCarousel({
     type: "prev" | "next";
     actionType: SlideActionType;
     newActiveItem?: number;
+    shouldAnimate?: boolean;
   };
   function slideToItemValue({
     type,
     actionType,
     newActiveItem,
+    shouldAnimate = true,
   }: SlideToItemProps) {
     let total = 0;
     let from = spring.value.get();
 
     startReached.current = false;
     endReached.current = false;
-
-    console.log(getScrollAmount());
 
     if (slideType === "fixed") {
       const currentActiveItemIndex = activeItem.current;
@@ -505,6 +505,7 @@ export function useSpringCarousel({
       to: {
         value: parsedTotal,
       },
+      immediate: !shouldAnimate,
       onRest({ finished }) {
         if (finished && slideType === "fixed") {
           emitEvent({
@@ -535,7 +536,11 @@ export function useSpringCarousel({
       },
     });
   }
-  function slideToNextItem(actionType: SlideActionType, index?: number) {
+  function slideToNextItem(
+    actionType: SlideActionType,
+    index?: number,
+    shouldAnimate = true
+  ) {
     if (!carouselIsInitialized.current) {
       handleAppNotInitialized();
       return;
@@ -551,6 +556,7 @@ export function useSpringCarousel({
         type: "next",
         actionType,
         newActiveItem: itemIndex,
+        shouldAnimate,
       });
     }
     if (
@@ -561,10 +567,15 @@ export function useSpringCarousel({
       slideToItemValue({
         type: "next",
         actionType,
+        shouldAnimate,
       });
     }
   }
-  function slideToPrevItem(actionType: SlideActionType, index?: number) {
+  function slideToPrevItem(
+    actionType: SlideActionType,
+    index?: number,
+    shouldAnimate = true
+  ) {
     if (!carouselIsInitialized.current) {
       handleAppNotInitialized();
       return;
@@ -580,6 +591,7 @@ export function useSpringCarousel({
         type: "prev",
         actionType,
         newActiveItem: itemIndex,
+        shouldAnimate,
       });
     }
     if (
@@ -590,10 +602,11 @@ export function useSpringCarousel({
       slideToItemValue({
         type: "prev",
         actionType,
+        shouldAnimate,
       });
     }
   }
-  function handleSlideToItem(id: string | number) {
+  function handleSlideToItem(id: string | number, shouldAnimate = true) {
     let itemIndex = 0;
     if (typeof id === "string") {
       itemIndex = _items.findIndex((i) => i.id === id);
@@ -602,10 +615,10 @@ export function useSpringCarousel({
     }
 
     if (itemIndex > activeItem.current) {
-      slideToNextItem("click", itemIndex);
+      slideToNextItem("click", itemIndex, shouldAnimate);
     }
     if (itemIndex < activeItem.current) {
-      slideToPrevItem("click", itemIndex);
+      slideToPrevItem("click", itemIndex, shouldAnimate);
     }
   }
   type ThumbsContainerScrollProps = {
@@ -1043,12 +1056,12 @@ export function useSpringCarousel({
     useListenToCustomEvent,
     slideToNextItem: () => slideToNextItem("click"),
     slideToPrevItem: () => slideToPrevItem("click"),
-    slideToIem: (id: string | number) => {
+    slideToIem: (id: string | number, shouldAnimate = true) => {
       if (!carouselIsInitialized.current) {
         handleAppNotInitialized();
         return;
       }
-      handleSlideToItem(id);
+      handleSlideToItem(id, shouldAnimate);
     },
     handleThumbsContainerScroll,
     carouselId,
