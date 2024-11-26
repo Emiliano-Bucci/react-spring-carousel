@@ -714,17 +714,11 @@ export function useSpringCarousel({
           slideWhenDragThresholdIsReached &&
           (prevItemTresholdReached || nextItemTresholdReached)
         ) {
-          console.log("cancel", {
-            slideWhenDragThresholdIsReached,
-            prevItemTresholdReached,
-            nextItemTresholdReached,
-          });
           state.cancel();
         }
       }
 
       if (state.last) {
-        console.log("last");
         if (prevItemTresholdReached) {
           slideToPrevItem("drag");
         } else if (nextItemTresholdReached) {
