@@ -19,6 +19,7 @@ export function useSpringCarousel({
   gutter = 0,
   startEndGutter = 0,
   fadeIn = false,
+  useCssVarItemsPerSlide = false,
 }: Props) {
   const carouselIsInitialized = useRef(false);
   const errorMessages = useRef<string[]>([]);
@@ -147,6 +148,12 @@ export function useSpringCarousel({
     return { totalGutterCssVar, totalStartEndGutterCssVar };
   }
   function getCarouselItemDimension() {
+    if (useCssVarItemsPerSlide) {
+      return `calc(100% / var(--${carouselId}-items-per-slide) - var(--${carouselId}-react-spring-carousel-item-gutter) / var(--${carouselId}-items-per-slide) * ${
+        itemsPerSlide - 1
+      }) !important`;
+    }
+
     if (itemsPerSlide > 1) {
       return `calc(100% / ${itemsPerSlide} - var(--${carouselId}-react-spring-carousel-item-gutter) / ${itemsPerSlide} * ${
         itemsPerSlide - 1
@@ -382,9 +389,6 @@ export function useSpringCarousel({
           Math.abs(total) > getTotalScrollAvailableSpace();
 
         if (nextItemWillExceed) {
-          endReached.current = true;
-          total = -getTotalScrollAvailableSpace();
-        } else if (nextItemWillExceed) {
           endReached.current = true;
           total = -getTotalScrollAvailableSpace();
         } else {
@@ -838,7 +842,7 @@ export function useSpringCarousel({
         );
       }
 
-      let { totalGutterCssVar, totalStartEndGutterCssVar } =
+      const { totalGutterCssVar, totalStartEndGutterCssVar } =
         getGutterCssVariable();
 
       total += totalGutterCssVar;

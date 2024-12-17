@@ -39,6 +39,7 @@ export type Props = {
   gutter?: number;
   startEndGutter?: number;
   fadeIn?: boolean;
+  useCssVarItemsPerSlide?: boolean;
 } & (FixedSlideTypeProps | FluidSlideTypeProps | FreeScrollSlideTypeProps);
 
 export * from "./events";
