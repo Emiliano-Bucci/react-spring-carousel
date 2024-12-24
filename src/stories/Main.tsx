@@ -6,7 +6,7 @@ import "./main.css";
 function generateRGBA(index: number) {
   // Seed the random number generator with the given index
   function seededRandom(seed: number) {
-    let x = Math.sin(seed) * 10000;
+    const x = Math.sin(seed) * 10000;
     return x - Math.floor(x);
   }
 
@@ -32,11 +32,9 @@ export function Main() {
     slideToNextItem,
     useListenToCustomEvent,
   } = useSpringCarousel({
-    withLoop: true,
-    startEndGutter: 40,
-    gutter: 40,
     init: () => handleInit(),
-    items: Array(2)
+    initialActiveItem: 3,
+    items: Array(100)
       .fill(0)
       .map((_, i) => ({
         id: `item-${i}`,
@@ -65,6 +63,7 @@ export function Main() {
 
   return (
     <div className="container">
+      <button onClick={slideToPrevItem}>prev</button>
       <div className="carousel-container">
         {/* <style>
             {`html:root {
@@ -77,6 +76,7 @@ export function Main() {
           </style> */}
         {carouselFragment}
       </div>
+      <button onClick={slideToNextItem}>prev</button>
     </div>
   );
 }

@@ -20,6 +20,7 @@ export function useSpringCarousel({
   startEndGutter = 0,
   fadeIn = false,
   useCssVarItemsPerSlide = false,
+  initialActiveItem,
 }: Props) {
   const carouselIsInitialized = useRef(false);
   const errorMessages = useRef<string[]>([]);
@@ -176,6 +177,8 @@ export function useSpringCarousel({
   }: SlideToItemProps) {
     let total = 0;
     let from = spring.value.get();
+
+    console.log({ newActiveItem });
 
     startReached.current = false;
     endReached.current = false;
@@ -619,9 +622,11 @@ export function useSpringCarousel({
     }
 
     if (itemIndex > activeItem.current) {
+      console.log("h1231222");
       slideToNextItem("click", itemIndex, shouldAnimate);
     }
     if (itemIndex < activeItem.current) {
+      console.log("qwewqeqw");
       slideToPrevItem("click", itemIndex, shouldAnimate);
     }
   }
@@ -924,6 +929,11 @@ export function useSpringCarousel({
       init().then((res) => {
         if (res) {
           initCarousel();
+
+          if (initialActiveItem !== undefined) {
+            handleSlideToItem(initialActiveItem, false);
+          }
+
           window.addEventListener("resize", handleResize);
           document.addEventListener("visibilitychange", handleVisibilityChange);
           return () => {
@@ -950,6 +960,11 @@ export function useSpringCarousel({
       carouselIsInitialized.current = false;
     }
   }, [scrollAmount, init, slideType, withLoop, carouselAxis]);
+  useEffect(() => {
+    if (initialActiveItem !== undefined) {
+      handleSlideToItem(initialActiveItem, false);
+    }
+  }, [initialActiveItem]);
 
   const carouselFragment = (
     <>
