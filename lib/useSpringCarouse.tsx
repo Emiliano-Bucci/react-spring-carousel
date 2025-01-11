@@ -1,4 +1,4 @@
-import { ElementRef, useEffect, useId, useRef } from "react";
+import { ElementRef, useEffect, useId, useRef, useState } from "react";
 import { Controller, useSpring } from "@react-spring/web";
 import { useEventsModule } from "./useEventsModule";
 import { useDrag } from "@use-gesture/react";
@@ -22,7 +22,7 @@ export function useSpringCarousel({
   useCssVarItemsPerSlide = false,
   initialActiveItem,
 }: Props) {
-  const carouselIsInitialized = useRef(false);
+  const [carouselIsInitialized, setCarouselIsInitialized] = useState(false);
   const errorMessages = useRef<string[]>([]);
   const windowIsHidden = useRef(false);
 
@@ -93,7 +93,10 @@ export function useSpringCarousel({
       ]
     );
   }
-  function handleAppNotInitialized() {
+  function handleAppNotInitialized(message?: string) {
+    if (message) {
+      errorMessages.current.push(message);
+    }
     logWarn("The carousel can't be initialized. List of errors:");
     console.table(errorMessages.current);
   }
@@ -548,8 +551,8 @@ export function useSpringCarousel({
     index?: number,
     shouldAnimate = true
   ) {
-    if (!carouselIsInitialized.current) {
-      handleAppNotInitialized();
+    if (!carouselIsInitialized) {
+      handleAppNotInitialized("Carousel not initialized yet: slideToNextItem");
       return;
     }
 
@@ -583,8 +586,8 @@ export function useSpringCarousel({
     index?: number,
     shouldAnimate = true
   ) {
-    if (!carouselIsInitialized.current) {
-      handleAppNotInitialized();
+    if (!carouselIsInitialized) {
+      handleAppNotInitialized("Carousel not initialized yet: slideToPrevItem");
       return;
     }
 
@@ -707,7 +710,7 @@ export function useSpringCarousel({
 
   const bindDrag = useDrag(
     (state) => {
-      if (!carouselIsInitialized.current) {
+      if (!carouselIsInitialized) {
         handleAppNotInitialized();
         return;
       }
@@ -785,10 +788,10 @@ export function useSpringCarousel({
     function handleVisibilityChange() {
       if (document.hidden) {
         windowIsHidden.current = true;
-        carouselIsInitialized.current = false;
+        setCarouselIsInitialized(false);
       } else {
         windowIsHidden.current = false;
-        carouselIsInitialized.current = true;
+        setCarouselIsInitialized(true);
       }
     }
     function handleSetBasicCarouselPosition() {
@@ -922,7 +925,7 @@ export function useSpringCarousel({
       /**
        * Initialize carousel
        */
-      carouselIsInitialized.current = true;
+      setCarouselIsInitialized(true);
     }
 
     if (typeof init === "function") {
@@ -957,14 +960,14 @@ export function useSpringCarousel({
         window.removeEventListener("resize", handleResize);
       };
     } else {
-      carouselIsInitialized.current = false;
+      setCarouselIsInitialized(false);
     }
   }, [scrollAmount, init, slideType, withLoop, carouselAxis]);
   useEffect(() => {
-    if (initialActiveItem !== undefined) {
+    if (initialActiveItem !== undefined && carouselIsInitialized) {
       handleSlideToItem(initialActiveItem, false);
     }
-  }, [initialActiveItem]);
+  }, [carouselIsInitialized, initialActiveItem]);
 
   const carouselFragment = (
     <>
@@ -1076,7 +1079,7 @@ export function useSpringCarousel({
     slideToNextItem: () => slideToNextItem("click"),
     slideToPrevItem: () => slideToPrevItem("click"),
     slideToIem: (id: string | number, shouldAnimate = true) => {
-      if (!carouselIsInitialized.current) {
+      if (!carouselIsInitialized) {
         handleAppNotInitialized();
         return;
       }
