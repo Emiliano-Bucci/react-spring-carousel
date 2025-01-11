@@ -911,13 +911,11 @@ export function useSpringCarousel({
        */
       handleSetScrollAmount();
 
-      if (withLoop) {
-        /**
-         * For loop option we set the initial
-         * position of the carousel in the middle (having repeated items before and after)
-         */
-        handleSetBasicCarouselPosition();
-      }
+      /**
+       * For loop option we set the initial
+       * position of the carousel in the middle (having repeated items before and after)
+       */
+      handleSetBasicCarouselPosition();
 
       /**
        * Set drag treshold based on scroll amount
