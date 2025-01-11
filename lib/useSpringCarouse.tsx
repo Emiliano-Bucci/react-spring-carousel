@@ -796,6 +796,8 @@ export function useSpringCarousel({
     }
     function handleSetBasicCarouselPosition() {
       if ((slideType === "fixed" && !withLoop) || slideType === "freeScroll") {
+        carouselTrackRef.current!.style[carouselAxis === "x" ? "left" : "top"] =
+          "0";
         return;
       }
 
