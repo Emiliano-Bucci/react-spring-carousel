@@ -32,6 +32,8 @@ export function Main() {
     slideToNextItem,
     useListenToCustomEvent,
   } = useSpringCarousel({
+    carouselAxis: 'y',
+    slideType: "fluid",
     items: Array(100)
       .fill(0)
       .map((_, i) => ({

@@ -181,7 +181,6 @@ export function useSpringCarousel({
     let total = 0;
     let from = spring.value.get();
 
-    console.log({ newActiveItem });
 
     startReached.current = false;
     endReached.current = false;
@@ -625,11 +624,9 @@ export function useSpringCarousel({
     }
 
     if (itemIndex > activeItem.current) {
-      console.log("h1231222");
       slideToNextItem("click", itemIndex, shouldAnimate);
     }
     if (itemIndex < activeItem.current) {
-      console.log("qwewqeqw");
       slideToPrevItem("click", itemIndex, shouldAnimate);
     }
   }
@@ -795,7 +792,7 @@ export function useSpringCarousel({
       }
     }
     function handleSetBasicCarouselPosition() {
-      if ((slideType === "fixed" && !withLoop) || slideType === "freeScroll") {
+      if ((slideType === "fixed" && !withLoop) || slideType === "freeScroll" || slideType === 'fluid') {
         carouselTrackRef.current!.style[carouselAxis === "x" ? "left" : "top"] =
           "0";
         return;
