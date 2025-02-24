@@ -119,23 +119,26 @@ export function useSpringCarousel({
 
   const activeItem = useRef(0);
 
-  const [spring, setSpring] = useSpring(() => ({
-    value: 0,
-    onChange({ value }) {
-      if (slideType === "fixed" || slideType === "fluid") {
-        if (carouselAxis === "x") {
-          carouselTrackRef.current!.style.transform = `translate3d(${value.value}px, 0px, 0px)`;
-        } else {
-          carouselTrackRef.current!.style.transform = `translate3d(0px, ${value.value}px, 0px)`;
+  const [spring, setSpring] = useSpring(
+    () => ({
+      value: 0,
+      onChange({ value }) {
+        if (slideType === "fixed" || slideType === "fluid") {
+          if (carouselAxis === "x") {
+            carouselTrackRef.current!.style.transform = `translate3d(${value.value}px, 0px, 0px)`;
+          } else {
+            carouselTrackRef.current!.style.transform = `translate3d(0px, ${value.value}px, 0px)`;
+          }
         }
-      }
-      if (slideType === "freeScroll") {
-        carouselTrackRef.current![
-          carouselAxis === "x" ? "scrollLeft" : "scrollTop"
-        ] = Math.abs(value.value);
-      }
-    },
-  }));
+        if (slideType === "freeScroll") {
+          carouselTrackRef.current![
+            carouselAxis === "x" ? "scrollLeft" : "scrollTop"
+          ] = Math.abs(value.value);
+        }
+      },
+    }),
+    [carouselAxis],
+  );
 
   const { useListenToCustomEvent, emitEvent } = useEventsModule();
 
@@ -867,14 +870,10 @@ export function useSpringCarousel({
       ) {
         const totalGroups = (_items.length * 3) / itemsPerSlide.current;
         carouselTrackRef.current!.style[carouselAxis === "x" ? "left" : "top"] =
-          `calc(-${pFloat(
-            (getScrollAmount() * totalGroups) / 3,
-          )}px + var(--${carouselId}-react-spring-carousel-start-end-gutter))`;
+          `calc(-${pFloat((getScrollAmount() * totalGroups) / 3)}px)`;
       } else {
         carouselTrackRef.current!.style[carouselAxis === "x" ? "left" : "top"] =
-          `calc(-${pFloat(
-            (getScrollAmount() * items.length) / 3,
-          )}px + var(--${carouselId}-react-spring-carousel-start-end-gutter))`;
+          `calc(-${pFloat((getScrollAmount() * items.length) / 3)}px)`;
       }
     }
     function handleResize() {
@@ -1029,9 +1028,9 @@ export function useSpringCarousel({
             }
             .carousel-${carouselId} {
               display: flex;
-              width: 100%;
-              height: 100%;
+              flex: 1;
               overflow: hidden;
+              padding: ${carouselAxis === "x" ? `0px var(--${carouselId}-react-spring-carousel-start-end-gutter)` : `var(--${carouselId}-react-spring-carousel-start-end-gutter) 0px`};
             }
             .carousel-${carouselId} .use-spring-carousel-track {
               display: flex;
@@ -1067,7 +1066,7 @@ export function useSpringCarousel({
             .carousel-${carouselId} .use-spring-carousel-item {
               position: relative;
               display: flex;
-              ${slideType === "fixed" ? `flex: 0 0 calc(100% / var(--${carouselId}-react-spring-carousel-items-per-slide) - calc(var(--${carouselId}-react-spring-carousel-item-gutter) * (var(--${carouselId}-react-spring-carousel-items-per-slide) - 1) / var(--${carouselId}-react-spring-carousel-items-per-slide)) - var(--${carouselId}-react-spring-carousel-start-end-gutter));` : ""}
+              ${slideType === "fixed" ? `flex: 0 0 calc(100% / var(--${carouselId}-react-spring-carousel-items-per-slide) - calc(var(--${carouselId}-react-spring-carousel-item-gutter) * (var(--${carouselId}-react-spring-carousel-items-per-slide) - 1) / var(--${carouselId}-react-spring-carousel-items-per-slide)));` : ""}
             }
             ${
               fadeIn

@@ -23,7 +23,7 @@ export function Main() {
   const { carouselFragment, slideToPrevItem, slideToNextItem, carouselId } =
     useSpringCarousel({
       withLoop: true,
-      slideType: "fluid",
+      carouselAxis: "y",
       items: Array(100)
         .fill(0)
         .map((_, i) => ({
@@ -51,10 +51,16 @@ export function Main() {
       <div className="carousel-container">
         <style>
           {`html:root {
-                --${carouselId}-react-spring-carousel-items-per-slide: 2;
-                --${carouselId}-react-spring-carousel-item-gutter: 12px;
-                --${carouselId}-react-spring-carousel-start-end-gutter: 40px;
+                --${carouselId}-react-spring-carousel-items-per-slide: 3;
+                --${carouselId}-react-spring-carousel-item-gutter: 10px;
+                --${carouselId}-react-spring-carousel-start-end-gutter: 10px;
               }
+
+              @media (max-width: 1200px) {
+                  html:root {
+                    --${carouselId}-react-spring-carousel-start-end-gutter: 40px;
+                  }
+                }
               `}
         </style>
         {carouselFragment}
