@@ -62,7 +62,7 @@ export function useSpringCarousel({
         if (carouselAxis === "x") {
           carouselTrackRef.current!.style.transform = `translate3d(${value.value}px, 0px, 0px)`;
         } else {
-          carouselTrackRef.current!.style.transform = `translate3d(${value.value}px, 0px, 0px)`;
+          carouselTrackRef.current!.style.transform = `translate3d(0px, ${value.value}px, 0px)`;
         }
       }
       if (slideType === "freeScroll") {
