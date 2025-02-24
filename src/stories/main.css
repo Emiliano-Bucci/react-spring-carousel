@@ -1,6 +1,6 @@
 .container {
   display: flex;
-  flex-direction: column;
+  /* flex-direction: column; */
 }
 
 .wrapper {
@@ -19,7 +19,7 @@
   display: flex;
   flex: 1;
   overflow: hidden;
-  max-width: 560px;
+  /* max-width: 560px; */
 }
 
 .wrapper .carousel-container .use-spring-carousel-item {
