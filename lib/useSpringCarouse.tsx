@@ -853,13 +853,14 @@ export function useSpringCarousel({
       }
     }
     function handleSetBasicCarouselPosition() {
+      carouselTrackRef.current!.style.top = "0px";
+      carouselTrackRef.current!.style.left = "0px";
+
       if (
         (slideType === "fixed" && !withLoop) ||
         slideType === "freeScroll" ||
         slideType === "fluid"
       ) {
-        carouselTrackRef.current!.style[carouselAxis === "x" ? "left" : "top"] =
-          "0";
         return;
       }
 
@@ -1028,8 +1029,9 @@ export function useSpringCarousel({
             }
             .carousel-${carouselId} {
               display: flex;
-              flex: 1;
               overflow: hidden;
+              width: 100%;
+              height: ${carouselAxis === "x" ? "100%" : `calc(100% - var(--${carouselId}-react-spring-carousel-start-end-gutter) * 2)`};
               padding: ${carouselAxis === "x" ? `0px var(--${carouselId}-react-spring-carousel-start-end-gutter)` : `var(--${carouselId}-react-spring-carousel-start-end-gutter) 0px`};
             }
             .carousel-${carouselId} .use-spring-carousel-track {
@@ -1066,6 +1068,8 @@ export function useSpringCarousel({
             .carousel-${carouselId} .use-spring-carousel-item {
               position: relative;
               display: flex;
+              width: 100%;
+              height: 100%;
               ${slideType === "fixed" ? `flex: 0 0 calc(100% / var(--${carouselId}-react-spring-carousel-items-per-slide) - calc(var(--${carouselId}-react-spring-carousel-item-gutter) * (var(--${carouselId}-react-spring-carousel-items-per-slide) - 1) / var(--${carouselId}-react-spring-carousel-items-per-slide)));` : ""}
             }
             ${

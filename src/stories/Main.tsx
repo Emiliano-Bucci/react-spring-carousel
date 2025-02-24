@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { useSpringCarousel } from "../../lib";
 import "./main.css";
@@ -20,10 +20,12 @@ function generateRGBA(index: number) {
 }
 
 export function Main() {
+  const [axis, setAxis] = useState("x");
+
   const { carouselFragment, slideToPrevItem, slideToNextItem, carouselId } =
     useSpringCarousel({
       withLoop: true,
-      carouselAxis: "y",
+      carouselAxis: axis,
       items: Array(100)
         .fill(0)
         .map((_, i) => ({
@@ -44,6 +46,12 @@ export function Main() {
           ),
         })),
     });
+
+  useEffect(() => {
+    setTimeout(() => {
+      setAxis("y");
+    }, 5000);
+  }, []);
 
   return (
     <div className="container">
