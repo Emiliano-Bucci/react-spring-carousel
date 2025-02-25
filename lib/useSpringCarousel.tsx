@@ -1,4 +1,5 @@
 import { useSpring } from "@react-spring/web";
+import { useDrag } from "@use-gesture/react";
 import { useEffect, useRef } from "react";
 
 import { Props } from "./types";
@@ -19,6 +20,8 @@ export function useSpringCarousel({
   carouselAxis = "x",
   slideType = "fixed",
   startingPosition = "start",
+  enableGestures = true,
+  slideWhenDragThresholdIsReached = true,
 }: Props) {
   const carouselIsInitialized = useRef(init);
 
@@ -28,6 +31,7 @@ export function useSpringCarousel({
 
   const startReached = useRef<boolean | undefined>(withLoop ? false : true);
   const endReached = useRef<boolean | undefined>(false);
+  const dragThreshold = useRef(0);
 
   const activeItem = useRef(0);
 
@@ -109,7 +113,11 @@ export function useSpringCarousel({
 
       toValue = -(activeItem.current * scrollAmountValue);
 
-      if (totalAvailable - Math.abs(toValue) < scrollAmountValue / 1.2) {
+      if (
+        totalAvailable - Math.abs(toValue) < scrollAmountValue / 1.2 &&
+        slideType === "fluid" &&
+        !withLoop
+      ) {
         toValue = -totalAvailable;
       }
       if (!withLoop && Math.abs(toValue) >= totalAvailable) {
@@ -243,6 +251,10 @@ export function useSpringCarousel({
       });
     }
 
+    if (init) {
+      dragThreshold.current = getScrollAmountValue() / 4;
+    }
+
     if (init && slideType === "fixed") {
       handleResizeLoopContainer();
       window.addEventListener("resize", handleResize);
@@ -251,6 +263,81 @@ export function useSpringCarousel({
       };
     }
   }, [init, withLoop, id, carouselAxis, gutter, startingPosition, slideType]);
+
+  const bindDrag = useDrag(
+    (state) => {
+      if (!carouselIsInitialized.current) {
+        return;
+      }
+
+      const isDragging = state.dragging;
+      const movement = state.offset[carouselAxis === "x" ? 0 : 1];
+      const currentMovement = state.movement[carouselAxis === "x" ? 0 : 1];
+
+      const prevItemTresholdReached = currentMovement > dragThreshold.current;
+      const nextItemTresholdReached = currentMovement < -dragThreshold.current;
+
+      const velocity = state.velocity;
+
+      if (isDragging) {
+        // emitEvent({
+        //   ...state,
+        //   eventName: "onDrag",
+        //   slideActionType: "drag",
+        // });
+
+        setSpring.start({
+          value: movement,
+          immediate: true,
+          config: {
+            velocity: velocity,
+          },
+        });
+
+        if (
+          slideWhenDragThresholdIsReached &&
+          (prevItemTresholdReached || nextItemTresholdReached)
+        ) {
+          state.cancel();
+        }
+      }
+
+      if (state.last) {
+        if (prevItemTresholdReached) {
+          handleSlideToPrevItem();
+        } else if (nextItemTresholdReached) {
+          handleSlideToNextItem();
+        } else {
+          setSpring.start({
+            value: totalScrolledAmount.current,
+            config: {
+              velocity,
+            },
+          });
+        }
+      }
+    },
+    {
+      enabled: enableGestures && slideType !== "freeScroll",
+      axis: carouselAxis,
+      rubberband: !withLoop,
+      ...(!withLoop
+        ? {
+            bounds: () => {
+              return {
+                right: 0,
+                left: -getTotalScrollAvailableSpace(0),
+                top: -getTotalScrollAvailableSpace(0),
+                bottom: 0,
+              };
+            },
+          }
+        : {}),
+      from: () => {
+        return [spring.value.get(), spring.value.get()];
+      },
+    },
+  );
 
   const carouselFragment = (
     <div
@@ -281,7 +368,14 @@ export function useSpringCarousel({
               height: 100%;
               gap: var(--${id}-gutter);
               transform: translate3d(var(--${id}-scroll-x-value), var(--${id}-scroll-y-value), 0px);
-              overflow-x: ${slideType === "freeScroll" ? "auto" : "hidden"};
+              overflow-x: ${slideType === "freeScroll" ? "auto" : "visible"};
+              touch-action: ${
+                !enableGestures
+                  ? "auto"
+                  : carouselAxis === "x"
+                    ? "pan-y"
+                    : "pan-x"
+              };
             }
             [data-part-internal="${id}-Item"] {
               display: flex;
@@ -295,6 +389,7 @@ export function useSpringCarousel({
         className="ReactSpringCarouselTrack"
         data-part="Track"
         data-part-internal={`${id}-Track`}
+        {...bindDrag()}
         {...(slideType === "freeScroll"
           ? {
               onWheel() {
