@@ -1,16 +1,25 @@
 import { ReactNode } from "react";
 
-type SlideType = "fixed" | "fluid" | "freeScroll";
+export type SlideType = "fixed" | "fluid" | "freeScroll";
+export type CarouselAxis = "x" | "y";
 
 type Item = {
   id: string;
   renderItem: ReactNode;
 };
 
-export type Props = {
+type LayoutProps = {
+  itemsPerSlide?: number;
+  gutter?: number;
+  carouselAxis?: CarouselAxis;
+};
+
+type BaseProps = {
   init?: boolean;
   withLoop?: boolean;
   items: Item[];
   id: string;
   slideType?: SlideType;
 };
+
+export type Props = BaseProps & LayoutProps;

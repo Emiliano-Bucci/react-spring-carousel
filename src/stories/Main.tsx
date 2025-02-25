@@ -20,32 +20,37 @@ export function generateRGBA(index: number) {
 }
 
 export function Main() {
-  const { carouselFragment } = useSpringCarousel({
-    id: "carousel-test",
-    items: Array(100)
-      .fill(0)
-      .map((_, i) => ({
-        id: `item-${i}`,
-        renderItem: (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flex: "1",
-              background: generateRGBA(i),
-              padding: "24px",
-            }}
-          >
-            Item {i + 1}
-          </div>
-        ),
-      })),
-  });
+  const { carouselFragment, slideToNextItem, slideToPrevItem } =
+    useSpringCarousel({
+      id: "carousel-test",
+      itemsPerSlide: 3,
+      gutter: 24,
+      items: Array(50)
+        .fill(0)
+        .map((_, i) => ({
+          id: `item-${i}`,
+          renderItem: (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flex: "1",
+                background: generateRGBA(i),
+                padding: "24px",
+              }}
+            >
+              Item {i + 1}
+            </div>
+          ),
+        })),
+    });
 
   return (
     <div className="container">
+      <button onClick={slideToPrevItem}>prev</button>
       <div className="carousel-root">{carouselFragment}</div>
+      <button onClick={slideToNextItem}>next</button>
     </div>
   );
 }
