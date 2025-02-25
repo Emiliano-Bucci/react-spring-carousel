@@ -23,9 +23,10 @@ export function Main() {
   const { carouselFragment, slideToNextItem, slideToPrevItem } =
     useSpringCarousel({
       id: "carousel-test",
-      itemsPerSlide: 3,
+      itemsPerSlide: 4,
       gutter: 24,
-      items: Array(50)
+      withLoop: true,
+      items: Array(10)
         .fill(0)
         .map((_, i) => ({
           id: `item-${i}`,

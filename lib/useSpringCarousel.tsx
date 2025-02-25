@@ -1,32 +1,12 @@
 import { useSpring } from "@react-spring/web";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import { Props } from "./types";
-import { CarouselAxis } from "./types/index";
-import { pFloat } from "./utils";
 
 type AnimateItem = {
   shouldAnimate?: boolean;
   type: "prev" | "next";
 };
-
-function getScrollAmountValue(
-  container: HTMLElement,
-  carouselAxis: CarouselAxis,
-  gutter: number,
-) {
-  const firstItem = container.children[0] as HTMLElement;
-  let total = 0;
-
-  total =
-    pFloat(
-      firstItem.getBoundingClientRect()[
-        carouselAxis === "x" ? "width" : "height"
-      ],
-    ) + gutter;
-
-  return total;
-}
 
 export function useSpringCarousel({
   init = true,
@@ -44,25 +24,20 @@ export function useSpringCarousel({
   const carouselTrackRef = useRef<HTMLDivElement | null>(null);
   const totalScrolledAmount = useRef(0);
 
-  const startReached = useRef<boolean | undefined>(true);
+  const startReached = useRef<boolean | undefined>(withLoop ? false : true);
   const endReached = useRef<boolean | undefined>(false);
+
+  const activeItem = useRef(0);
 
   const [spring, setSpring] = useSpring(
     () => ({
       value: 0,
       onChange({ value }) {
         if (slideType === "fixed" || slideType === "fluid") {
-          if (carouselAxis === "x") {
-            carouselContainerRef.current!.style.setProperty(
-              `--${id}-scroll-x-value`,
-              `${value.value}px`,
-            );
-          } else {
-            carouselContainerRef.current!.style.setProperty(
-              `--${id}-scroll-y-value`,
-              `${value.value}px`,
-            );
-          }
+          carouselContainerRef.current!.style.setProperty(
+            `--${id}-offset-position`,
+            `${value.value}px`,
+          );
         }
         // if (slideType === "freeScroll") {
         //   carouselTrackRef.current![
@@ -89,45 +64,99 @@ export function useSpringCarousel({
     : items;
 
   function handleSlideToNextItem() {
-    if (!carouselIsInitialized.current) {
-      return;
-    }
+    if (!carouselIsInitialized.current) return;
+    if (endReached.current) return;
 
     animateItem({
       type: "next",
     });
   }
   function handleSlideToPrevItem() {
-    if (!carouselIsInitialized.current) {
-      return;
-    }
+    if (!carouselIsInitialized.current) return;
+    if (startReached.current) return;
 
     animateItem({
       type: "prev",
     });
   }
 
-  function animateItem({ type }: AnimateItem) {
+  function getScrollAmountValue() {
+    const firstItem = carouselTrackRef.current!.children[0] as HTMLElement;
+    let total = 0;
+
+    total =
+      firstItem.getBoundingClientRect()[
+        carouselAxis === "x" ? "width" : "height"
+      ] + gutter;
+
+    return total;
+  }
+  function getTotalScrollAvailableSpace(modifier: number) {
+    const container = carouselTrackRef.current!;
+    const total =
+      container[carouselAxis === "x" ? "scrollWidth" : "scrollHeight"] -
+      container.getBoundingClientRect()[
+        carouselAxis === "x" ? "width" : "height"
+      ] -
+      modifier;
+
+    return total;
+  }
+
+  function animateItem({ type, shouldAnimate = true }: AnimateItem) {
+    const scrollAmountValue = getScrollAmountValue();
+    const immediate = !shouldAnimate;
+
     startReached.current = false;
     endReached.current = false;
 
-    const fromValue = spring.value.get();
+    let fromValue = spring.value.get();
     let toValue = 0;
 
     if (type === "next") {
-      toValue =
-        -getScrollAmountValue(carouselTrackRef.current!, carouselAxis, gutter) +
-        totalScrolledAmount.current;
+      activeItem.current += 1;
     }
     if (type === "prev") {
-      toValue =
-        totalScrolledAmount.current +
-        getScrollAmountValue(carouselTrackRef.current!, carouselAxis, gutter);
+      activeItem.current -= 1;
+    }
+
+    if (slideType === "fixed" && type === "next") {
+      const totalAvailable = getTotalScrollAvailableSpace(
+        withLoop ? scrollAmountValue * (items.length * 2) : 0,
+      );
+
+      toValue = -(activeItem.current * scrollAmountValue);
+
+      if (!withLoop && Math.abs(toValue) >= totalAvailable) {
+        endReached.current = true;
+        toValue = -totalAvailable;
+      }
+
+      if (withLoop && activeItem.current === items.length) {
+        activeItem.current = 0;
+        fromValue = fromValue + scrollAmountValue * items.length;
+        toValue = 0;
+      }
+    }
+
+    if (slideType === "fixed" && type === "prev") {
+      toValue = -(activeItem.current * scrollAmountValue);
+
+      if (!withLoop && toValue >= 0) {
+        startReached.current = true;
+        toValue = 0;
+      }
+      if (withLoop && Math.abs(activeItem.current) === items.length / 2) {
+        fromValue = fromValue - scrollAmountValue * items.length;
+        toValue = -(Math.abs(activeItem.current) * scrollAmountValue);
+        activeItem.current = items.length / 2;
+      }
     }
 
     totalScrolledAmount.current = toValue;
 
     setSpring.start({
+      immediate,
       from: {
         value: fromValue,
       },
@@ -136,6 +165,23 @@ export function useSpringCarousel({
       },
     });
   }
+
+  useEffect(() => {
+    function handleResizeLoopContainer() {
+      if (carouselContainerRef.current) {
+        carouselContainerRef.current.style.setProperty(
+          `--${id}-offset-modifier`,
+          `${-getScrollAmountValue() * items.length}px`,
+        );
+      }
+    }
+
+    if (init) {
+      if (withLoop) {
+        handleResizeLoopContainer();
+      }
+    }
+  }, [init, withLoop, id, carouselAxis, gutter]);
 
   const carouselFragment = (
     <div
@@ -154,9 +200,10 @@ export function useSpringCarousel({
               overflow: hidden;
               --${id}-gutter: ${gutter}px;
               --${id}-items-per-slide: ${itemsPerSlide};
+              --${id}-offset-modifier: 0px;
               --${id}-offset-position: 0px;
-              --${id}-scroll-x-value: ${slideType === "fixed" && carouselAxis === "x" ? `var(--${id}-offset-position)` : "0px"};
-              --${id}-scroll-y-value: ${slideType === "fixed" && carouselAxis === "y" ? `var(--${id}-offset-position)` : "0px"};
+              --${id}-scroll-x-value: ${slideType === "fixed" && carouselAxis === "x" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
+              --${id}-scroll-y-value: ${slideType === "fixed" && carouselAxis === "y" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
             }
             [data-part-internal="${id}-Track"] {
               display: flex;
