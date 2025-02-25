@@ -1108,7 +1108,7 @@ export function useSpringCarousel({
                 id={item.id}
               >
                 {typeof item.renderItem === "function"
-                  ? item.renderItem({ useListenToCustomEvent })
+                  ? item.renderItem({ useListenToCustomEvent, index })
                   : item.renderItem}
               </div>
             );

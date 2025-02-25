@@ -8,6 +8,7 @@ type Item = {
   renderItem:
     | ReactNode
     | ((props: {
+        index: number;
         useListenToCustomEvent(
           eventHandler: SpringCarouselEventsEventHandler,
         ): void;
