@@ -18,6 +18,7 @@ export function useSpringCarousel({
   gutter = 0,
   carouselAxis = "x",
   slideType = "fixed",
+  startingPosition = "start",
 }: Props) {
   const carouselIsInitialized = useRef(init);
 
@@ -150,7 +151,11 @@ export function useSpringCarousel({
         startReached.current = true;
         toValue = 0;
       }
-      if (withLoop && Math.abs(activeItem.current) === items.length / 2) {
+      if (
+        withLoop &&
+        activeItem.current < 0 &&
+        Math.abs(activeItem.current) === items.length / 2
+      ) {
         fromValue = fromValue - scrollAmountValue * items.length;
         toValue = -(Math.abs(activeItem.current) * scrollAmountValue);
         activeItem.current = items.length / 2;
@@ -171,21 +176,48 @@ export function useSpringCarousel({
   }
 
   useEffect(() => {
+    function getIndexModifier(
+      choice: "start" | "middle-start" | "center" | "middle-end" | "end",
+      itemsPerSlide: number,
+    ): number {
+      switch (choice) {
+        case "start":
+          return 0;
+        case "middle-start":
+          return Math.floor((itemsPerSlide - 1) * 0.25);
+        case "center":
+          return Math.floor((itemsPerSlide - 1) * 0.5);
+        case "middle-end":
+          return Math.floor((itemsPerSlide - 1) * 0.75);
+        case "end":
+          return itemsPerSlide - 1;
+        default:
+          return 0;
+      }
+    }
     function handleResizeLoopContainer() {
       if (carouselContainerRef.current) {
+        let offset = 0;
+
+        if (withLoop) {
+          offset = getScrollAmountValue() * items.length;
+        }
+
+        offset -=
+          getScrollAmountValue() *
+          getIndexModifier(startingPosition, itemsPerSlide);
+
         carouselContainerRef.current.style.setProperty(
           `--${id}-offset-modifier`,
-          `${-getScrollAmountValue() * items.length}px`,
+          `${-offset}px`,
         );
       }
     }
 
     if (init) {
-      if (withLoop) {
-        handleResizeLoopContainer();
-      }
+      handleResizeLoopContainer();
     }
-  }, [init, withLoop, id, carouselAxis, gutter]);
+  }, [init, withLoop, id, carouselAxis, gutter, startingPosition]);
 
   const carouselFragment = (
     <div
@@ -211,12 +243,14 @@ export function useSpringCarousel({
             }
             [data-part-internal="${id}-Track"] {
               display: flex;
+              flex-direction: ${carouselAxis === "x" ? "row" : "column"};
               width: 100%;
               height: 100%;
               gap: var(--${id}-gutter);
               transform: translate3d(var(--${id}-scroll-x-value), var(--${id}-scroll-y-value), 0px);
             }
             [data-part-internal="${id}-Item"] {
+              display: flex;
               flex: 1 0 calc(100% / var(--${id}-items-per-slide) - calc(var(--${id}-gutter) * (var(--${id}-items-per-slide) - 1)) / var(--${id}-items-per-slide));
             }
           `,

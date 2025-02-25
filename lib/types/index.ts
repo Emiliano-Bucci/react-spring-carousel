@@ -12,6 +12,7 @@ type LayoutProps = {
   itemsPerSlide?: number;
   gutter?: number;
   carouselAxis?: CarouselAxis;
+  startingPosition?: "start" | "middle-start" | "center" | "middle-end" | "end";
 };
 
 type BaseProps = {
