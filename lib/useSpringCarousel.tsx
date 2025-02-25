@@ -214,8 +214,21 @@ export function useSpringCarousel({
       }
     }
 
+    function handleResize() {
+      handleResizeLoopContainer();
+      animateItem({
+        type: "next",
+        toIndex: activeItem.current,
+        shouldAnimate: false,
+      });
+    }
+
     if (init) {
       handleResizeLoopContainer();
+      window.addEventListener("resize", handleResize);
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
     }
   }, [init, withLoop, id, carouselAxis, gutter, startingPosition]);
 
