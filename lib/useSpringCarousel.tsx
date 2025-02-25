@@ -264,7 +264,7 @@ export function useSpringCarousel({
     }
 
     if (init && slideType === "fixed") {
-      handleResizeContainer();
+      handleResizeContainer(onInit);
       window.addEventListener("resize", handleResize);
       return () => {
         window.removeEventListener("resize", handleResize);
