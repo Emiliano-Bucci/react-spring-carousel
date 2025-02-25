@@ -1,0 +1,22 @@
+*::after,
+*::before {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  padding: 0 !important;
+  flex: 1;
+}
+
+#storybook-root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}

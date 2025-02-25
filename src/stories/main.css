@@ -1,0 +1,16 @@
+.container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  background-color: #ccc;
+  justify-content: center;
+  align-items: center;
+}
+
+.carousel-root {
+  width: 90%;
+  height: 90%;
+  background-color: #fff;
+}
