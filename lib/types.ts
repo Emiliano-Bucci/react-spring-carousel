@@ -4,12 +4,13 @@ import { ReactNode } from "react";
 export type SlideType = "fixed" | "fluid" | "freeScroll";
 export type CarouselAxis = "x" | "y";
 
-type Item = {
+export type Item = {
   id: string;
   renderItem:
     | ReactNode
     | ((props: {
         index: number;
+        isClonedItem: boolean;
         useListenToCustomEvent(
           eventHandler: SpringCarouselEventsEventHandler,
         ): void;

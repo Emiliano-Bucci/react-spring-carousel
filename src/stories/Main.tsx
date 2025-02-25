@@ -30,7 +30,6 @@ export function Main() {
     gutter: 24,
     itemsPerSlide: 5,
     withLoop: true,
-    slideType: "fluid",
     items: Array(8)
       .fill(0)
       .map((_, i) => ({

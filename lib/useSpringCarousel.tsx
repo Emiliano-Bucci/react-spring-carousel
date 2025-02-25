@@ -2,7 +2,7 @@ import { useSpring } from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
 import { useEffect, useRef } from "react";
 
-import { Props, SlideActionType } from "./types";
+import { Item, Props, SlideActionType } from "./types";
 import { useEventsModule } from "./useEventsModule";
 
 type AnimateItem = {
@@ -11,6 +11,8 @@ type AnimateItem = {
   toIndex?: number;
   actionType: SlideActionType;
 };
+
+type ExtendedGroupedItem = Item & { isClonedItem: boolean };
 
 export function useSpringCarousel({
   init = true,
@@ -59,20 +61,23 @@ export function useSpringCarousel({
     [carouselAxis],
   );
 
-  const groupedItems =
+  const groupedItems = (
     slideType !== "freeScroll" && withLoop
       ? [
           ...items.map((i) => ({
             ...i,
             id: `prev-repeated-item-${i.id}`,
+            isClonedItem: true,
           })),
           ...items,
           ...items.map((i) => ({
             ...i,
             id: `next-repeated-item-${i.id}`,
+            isClonedItem: true,
           })),
         ]
-      : items;
+      : items
+  ) as ExtendedGroupedItem[];
 
   const { useListenToCustomEvent, emitEvent } = useEventsModule();
 
@@ -487,7 +492,11 @@ export function useSpringCarousel({
               data-id={item.id}
             >
               {typeof item.renderItem === "function"
-                ? item.renderItem({ useListenToCustomEvent, index })
+                ? item.renderItem({
+                    useListenToCustomEvent,
+                    index,
+                    isClonedItem: Boolean(item.isClonedItem),
+                  })
                 : item.renderItem}
             </div>
           );
