@@ -20,7 +20,7 @@ export function generateRGBA(index: number) {
 }
 
 export function Main() {
-  const { carouselFragment, slideToNextItem, slideToPrevItem } =
+  const { carouselFragment, slideToNextItem, slideToPrevItem, slideToItem } =
     useSpringCarousel({
       id: "carousel-test",
       itemsPerSlide: 4,
@@ -51,7 +51,7 @@ export function Main() {
     <div className="container">
       <button onClick={slideToPrevItem}>prev</button>
       <div className="carousel-root">{carouselFragment}</div>
-      <button onClick={slideToNextItem}>next</button>
+      <button onClick={() => slideToItem("item-2")}>next</button>
     </div>
   );
 }

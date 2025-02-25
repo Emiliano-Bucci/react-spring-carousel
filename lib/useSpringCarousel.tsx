@@ -6,6 +6,7 @@ import { Props } from "./types";
 type AnimateItem = {
   shouldAnimate?: boolean;
   type: "prev" | "next";
+  toIndex?: number;
 };
 
 export function useSpringCarousel({
@@ -63,20 +64,20 @@ export function useSpringCarousel({
       ]
     : items;
 
-  function handleSlideToNextItem() {
+  function handleSlideToNextItem(toIndex?: number) {
     if (!carouselIsInitialized.current) return;
     if (endReached.current) return;
-
     animateItem({
       type: "next",
+      toIndex,
     });
   }
-  function handleSlideToPrevItem() {
+  function handleSlideToPrevItem(toIndex?: number) {
     if (!carouselIsInitialized.current) return;
     if (startReached.current) return;
-
     animateItem({
       type: "prev",
+      toIndex,
     });
   }
 
@@ -103,7 +104,7 @@ export function useSpringCarousel({
     return total;
   }
 
-  function animateItem({ type, shouldAnimate = true }: AnimateItem) {
+  function animateItem({ type, shouldAnimate = true, toIndex }: AnimateItem) {
     const scrollAmountValue = getScrollAmountValue();
     const immediate = !shouldAnimate;
 
@@ -118,6 +119,9 @@ export function useSpringCarousel({
     }
     if (type === "prev") {
       activeItem.current -= 1;
+    }
+    if (toIndex !== undefined) {
+      activeItem.current = toIndex;
     }
 
     if (slideType === "fixed" && type === "next") {
@@ -242,7 +246,41 @@ export function useSpringCarousel({
 
   return {
     carouselFragment,
-    slideToNextItem: handleSlideToNextItem,
-    slideToPrevItem: handleSlideToPrevItem,
+    slideToNextItem: () => handleSlideToNextItem(),
+    slideToPrevItem: () => handleSlideToPrevItem(),
+    slideToItem: (id: string | number) => {
+      if (typeof id === "number") {
+        const existingItem = items[id];
+
+        if (!existingItem) {
+          console.warn(
+            `The item you're trying to slide doesn't exist. index: ${id}`,
+          );
+          return;
+        }
+
+        if (id > activeItem.current) {
+          handleSlideToNextItem(id);
+        } else {
+          handleSlideToPrevItem(id);
+        }
+      }
+      if (typeof id === "string") {
+        const index = items.findIndex((i) => i.id === id);
+
+        if (index < 0) {
+          console.warn(
+            `The item you're trying to slide doesn't exist. id: ${id}`,
+          );
+          return;
+        }
+
+        if (index > activeItem.current) {
+          handleSlideToNextItem(index);
+        } else {
+          handleSlideToPrevItem(index);
+        }
+      }
+    },
   };
 }
