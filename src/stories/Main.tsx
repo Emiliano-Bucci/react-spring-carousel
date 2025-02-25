@@ -23,10 +23,8 @@ export function Main() {
   const { carouselFragment, slideToNextItem, slideToPrevItem } =
     useSpringCarousel({
       id: "carousel-test",
-      itemsPerSlide: 5,
-      withLoop: true,
       gutter: 24,
-      startingPosition: "middle-end",
+      slideType: "fluid",
       items: Array(10)
         .fill(0)
         .map((_, i) => ({
@@ -40,6 +38,7 @@ export function Main() {
                 flex: "1",
                 background: generateRGBA(i),
                 padding: "24px",
+                minWidth: "300px",
               }}
             >
               Item {i + 1}

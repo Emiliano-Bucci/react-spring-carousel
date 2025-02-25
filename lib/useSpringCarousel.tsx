@@ -81,30 +81,6 @@ export function useSpringCarousel({
       toIndex,
     });
   }
-
-  function getScrollAmountValue() {
-    const firstItem = carouselTrackRef.current!.children[0] as HTMLElement;
-    let total = 0;
-
-    total =
-      firstItem.getBoundingClientRect()[
-        carouselAxis === "x" ? "width" : "height"
-      ] + gutter;
-
-    return total;
-  }
-  function getTotalScrollAvailableSpace(modifier: number) {
-    const container = carouselTrackRef.current!;
-    const total =
-      container[carouselAxis === "x" ? "scrollWidth" : "scrollHeight"] -
-      container.getBoundingClientRect()[
-        carouselAxis === "x" ? "width" : "height"
-      ] -
-      modifier;
-
-    return total;
-  }
-
   function animateItem({ type, shouldAnimate = true, toIndex }: AnimateItem) {
     const scrollAmountValue = getScrollAmountValue();
     const immediate = !shouldAnimate;
@@ -125,13 +101,16 @@ export function useSpringCarousel({
       activeItem.current = toIndex;
     }
 
-    if (slideType === "fixed" && type === "next") {
+    if (slideType !== "freeScroll" && type === "next") {
       const totalAvailable = getTotalScrollAvailableSpace(
         withLoop ? scrollAmountValue * (items.length * 2) : 0,
       );
 
       toValue = -(activeItem.current * scrollAmountValue);
 
+      if (totalAvailable - Math.abs(toValue) < scrollAmountValue / 1.2) {
+        toValue = -totalAvailable;
+      }
       if (!withLoop && Math.abs(toValue) >= totalAvailable) {
         endReached.current = true;
         toValue = -totalAvailable;
@@ -143,14 +122,14 @@ export function useSpringCarousel({
         toValue = 0;
       }
     }
-
-    if (slideType === "fixed" && type === "prev") {
+    if (slideType !== "freeScroll" && type === "prev") {
       toValue = -(activeItem.current * scrollAmountValue);
 
       if (!withLoop && toValue >= 0) {
         startReached.current = true;
         toValue = 0;
       }
+
       if (
         withLoop &&
         activeItem.current < 0 &&
@@ -173,6 +152,29 @@ export function useSpringCarousel({
         value: toValue,
       },
     });
+  }
+
+  function getScrollAmountValue() {
+    const firstItem = carouselTrackRef.current!.children[0] as HTMLElement;
+    let total = 0;
+
+    total =
+      firstItem.getBoundingClientRect()[
+        carouselAxis === "x" ? "width" : "height"
+      ] + gutter;
+
+    return total;
+  }
+  function getTotalScrollAvailableSpace(modifier: number) {
+    const container = carouselTrackRef.current!;
+    const total =
+      container[carouselAxis === "x" ? "scrollWidth" : "scrollHeight"] -
+      container.getBoundingClientRect()[
+        carouselAxis === "x" ? "width" : "height"
+      ] -
+      modifier;
+
+    return total;
   }
 
   useEffect(() => {
@@ -251,8 +253,8 @@ export function useSpringCarousel({
               --${id}-items-per-slide: ${itemsPerSlide};
               --${id}-offset-modifier: 0px;
               --${id}-offset-position: 0px;
-              --${id}-scroll-x-value: ${slideType === "fixed" && carouselAxis === "x" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
-              --${id}-scroll-y-value: ${slideType === "fixed" && carouselAxis === "y" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
+              --${id}-scroll-x-value: ${slideType !== "freeScroll" && carouselAxis === "x" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
+              --${id}-scroll-y-value: ${slideType !== "freeScroll" && carouselAxis === "y" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
             }
             [data-part-internal="${id}-Track"] {
               display: flex;
@@ -264,7 +266,7 @@ export function useSpringCarousel({
             }
             [data-part-internal="${id}-Item"] {
               display: flex;
-              flex: 1 0 calc(100% / var(--${id}-items-per-slide) - calc(var(--${id}-gutter) * (var(--${id}-items-per-slide) - 1)) / var(--${id}-items-per-slide));
+              flex: ${slideType === "fixed" ? `1 0 calc(100% / var(--${id}-items-per-slide) - calc(var(--${id}-gutter) * (var(--${id}-items-per-slide) - 1)) / var(--${id}-items-per-slide))` : "1"};
             }
           `,
         }}
