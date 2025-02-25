@@ -113,7 +113,11 @@ export function useSpringCarousel({
       activeItem.current += 1;
     }
     if (type === "prev") {
-      activeItem.current -= 1;
+      if (activeItem.current === 0) {
+        activeItem.current = items.length - 1;
+      } else {
+        activeItem.current -= 1;
+      }
     }
     if (toIndex !== undefined) {
       activeItem.current = toIndex;
@@ -147,19 +151,13 @@ export function useSpringCarousel({
     if (slideType !== "freeScroll" && type === "prev") {
       toValue = -(activeItem.current * scrollAmountValue);
 
+      if (activeItem.current === items.length - 1) {
+        fromValue = fromValue - items.length * scrollAmountValue;
+      }
+
       if (!withLoop && toValue >= 0) {
         startReached.current = true;
         toValue = 0;
-      }
-
-      if (
-        withLoop &&
-        activeItem.current < 0 &&
-        Math.abs(activeItem.current) === items.length / 2
-      ) {
-        fromValue = fromValue - scrollAmountValue * items.length;
-        toValue = -(Math.abs(activeItem.current) * scrollAmountValue);
-        activeItem.current = items.length / 2;
       }
     }
 

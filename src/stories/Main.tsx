@@ -29,9 +29,9 @@ export function Main() {
     id: "carousel-test",
     gutter: 24,
     itemsPerSlide: 5,
-    carouselAxis: "y",
     withLoop: true,
-    items: Array(10)
+    slideType: "fluid",
+    items: Array(8)
       .fill(0)
       .map((_, i) => ({
         id: `item-${i}`,
@@ -53,7 +53,9 @@ export function Main() {
   });
 
   useListenToCustomEvent((ev) => {
-    console.log(ev);
+    if (ev.eventName === "onSlideStartChange") {
+      console.log(ev.nextItem.index);
+    }
   });
 
   return (
