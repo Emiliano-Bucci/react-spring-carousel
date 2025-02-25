@@ -17,6 +17,7 @@ export function useSpringCarousel({
   id,
   itemsPerSlide = 1,
   gutter = 0,
+  startEndGutter = 0,
   carouselAxis = "x",
   slideType = "fixed",
   startingPosition = "start",
@@ -223,7 +224,7 @@ export function useSpringCarousel({
           return 0;
       }
     }
-    function handleResizeLoopContainer() {
+    function handleResizeContainer() {
       if (carouselContainerRef.current) {
         let offset = 0;
 
@@ -235,6 +236,8 @@ export function useSpringCarousel({
           getScrollAmountValue() *
           getIndexModifier(startingPosition, itemsPerSlide);
 
+        offset -= startEndGutter;
+
         carouselContainerRef.current.style.setProperty(
           `--${id}-offset-modifier`,
           `${-offset}px`,
@@ -243,7 +246,7 @@ export function useSpringCarousel({
     }
 
     function handleResize() {
-      handleResizeLoopContainer();
+      handleResizeContainer();
       animateItem({
         type: "next",
         toIndex: activeItem.current,
@@ -256,7 +259,7 @@ export function useSpringCarousel({
     }
 
     if (init && slideType === "fixed") {
-      handleResizeLoopContainer();
+      handleResizeContainer();
       window.addEventListener("resize", handleResize);
       return () => {
         window.removeEventListener("resize", handleResize);
@@ -356,10 +359,11 @@ export function useSpringCarousel({
               overflow: hidden;
               --${id}-gutter: ${gutter}px;
               --${id}-items-per-slide: ${itemsPerSlide};
-              --${id}-offset-modifier: 0px;
               --${id}-offset-position: 0px;
+              --${id}-offset-modifier: 0px;
               --${id}-scroll-x-value: ${slideType !== "freeScroll" && carouselAxis === "x" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
               --${id}-scroll-y-value: ${slideType !== "freeScroll" && carouselAxis === "y" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
+              --${id}-start-end-gutter: ${startEndGutter * 2}px;
             }
             [data-part-internal="${id}-Track"] {
               display: flex;
@@ -379,7 +383,7 @@ export function useSpringCarousel({
             }
             [data-part-internal="${id}-Item"] {
               display: flex;
-              flex: ${slideType === "fixed" ? `1 0 calc(100% / var(--${id}-items-per-slide) - calc(var(--${id}-gutter) * (var(--${id}-items-per-slide) - 1)) / var(--${id}-items-per-slide))` : "1"};
+              flex: ${slideType === "fixed" ? `1 0 calc(100% / var(--${id}-items-per-slide) - calc(var(--${id}-gutter) * (var(--${id}-items-per-slide) - 1)) / var(--${id}-items-per-slide) - calc(var(--${id}-start-end-gutter) / var(--${id}-items-per-slide)))` : "1"};
             }
           `,
         }}

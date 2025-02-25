@@ -11,6 +11,7 @@ type Item = {
 type LayoutProps = {
   itemsPerSlide?: number;
   gutter?: number;
+  startEndGutter?: number;
   carouselAxis?: CarouselAxis;
   startingPosition?: "start" | "middle-start" | "center" | "middle-end" | "end";
 };
