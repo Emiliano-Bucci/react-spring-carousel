@@ -23,6 +23,7 @@ export function useSpringCarousel({
   startingPosition = "start",
   enableGestures = true,
   slideWhenDragThresholdIsReached = true,
+  onInit,
 }: Props) {
   const carouselIsInitialized = useRef(init);
 
@@ -224,7 +225,7 @@ export function useSpringCarousel({
           return 0;
       }
     }
-    function handleResizeContainer() {
+    function handleResizeContainer(_onInit?: () => void) {
       if (carouselContainerRef.current) {
         let offset = 0;
 
@@ -242,6 +243,10 @@ export function useSpringCarousel({
           `--${id}-offset-modifier`,
           `${-offset}px`,
         );
+
+        if (_onInit) {
+          _onInit();
+        }
       }
     }
 

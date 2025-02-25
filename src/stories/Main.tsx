@@ -25,9 +25,11 @@ export function Main() {
       id: "carousel-test",
       gutter: 24,
       withLoop: true,
-      carouselAxis: "y",
       itemsPerSlide: 4,
       startEndGutter: 40,
+      onInit() {
+        console.log("ere");
+      },
       items: Array(10)
         .fill(0)
         .map((_, i) => ({
@@ -41,7 +43,6 @@ export function Main() {
                 flex: "1",
                 background: generateRGBA(i),
                 padding: "24px",
-                // minWidth: "300px",
               }}
             >
               Item {i + 1}

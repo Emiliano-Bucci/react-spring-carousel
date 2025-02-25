@@ -24,6 +24,7 @@ type BaseProps = {
   slideType?: SlideType;
   enableGestures?: boolean;
   slideWhenDragThresholdIsReached?: boolean;
+  onInit?(): void;
 };
 
 export type Props = BaseProps & LayoutProps;
