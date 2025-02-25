@@ -20,36 +20,42 @@ export function generateRGBA(index: number) {
 }
 
 export function Main() {
-  const { carouselFragment, slideToNextItem, slideToPrevItem } =
-    useSpringCarousel({
-      id: "carousel-test",
-      gutter: 24,
-      withLoop: true,
-      itemsPerSlide: 4,
-      startEndGutter: 40,
-      onInit() {
-        console.log("ere");
-      },
-      items: Array(10)
-        .fill(0)
-        .map((_, i) => ({
-          id: `item-${i}`,
-          renderItem: (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flex: "1",
-                background: generateRGBA(i),
-                padding: "24px",
-              }}
-            >
-              Item {i + 1}
-            </div>
-          ),
-        })),
-    });
+  const {
+    carouselFragment,
+    slideToNextItem,
+    slideToPrevItem,
+    useListenToCustomEvent,
+  } = useSpringCarousel({
+    id: "carousel-test",
+    gutter: 24,
+    itemsPerSlide: 4,
+    onInit() {
+      console.log("ere");
+    },
+    items: Array(10)
+      .fill(0)
+      .map((_, i) => ({
+        id: `item-${i}`,
+        renderItem: (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flex: "1",
+              background: generateRGBA(i),
+              padding: "24px",
+            }}
+          >
+            Item {i + 1}
+          </div>
+        ),
+      })),
+  });
+
+  useListenToCustomEvent((ev) => {
+    console.log(ev);
+  });
 
   return (
     <div className="container">

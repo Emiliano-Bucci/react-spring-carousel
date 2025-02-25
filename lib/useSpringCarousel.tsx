@@ -2,12 +2,15 @@ import { useSpring } from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
 import { useEffect, useRef } from "react";
 
-import { Props } from "./types";
+import { SlideActionType } from "./types/events";
+import { Props } from "./types/types";
+import { useEventsModule } from "./useEventsModule";
 
 type AnimateItem = {
   shouldAnimate?: boolean;
   type: "prev" | "next";
   toIndex?: number;
+  actionType: SlideActionType;
 };
 
 export function useSpringCarousel({
@@ -72,12 +75,15 @@ export function useSpringCarousel({
         ]
       : items;
 
+  const { useListenToCustomEvent, emitEvent } = useEventsModule();
+
   function handleSlideToNextItem(toIndex?: number) {
     if (!carouselIsInitialized.current) return;
     if (endReached.current) return;
     animateItem({
       type: "next",
       toIndex,
+      actionType: "click",
     });
   }
   function handleSlideToPrevItem(toIndex?: number) {
@@ -86,9 +92,15 @@ export function useSpringCarousel({
     animateItem({
       type: "prev",
       toIndex,
+      actionType: "click",
     });
   }
-  function animateItem({ type, shouldAnimate = true, toIndex }: AnimateItem) {
+  function animateItem({
+    type,
+    shouldAnimate = true,
+    toIndex,
+    actionType,
+  }: AnimateItem) {
     const scrollAmountValue = getScrollAmountValue();
     const immediate = !shouldAnimate;
 
@@ -171,6 +183,32 @@ export function useSpringCarousel({
 
     totalScrolledAmount.current = toValue;
 
+    if (actionType === "resize") {
+      emitEvent({
+        eventName: "onResize",
+        sliceActionType: actionType,
+        slideDirection: type,
+        currentItem: {
+          index: activeItem.current,
+          id: items[activeItem.current].id,
+          startReached: startReached.current,
+          endReached: endReached.current,
+        },
+      });
+    } else {
+      emitEvent({
+        eventName: "onSlideStartChange",
+        sliceActionType: actionType,
+        slideDirection: type,
+        nextItem: {
+          index: activeItem.current,
+          id: items[activeItem.current].id,
+          startReached: startReached.current,
+          endReached: endReached.current,
+        },
+      });
+    }
+
     setSpring.start({
       immediate,
       from: {
@@ -178,6 +216,34 @@ export function useSpringCarousel({
       },
       to: {
         value: toValue,
+      },
+      onRest({ finished }) {
+        if (finished && slideType === "fixed") {
+          emitEvent({
+            eventName: "onSlideChangeComplete",
+            sliceActionType: actionType,
+            slideDirection: type,
+            currentItem: {
+              index: activeItem.current,
+              id: items[activeItem.current].id,
+              startReached: startReached.current,
+              endReached: endReached.current,
+            },
+          });
+        }
+        if (finished && slideType === "fluid") {
+          emitEvent({
+            eventName: "onSlideChangeComplete",
+            sliceActionType: actionType,
+            slideDirection: type,
+            currentItem: {
+              index: 0,
+              id: "",
+              startReached: startReached.current,
+              endReached: endReached.current,
+            },
+          });
+        }
       },
     });
   }
@@ -256,6 +322,7 @@ export function useSpringCarousel({
         type: "next",
         toIndex: activeItem.current,
         shouldAnimate: false,
+        actionType: "resize",
       });
     }
 
@@ -312,9 +379,15 @@ export function useSpringCarousel({
 
       if (state.last) {
         if (prevItemTresholdReached) {
-          handleSlideToPrevItem();
+          animateItem({
+            actionType: "drag",
+            type: "prev",
+          });
         } else if (nextItemTresholdReached) {
-          handleSlideToNextItem();
+          animateItem({
+            actionType: "drag",
+            type: "next",
+          });
         } else {
           setSpring.start({
             value: totalScrolledAmount.current,
@@ -415,7 +488,9 @@ export function useSpringCarousel({
               key={`${item.id}-${index}`}
               data-part-internal={`${id}-Item`}
             >
-              {item.renderItem}
+              {typeof item.renderItem === "function"
+                ? item.renderItem({ useListenToCustomEvent, index })
+                : item.renderItem}
             </div>
           );
         })}
@@ -425,6 +500,7 @@ export function useSpringCarousel({
 
   return {
     carouselFragment,
+    useListenToCustomEvent,
     slideToNextItem: () => handleSlideToNextItem(),
     slideToPrevItem: () => handleSlideToPrevItem(),
     slideToItem: (id: string | number) => {
