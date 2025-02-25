@@ -1,6 +1,6 @@
 {
   "name": "react-spring-carousel",
-  "version": "3.0.0-beta-2.0.0",
+  "version": "3.0.0-beta-2.0.13",
   "type": "module",
   "license": "MIT",
   "main": "./dist/index.umd.js",
@@ -14,8 +14,7 @@
       "import": "./dist/index.es.js",
       "require": "./dist/index.umd.js",
       "types": "./dist/index.d.ts"
-    },
-    "./dist/style.css": "./dist/style.css"
+    }
   },
   "scripts": {
     "dev": "vite",

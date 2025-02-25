@@ -2,8 +2,7 @@ import { useSpring } from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
 import { useEffect, useRef } from "react";
 
-import { SlideActionType } from "./types/events";
-import { Props } from "./types/types";
+import { Props, SlideActionType } from "./types";
 import { useEventsModule } from "./useEventsModule";
 
 type AnimateItem = {
@@ -190,7 +189,7 @@ export function useSpringCarousel({
         slideDirection: type,
         currentItem: {
           index: activeItem.current,
-          id: items[activeItem.current].id,
+          id: items.at(activeItem.current)!.id,
           startReached: startReached.current,
           endReached: endReached.current,
         },
@@ -202,7 +201,7 @@ export function useSpringCarousel({
         slideDirection: type,
         nextItem: {
           index: activeItem.current,
-          id: items[activeItem.current].id,
+          id: items.at(activeItem.current)!.id,
           startReached: startReached.current,
           endReached: endReached.current,
         },
@@ -225,7 +224,7 @@ export function useSpringCarousel({
             slideDirection: type,
             currentItem: {
               index: activeItem.current,
-              id: items[activeItem.current].id,
+              id: items.at(activeItem.current)!.id,
               startReached: startReached.current,
               endReached: endReached.current,
             },
@@ -355,11 +354,11 @@ export function useSpringCarousel({
       const velocity = state.velocity;
 
       if (isDragging) {
-        // emitEvent({
-        //   ...state,
-        //   eventName: "onDrag",
-        //   slideActionType: "drag",
-        // });
+        emitEvent({
+          ...state,
+          eventName: "onDrag",
+          slideActionType: "drag",
+        });
 
         setSpring.start({
           value: movement,
@@ -487,6 +486,7 @@ export function useSpringCarousel({
               data-part="Item"
               key={`${item.id}-${index}`}
               data-part-internal={`${id}-Item`}
+              data-id={item.id}
             >
               {typeof item.renderItem === "function"
                 ? item.renderItem({ useListenToCustomEvent, index })

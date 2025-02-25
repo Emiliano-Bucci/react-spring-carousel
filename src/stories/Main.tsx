@@ -28,10 +28,9 @@ export function Main() {
   } = useSpringCarousel({
     id: "carousel-test",
     gutter: 24,
-    itemsPerSlide: 4,
-    onInit() {
-      console.log("ere");
-    },
+    itemsPerSlide: 5,
+    carouselAxis: "y",
+    withLoop: true,
     items: Array(10)
       .fill(0)
       .map((_, i) => ({
