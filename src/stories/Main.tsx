@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import { useSpringCarousel } from "../../lib";
 import "./main.css";
@@ -20,12 +20,10 @@ function generateRGBA(index: number) {
 }
 
 export function Main() {
-  const [axis, setAxis] = useState("x");
-
   const { carouselFragment, slideToPrevItem, slideToNextItem, carouselId } =
     useSpringCarousel({
+      carouselAxis: "y",
       withLoop: true,
-      carouselAxis: axis,
       items: Array(100)
         .fill(0)
         .map((_, i) => ({
@@ -47,33 +45,20 @@ export function Main() {
         })),
     });
 
-  useEffect(() => {
-    setTimeout(() => {
-      setAxis("y");
-    }, 5000);
-  }, []);
-
   return (
     <div className="container">
-      <button onClick={slideToPrevItem}>prev</button>
+      {/* <button onClick={slideToPrevItem}>prev</button> */}
       <div className="carousel-container">
         <style>
           {`html:root {
-                --${carouselId}-react-spring-carousel-items-per-slide: 3;
-                --${carouselId}-react-spring-carousel-item-gutter: 10px;
-                --${carouselId}-react-spring-carousel-start-end-gutter: 10px;
-              }
-
-              @media (max-width: 1200px) {
-                  html:root {
-                    --${carouselId}-react-spring-carousel-start-end-gutter: 40px;
-                  }
-                }
-              `}
+              --${carouselId}-react-spring-carousel-items-per-slide: 3;
+              --${carouselId}-react-spring-carousel-item-gutter: 10px;
+              --${carouselId}-react-spring-carousel-start-end-gutter: 10px;
+            }`}
         </style>
         {carouselFragment}
       </div>
-      <button onClick={slideToNextItem}>prev</button>
+      {/* <button onClick={slideToNextItem}>prev</button> */}
     </div>
   );
 }

@@ -1031,7 +1031,7 @@ export function useSpringCarousel({
               display: flex;
               overflow: hidden;
               width: 100%;
-              height: ${carouselAxis === "x" ? "100%" : `calc(100% - var(--${carouselId}-react-spring-carousel-start-end-gutter) * 2)`};
+              height: 100%;
               padding: ${carouselAxis === "x" ? `0px var(--${carouselId}-react-spring-carousel-start-end-gutter)` : `var(--${carouselId}-react-spring-carousel-start-end-gutter) 0px`};
             }
             .carousel-${carouselId} .use-spring-carousel-track {
