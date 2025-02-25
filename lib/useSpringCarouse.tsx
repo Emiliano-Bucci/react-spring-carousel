@@ -1,6 +1,6 @@
 import { Controller, useSpring } from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
-import { ElementRef, useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import { Props, SlideActionType } from "./types";
 import { useEventsModule } from "./useEventsModule";
@@ -110,8 +110,8 @@ export function useSpringCarousel({
   const scrollAmount = useRef(_scrollAmount);
   const dragTreshold = useRef(0);
   const carouselId = useId().replace(/:/g, "");
-  const carouselContainerRef = useRef<ElementRef<"div">>(null);
-  const carouselTrackRef = useRef<ElementRef<"div">>(null);
+  const carouselContainerRef = useRef<HTMLDivElement | null>(null);
+  const carouselTrackRef = useRef<HTMLDivElement | null>(null);
   const currentSlidedValue = useRef(0);
 
   const startReached = useRef<boolean | undefined>(true);
@@ -125,9 +125,15 @@ export function useSpringCarousel({
       onChange({ value }) {
         if (slideType === "fixed" || slideType === "fluid") {
           if (carouselAxis === "x") {
-            carouselTrackRef.current!.style.transform = `translate3d(${value.value}px, 0px, 0px)`;
+            carouselTrackRef.current!.style.setProperty(
+              "--scroll-x-value",
+              `${value.value}px`,
+            );
           } else {
-            carouselTrackRef.current!.style.transform = `translate3d(0px, ${value.value}px, 0px)`;
+            carouselTrackRef.current!.style.setProperty(
+              "--scroll-y-value",
+              `${value.value}px`,
+            );
           }
         }
         if (slideType === "freeScroll") {
@@ -980,7 +986,7 @@ export function useSpringCarousel({
         if (res) {
           initCarousel();
 
-          if (initialActiveItem !== undefined) {
+          if (initialActiveItem !== undefined && slideType === "fixed") {
             handleSlideToItem(initialActiveItem, false);
           }
 
@@ -1011,7 +1017,11 @@ export function useSpringCarousel({
     }
   }, [scrollAmount, init, slideType, withLoop, carouselAxis]);
   useEffect(() => {
-    if (initialActiveItem !== undefined && carouselIsInitialized) {
+    if (
+      initialActiveItem !== undefined &&
+      carouselIsInitialized &&
+      slideType === "fixed"
+    ) {
       handleSlideToItem(initialActiveItem, false);
     }
   }, [carouselIsInitialized, initialActiveItem]);
@@ -1040,6 +1050,13 @@ export function useSpringCarousel({
               position: relative;
               flex-direction: ${carouselAxis === "x" ? "row" : "column"};
               gap: var(--${carouselId}-react-spring-carousel-item-gutter);
+
+              --initial-active-item: ${initialActiveItem || 0};
+              --offset-position: calc(var(--item-scroll-value) * var(--initial-active-item));
+              --scroll-x-value: ${slideType === "fixed" && carouselAxis === "x" ? "var(--offset-position)" : "0px"};
+              --scroll-y-value: ${slideType === "fixed" && carouselAxis === "y" ? "var(--offset-position)" : "0px"};
+
+              transform: translate3d(var(--scroll-x-value), var(--scroll-y-value), 0px);
               touch-action: ${
                 !enableGestures
                   ? "auto"
@@ -1097,8 +1114,19 @@ export function useSpringCarousel({
         <div
           className={`use-spring-carousel-track`}
           {...bindDrag()}
-          ref={carouselTrackRef}
           {...getScrollHandlers()}
+          ref={(r) => {
+            carouselTrackRef.current = r;
+            if (r) {
+              const firtsElement = r.children[0] as HTMLElement;
+              if (firtsElement) {
+                r.style.setProperty(
+                  "--item-scroll-value",
+                  `-${firtsElement.getBoundingClientRect().width}px`,
+                );
+              }
+            }
+          }}
         >
           {items.map((item, index) => {
             return (

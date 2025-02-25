@@ -22,7 +22,7 @@ function generateRGBA(index: number) {
 export function Main() {
   const { carouselFragment, slideToPrevItem, slideToNextItem, carouselId } =
     useSpringCarousel({
-      carouselAxis: "y",
+      initialActiveItem: 1,
       withLoop: true,
       items: Array(100)
         .fill(0)
@@ -52,8 +52,8 @@ export function Main() {
         <style>
           {`html:root {
               --${carouselId}-react-spring-carousel-items-per-slide: 3;
-              --${carouselId}-react-spring-carousel-item-gutter: 10px;
-              --${carouselId}-react-spring-carousel-start-end-gutter: 10px;
+              // --${carouselId}-react-spring-carousel-item-gutter: 10px;
+              // --${carouselId}-react-spring-carousel-start-end-gutter: 10px;
             }`}
         </style>
         {carouselFragment}
