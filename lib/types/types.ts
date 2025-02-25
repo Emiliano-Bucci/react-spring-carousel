@@ -1,9 +1,17 @@
 import { ReactNode } from "react";
 
+import { SpringCarouselEventsEventHandler } from "./events";
+
 type Item = {
   id: string;
-  renderItem: ReactNode;
   renderThumb?: ReactNode;
+  renderItem:
+    | ReactNode
+    | ((props: {
+        useListenToCustomEvent(
+          eventHandler: SpringCarouselEventsEventHandler,
+        ): void;
+      }) => ReactNode);
 };
 
 type SlideType = "fixed" | "fluid" | "freeScroll";

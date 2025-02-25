@@ -1107,7 +1107,9 @@ export function useSpringCarousel({
                 className="use-spring-carousel-item"
                 id={item.id}
               >
-                {item.renderItem}
+                {typeof item.renderItem === "function"
+                  ? item.renderItem({ useListenToCustomEvent })
+                  : item.renderItem}
               </div>
             );
           })}
