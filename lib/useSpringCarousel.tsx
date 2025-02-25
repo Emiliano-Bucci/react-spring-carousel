@@ -41,29 +41,30 @@ export function useSpringCarousel({
             `${value.value}px`,
           );
         }
-        // if (slideType === "freeScroll") {
-        //   carouselTrackRef.current![
-        //     carouselAxis === "x" ? "scrollLeft" : "scrollTop"
-        //   ] = Math.abs(value.value);
-        // }
+        if (slideType === "freeScroll") {
+          carouselTrackRef.current![
+            carouselAxis === "x" ? "scrollLeft" : "scrollTop"
+          ] = Math.abs(value.value);
+        }
       },
     }),
     [carouselAxis],
   );
 
-  const groupedItems = withLoop
-    ? [
-        ...items.map((i) => ({
-          ...i,
-          id: `prev-repeated-item-${i.id}`,
-        })),
-        ...items,
-        ...items.map((i) => ({
-          ...i,
-          id: `next-repeated-item-${i.id}`,
-        })),
-      ]
-    : items;
+  const groupedItems =
+    slideType !== "freeScroll" && withLoop
+      ? [
+          ...items.map((i) => ({
+            ...i,
+            id: `prev-repeated-item-${i.id}`,
+          })),
+          ...items,
+          ...items.map((i) => ({
+            ...i,
+            id: `next-repeated-item-${i.id}`,
+          })),
+        ]
+      : items;
 
   function handleSlideToNextItem(toIndex?: number) {
     if (!carouselIsInitialized.current) return;
@@ -139,6 +140,23 @@ export function useSpringCarousel({
         toValue = -(Math.abs(activeItem.current) * scrollAmountValue);
         activeItem.current = items.length / 2;
       }
+    }
+
+    if (slideType === "freeScroll" && type === "next") {
+      const scrollValue =
+        carouselTrackRef.current![
+          carouselAxis === "x" ? "scrollLeft" : "scrollTop"
+        ];
+      fromValue = scrollValue;
+      toValue = scrollValue + scrollAmountValue;
+    }
+    if (slideType === "freeScroll" && type === "prev") {
+      const scrollValue =
+        carouselTrackRef.current![
+          carouselAxis === "x" ? "scrollLeft" : "scrollTop"
+        ];
+      fromValue = scrollValue;
+      toValue = scrollValue - scrollAmountValue;
     }
 
     totalScrolledAmount.current = toValue;
@@ -225,14 +243,14 @@ export function useSpringCarousel({
       });
     }
 
-    if (init) {
+    if (init && slideType === "fixed") {
       handleResizeLoopContainer();
       window.addEventListener("resize", handleResize);
       return () => {
         window.removeEventListener("resize", handleResize);
       };
     }
-  }, [init, withLoop, id, carouselAxis, gutter, startingPosition]);
+  }, [init, withLoop, id, carouselAxis, gutter, startingPosition, slideType]);
 
   const carouselFragment = (
     <div
@@ -263,6 +281,7 @@ export function useSpringCarousel({
               height: 100%;
               gap: var(--${id}-gutter);
               transform: translate3d(var(--${id}-scroll-x-value), var(--${id}-scroll-y-value), 0px);
+              overflow-x: ${slideType === "freeScroll" ? "auto" : "hidden"};
             }
             [data-part-internal="${id}-Item"] {
               display: flex;
@@ -276,6 +295,13 @@ export function useSpringCarousel({
         className="ReactSpringCarouselTrack"
         data-part="Track"
         data-part-internal={`${id}-Track`}
+        {...(slideType === "freeScroll"
+          ? {
+              onWheel() {
+                spring.value.stop();
+              },
+            }
+          : {})}
       >
         {groupedItems.map((item, index) => {
           return (
