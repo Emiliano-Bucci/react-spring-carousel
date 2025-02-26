@@ -27,9 +27,8 @@ export function Main() {
     useListenToCustomEvent,
   } = useSpringCarousel({
     id: "carousel-test",
-    gutter: 10,
-    withLoop: true,
-    itemsPerSlide: 4,
+    gutter: 16,
+    slideType: "freeScroll",
     items: Array(8)
       .fill(0)
       .map((_, i) => ({
@@ -40,9 +39,9 @@ export function Main() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              flex: "1",
               background: generateRGBA(i),
               padding: "24px",
+              width: "100%",
             }}
           >
             Item {i + 1}
@@ -59,22 +58,6 @@ export function Main() {
 
   return (
     <div className="container">
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-            @media screen and (min-width: 800px) {
-              html:root {
-                --carousel-test-start-end-gutter: 120px;
-              }
-            }
-            @media screen and (max-width: 799px) {
-              html:root {
-                --carousel-test-start-end-gutter: 20px;
-              }
-            }
-          `,
-        }}
-      />
       <button onClick={slideToPrevItem}>prev</button>
       <div className="carousel-root">{carouselFragment}</div>
       <button onClick={slideToNextItem}>next</button>

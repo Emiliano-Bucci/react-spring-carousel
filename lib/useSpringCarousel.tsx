@@ -116,10 +116,10 @@ export function useSpringCarousel({
     let fromValue = spring.value.get();
     let toValue = 0;
 
-    if (type === "next") {
+    if (type === "next" && slideType !== "freeScroll") {
       activeItem.current += 1;
     }
-    if (type === "prev") {
+    if (type === "prev" && slideType !== "freeScroll") {
       if (activeItem.current === 0) {
         activeItem.current = items.length - 1;
       } else {
@@ -173,8 +173,24 @@ export function useSpringCarousel({
         carouselTrackRef.current![
           carouselAxis === "x" ? "scrollLeft" : "scrollTop"
         ];
+
+      const availableScrollSpace =
+        carouselAxis === "x"
+          ? carouselTrackRef.current!.scrollWidth -
+            carouselTrackRef.current!.clientWidth
+          : carouselTrackRef.current!.scrollHeight -
+            carouselTrackRef.current!.clientHeight;
+
       fromValue = scrollValue;
       toValue = scrollValue + scrollAmountValue;
+
+      if (
+        toValue > availableScrollSpace ||
+        availableScrollSpace - toValue < 80
+      ) {
+        toValue = availableScrollSpace;
+        endReached.current = true;
+      }
     }
     if (slideType === "freeScroll" && type === "prev") {
       const scrollValue =
@@ -194,7 +210,7 @@ export function useSpringCarousel({
         slideDirection: type,
         currentItem: {
           index: activeItem.current,
-          id: items.at(activeItem.current)!.id,
+          id: items.at(activeItem.current)?.id ?? "",
           startReached: startReached.current,
           endReached: endReached.current,
         },
@@ -206,7 +222,7 @@ export function useSpringCarousel({
         slideDirection: type,
         nextItem: {
           index: activeItem.current,
-          id: items.at(activeItem.current)!.id,
+          id: items.at(activeItem.current)?.id ?? "",
           startReached: startReached.current,
           endReached: endReached.current,
         },
@@ -229,7 +245,7 @@ export function useSpringCarousel({
             slideDirection: type,
             currentItem: {
               index: activeItem.current,
-              id: items.at(activeItem.current)!.id,
+              id: items.at(activeItem.current)?.id ?? "",
               startReached: startReached.current,
               endReached: endReached.current,
             },
@@ -274,26 +290,13 @@ export function useSpringCarousel({
 
     return total;
   }
-
   function getCssVars() {
     let totalStartEndGutterCssVar = 0;
-    // let totalGutterCssVar = 0;
-    // let itemsPerSlide = 0;
 
     const startEndGutterCssVar = getComputedStyle(
       document.documentElement,
     ).getPropertyValue(`--${id}-start-end-gutter`);
-    // const itemsPerSlideCssVar = getComputedStyle(
-    //   document.documentElement,
-    // ).getPropertyValue(`--${id}-react-spring-carousel-items-per-slide`);
-    // const gutterCssVar = getComputedStyle(
-    //   document.documentElement,
-    // ).getPropertyValue(`--${id}-react-spring-carousel-item-gutter`);
 
-    // if (gutterCssVar.includes("px")) {
-    //   totalGutterCssVar = Number(gutterCssVar.replace("px", ""));
-    // }
-    // itemsPerSlide = Number(itemsPerSlideCssVar) || 1;
     if (startEndGutterCssVar.includes("px")) {
       totalStartEndGutterCssVar = Number(
         startEndGutterCssVar.replace("px", ""),
@@ -349,7 +352,6 @@ export function useSpringCarousel({
         }
       }
     }
-
     function handleResize() {
       handleResizeContainer();
       animateItem({
@@ -515,9 +517,15 @@ export function useSpringCarousel({
         data-part="Track"
         data-part-internal={`${id}-Track`}
         {...bindDrag()}
+        onScroll={() => {
+          startReached.current = false;
+          endReached.current = false;
+        }}
         {...(slideType === "freeScroll"
           ? {
               onWheel() {
+                startReached.current = false;
+                endReached.current = false;
                 spring.value.stop();
               },
             }
