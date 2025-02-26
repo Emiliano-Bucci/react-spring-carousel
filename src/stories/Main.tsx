@@ -30,7 +30,6 @@ export function Main() {
     gutter: 10,
     withLoop: true,
     itemsPerSlide: 4,
-    startEndGutter: 38,
     items: Array(8)
       .fill(0)
       .map((_, i) => ({
@@ -63,10 +62,17 @@ export function Main() {
       <style
         dangerouslySetInnerHTML={{
           __html: `
-            html:root {
+            @media screen and (min-width: 800px) {
+              html:root {
                 --carousel-test-start-end-gutter: 120px;
+              }
             }
-        `,
+            @media screen and (max-width: 799px) {
+              html:root {
+                --carousel-test-start-end-gutter: 20px;
+              }
+            }
+          `,
         }}
       />
       <button onClick={slideToPrevItem}>prev</button>

@@ -326,10 +326,6 @@ export function useSpringCarousel({
     function handleResizeContainer(_onInit?: () => void) {
       if (carouselContainerRef.current) {
         const { totalStartEndGutterCssVar } = getCssVars();
-        document.documentElement.style.setProperty(
-          `--${id}-start-end-gutter`,
-          `${totalStartEndGutterCssVar}px`,
-        );
 
         let offset = 0;
 
@@ -490,8 +486,8 @@ export function useSpringCarousel({
               --initial-offset-modifier: calc(calc(-100% - var(--${id}-gutter) + calc(var(--${id}-start-end-gutter) / 2 / ${items.length} * ${itemsPerSlide}) + var(--${id}-start-end-gutter)) * ${items.length} / ${itemsPerSlide});
 
 
-              left: ${carouselAxis === "x" && !initialized ? "var(--initial-offset-modifier)" : "0px"};
-              top: ${carouselAxis === "y" && !initialized ? "var(--initial-offset-modifier)" : "0px"};
+              left: ${withLoop && carouselAxis === "x" && !initialized ? "var(--initial-offset-modifier)" : "0px"};
+              top: ${withLoop && carouselAxis === "y" && !initialized ? "var(--initial-offset-modifier)" : "0px"};
               flex-direction: ${carouselAxis === "x" ? "row" : "column"};
               width: 100%;
               height: 100%;
