@@ -199,6 +199,11 @@ export function useSpringCarousel({
         ];
       fromValue = scrollValue;
       toValue = scrollValue - scrollAmountValue;
+
+      if (toValue <= 0) {
+        toValue = 0;
+        endReached.current = true;
+      }
     }
 
     totalScrolledAmount.current = toValue;
@@ -375,6 +380,8 @@ export function useSpringCarousel({
     }
   }, [init, withLoop, id, carouselAxis, gutter, startingPosition, slideType]);
 
+  const shouldEnableGestures = enableGestures && slideType !== "freeScroll";
+
   const bindDrag = useDrag(
     (state) => {
       if (!carouselIsInitialized.current) {
@@ -435,7 +442,7 @@ export function useSpringCarousel({
       }
     },
     {
-      enabled: enableGestures && slideType !== "freeScroll",
+      enabled: shouldEnableGestures,
       axis: carouselAxis,
       rubberband: !withLoop,
       ...(!withLoop
@@ -497,7 +504,7 @@ export function useSpringCarousel({
               transform: translate3d(var(--${id}-scroll-x-value), var(--${id}-scroll-y-value), 0px);
               overflow-x: ${slideType === "freeScroll" ? "auto" : "visible"};
               touch-action: ${
-                !enableGestures
+                !shouldEnableGestures
                   ? "auto"
                   : carouselAxis === "x"
                     ? "pan-y"
