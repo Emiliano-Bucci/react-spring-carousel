@@ -1,6 +1,6 @@
 import { useSpring } from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Item, Props, SlideActionType } from "./types";
 import { useEventsModule } from "./useEventsModule";
@@ -29,6 +29,8 @@ export function useSpringCarousel({
   slideWhenDragThresholdIsReached = true,
   onInit,
 }: Props) {
+  const [initialized, setInitialized] = useState(false);
+
   const carouselIsInitialized = useRef(init);
 
   const carouselContainerRef = useRef<HTMLDivElement | null>(null);
@@ -273,6 +275,34 @@ export function useSpringCarousel({
     return total;
   }
 
+  function getCssVars() {
+    let totalStartEndGutterCssVar = 0;
+    // let totalGutterCssVar = 0;
+    // let itemsPerSlide = 0;
+
+    const startEndGutterCssVar = getComputedStyle(
+      document.documentElement,
+    ).getPropertyValue(`--${id}-start-end-gutter`);
+    // const itemsPerSlideCssVar = getComputedStyle(
+    //   document.documentElement,
+    // ).getPropertyValue(`--${id}-react-spring-carousel-items-per-slide`);
+    // const gutterCssVar = getComputedStyle(
+    //   document.documentElement,
+    // ).getPropertyValue(`--${id}-react-spring-carousel-item-gutter`);
+
+    // if (gutterCssVar.includes("px")) {
+    //   totalGutterCssVar = Number(gutterCssVar.replace("px", ""));
+    // }
+    // itemsPerSlide = Number(itemsPerSlideCssVar) || 1;
+    if (startEndGutterCssVar.includes("px")) {
+      totalStartEndGutterCssVar = Number(
+        startEndGutterCssVar.replace("px", ""),
+      );
+    }
+
+    return { totalStartEndGutterCssVar };
+  }
+
   useEffect(() => {
     function getIndexModifier(
       choice: "start" | "middle-start" | "center" | "middle-end" | "end",
@@ -295,6 +325,12 @@ export function useSpringCarousel({
     }
     function handleResizeContainer(_onInit?: () => void) {
       if (carouselContainerRef.current) {
+        const { totalStartEndGutterCssVar } = getCssVars();
+        document.documentElement.style.setProperty(
+          `--${id}-start-end-gutter`,
+          `${totalStartEndGutterCssVar}px`,
+        );
+
         let offset = 0;
 
         if (withLoop) {
@@ -304,14 +340,14 @@ export function useSpringCarousel({
         offset -=
           getScrollAmountValue() *
           getIndexModifier(startingPosition, itemsPerSlide);
-
-        offset -= startEndGutter;
+        offset -= totalStartEndGutterCssVar / 2;
 
         carouselContainerRef.current.style.setProperty(
           `--${id}-offset-modifier`,
           `${-offset}px`,
         );
 
+        setInitialized(true);
         if (_onInit) {
           _onInit();
         }
@@ -432,21 +468,31 @@ export function useSpringCarousel({
       <style
         dangerouslySetInnerHTML={{
           __html: `
+            :root {
+              --${id}-raw-start-end-gutter: ${startEndGutter}px;
+              --${id}-start-end-gutter: ${startEndGutter * 2}px;
+              --${id}-gutter: ${gutter}px;
+            }
             [data-part-internal="${id}-Container"] {
               display: flex;
               width: 100%;
               height: 100%;
               overflow: hidden;
-              --${id}-gutter: ${gutter}px;
               --${id}-items-per-slide: ${itemsPerSlide};
               --${id}-offset-position: 0px;
               --${id}-offset-modifier: 0px;
               --${id}-scroll-x-value: ${slideType !== "freeScroll" && carouselAxis === "x" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
               --${id}-scroll-y-value: ${slideType !== "freeScroll" && carouselAxis === "y" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
-              --${id}-start-end-gutter: ${startEndGutter * 2}px;
+              
             }
             [data-part-internal="${id}-Track"] {
               display: flex;
+              position: relative;
+              --initial-offset-modifier: calc(calc(-100% - var(--${id}-gutter) + calc(var(--${id}-raw-start-end-gutter) / ${items.length} * ${itemsPerSlide}) + var(--${id}-start-end-gutter)) * ${items.length} / ${itemsPerSlide});
+
+
+              left: ${carouselAxis === "x" && !initialized ? "var(--initial-offset-modifier)" : "0px"};
+              top: ${carouselAxis === "y" && !initialized ? "var(--initial-offset-modifier)" : "0px"};
               flex-direction: ${carouselAxis === "x" ? "row" : "column"};
               width: 100%;
               height: 100%;

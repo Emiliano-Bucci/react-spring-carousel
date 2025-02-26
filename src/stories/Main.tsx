@@ -27,9 +27,10 @@ export function Main() {
     useListenToCustomEvent,
   } = useSpringCarousel({
     id: "carousel-test",
-    gutter: 24,
-    itemsPerSlide: 5,
+    gutter: 10,
     withLoop: true,
+    itemsPerSlide: 4,
+    startEndGutter: 38,
     items: Array(8)
       .fill(0)
       .map((_, i) => ({
