@@ -469,7 +469,6 @@ export function useSpringCarousel({
         dangerouslySetInnerHTML={{
           __html: `
             :root {
-              --${id}-raw-start-end-gutter: ${startEndGutter}px;
               --${id}-start-end-gutter: ${startEndGutter * 2}px;
               --${id}-gutter: ${gutter}px;
             }
@@ -488,7 +487,7 @@ export function useSpringCarousel({
             [data-part-internal="${id}-Track"] {
               display: flex;
               position: relative;
-              --initial-offset-modifier: calc(calc(-100% - var(--${id}-gutter) + calc(var(--${id}-raw-start-end-gutter) / ${items.length} * ${itemsPerSlide}) + var(--${id}-start-end-gutter)) * ${items.length} / ${itemsPerSlide});
+              --initial-offset-modifier: calc(calc(-100% - var(--${id}-gutter) + calc(var(--${id}-start-end-gutter) / 2 / ${items.length} * ${itemsPerSlide}) + var(--${id}-start-end-gutter)) * ${items.length} / ${itemsPerSlide});
 
 
               left: ${carouselAxis === "x" && !initialized ? "var(--initial-offset-modifier)" : "0px"};

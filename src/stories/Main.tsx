@@ -60,6 +60,15 @@ export function Main() {
 
   return (
     <div className="container">
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            html:root {
+                --carousel-test-start-end-gutter: 120px;
+            }
+        `,
+        }}
+      />
       <button onClick={slideToPrevItem}>prev</button>
       <div className="carousel-root">{carouselFragment}</div>
       <button onClick={slideToNextItem}>next</button>
