@@ -349,6 +349,7 @@ export function useSpringCarousel({
     }
 
     if (init) {
+      carouselIsInitialized.current = true;
       dragThreshold.current = getScrollAmountValue() / 4;
     }
 
