@@ -29,8 +29,6 @@ export function Main() {
     id: "carousel-test",
     gutter: 16,
     itemsPerSlide: 1,
-    slideType: "fluid",
-    withLoop: true,
     items: Array(5)
       .fill(0)
       .map((_, i) => ({

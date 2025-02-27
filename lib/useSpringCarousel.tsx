@@ -47,7 +47,7 @@ export function useSpringCarousel({
     () => ({
       value: 0,
       onChange({ value }) {
-        if (slideType === "fixed" || slideType === "fluid") {
+        if (slideType === "fixed") {
           carouselContainerRef.current!.style.setProperty(
             `--${id}-offset-position`,
             `${value.value}px`,
@@ -116,10 +116,10 @@ export function useSpringCarousel({
     let fromValue = spring.value.get();
     let toValue = 0;
 
-    if (type === "next" && (slideType === "fixed" || slideType === "fluid")) {
+    if (type === "next" && slideType === "fixed") {
       activeItem.current += 1;
     }
-    if (type === "prev" && (slideType === "fixed" || slideType === "fluid")) {
+    if (type === "prev" && slideType === "fixed") {
       if (activeItem.current === 0) {
         activeItem.current = items.length - 1;
       } else {
@@ -127,7 +127,7 @@ export function useSpringCarousel({
       }
     }
 
-    if (type === "next" && (slideType === "fixed" || slideType === "fluid")) {
+    if (type === "next" && slideType === "fixed") {
       const totalAvailable = getTotalScrollAvailableSpace(
         withLoop ? scrollAmountValue * (items.length * 2) : 0,
       );
@@ -144,7 +144,7 @@ export function useSpringCarousel({
         toValue = -totalAvailable;
       }
     }
-    if (type === "prev" && (slideType === "fixed" || slideType === "fluid")) {
+    if (type === "prev" && slideType === "fixed") {
       toValue = -(activeItem.current * scrollAmountValue);
 
       if (activeItem.current === items.length - 1) {
@@ -250,19 +250,6 @@ export function useSpringCarousel({
             },
           });
         }
-        if (finished && slideType === "fluid") {
-          emitEvent({
-            eventName: "onSlideChangeComplete",
-            sliceActionType: actionType,
-            slideDirection: type,
-            currentItem: {
-              index: 0,
-              id: "",
-              startReached: startReached.current,
-              endReached: endReached.current,
-            },
-          });
-        }
       },
     });
   }
@@ -359,15 +346,13 @@ export function useSpringCarousel({
         shouldAnimate: false,
         actionType: "resize",
       });
-
-      console.log(endReached.current);
     }
 
     if (init) {
       dragThreshold.current = getScrollAmountValue() / 4;
     }
 
-    if (init && slideType !== "freeScroll") {
+    if (init && slideType === "fixed") {
       handleResizeContainer(onInit);
       window.addEventListener("resize", handleResize);
       return () => {
@@ -459,6 +444,13 @@ export function useSpringCarousel({
     },
   );
 
+  function handleIsActiveItem(itemId: string | number) {
+    return typeof itemId === "number"
+      ? activeItem.current === itemId
+      : items.find((i) => i.id === itemId)?.id ===
+          items[activeItem.current]?.id;
+  }
+
   const carouselFragment = (
     <div
       ref={carouselContainerRef}
@@ -548,6 +540,7 @@ export function useSpringCarousel({
                     useListenToCustomEvent,
                     index,
                     isClonedItem: Boolean(item.isClonedItem),
+                    isActiveItem: handleIsActiveItem,
                   })
                 : item.renderItem}
             </div>

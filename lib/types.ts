@@ -1,7 +1,7 @@
 import { FullGestureState } from "@use-gesture/react";
 import { ReactNode } from "react";
 
-export type SlideType = "fixed" | "fluid" | "freeScroll";
+export type SlideType = "fixed" | "freeScroll";
 export type CarouselAxis = "x" | "y";
 
 export type Item = {
@@ -11,6 +11,7 @@ export type Item = {
     | ((props: {
         index: number;
         isClonedItem: boolean;
+        isActiveItem(id: string | number): boolean;
         useListenToCustomEvent(
           eventHandler: SpringCarouselEventsEventHandler,
         ): void;
