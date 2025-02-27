@@ -365,13 +365,15 @@ export function useSpringCarousel({
         shouldAnimate: false,
         actionType: "resize",
       });
+
+      console.log(endReached.current);
     }
 
     if (init) {
       dragThreshold.current = getScrollAmountValue() / 4;
     }
 
-    if (init && slideType === "fixed") {
+    if (init && slideType !== "freeScroll") {
       handleResizeContainer(onInit);
       window.addEventListener("resize", handleResize);
       return () => {
