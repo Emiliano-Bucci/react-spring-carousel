@@ -116,46 +116,35 @@ export function useSpringCarousel({
     let fromValue = spring.value.get();
     let toValue = 0;
 
-    if (type === "next" && slideType !== "freeScroll") {
+    if (type === "next" && (slideType === "fixed" || slideType === "fluid")) {
       activeItem.current += 1;
     }
-    if (type === "prev" && slideType !== "freeScroll") {
+    if (type === "prev" && (slideType === "fixed" || slideType === "fluid")) {
       if (activeItem.current === 0) {
         activeItem.current = items.length - 1;
       } else {
         activeItem.current -= 1;
       }
     }
-    if (toIndex !== undefined) {
-      activeItem.current = toIndex;
-    }
 
-    if (slideType !== "freeScroll" && type === "next") {
+    if (type === "next" && (slideType === "fixed" || slideType === "fluid")) {
       const totalAvailable = getTotalScrollAvailableSpace(
         withLoop ? scrollAmountValue * (items.length * 2) : 0,
       );
 
       toValue = -(activeItem.current * scrollAmountValue);
 
-      if (
-        totalAvailable - Math.abs(toValue) < scrollAmountValue / 1.6 &&
-        slideType === "fluid" &&
-        !withLoop
-      ) {
-        toValue = -totalAvailable;
-      }
-      if (!withLoop && Math.abs(toValue) >= totalAvailable) {
-        endReached.current = true;
-        toValue = -totalAvailable;
-      }
-
       if (withLoop && activeItem.current === items.length) {
         activeItem.current = 0;
         fromValue = fromValue + scrollAmountValue * items.length;
         toValue = 0;
       }
+      if (!withLoop && Math.abs(toValue) >= totalAvailable) {
+        endReached.current = true;
+        toValue = -totalAvailable;
+      }
     }
-    if (slideType !== "freeScroll" && type === "prev") {
+    if (type === "prev" && (slideType === "fixed" || slideType === "fluid")) {
       toValue = -(activeItem.current * scrollAmountValue);
 
       if (activeItem.current === items.length - 1) {
@@ -168,7 +157,8 @@ export function useSpringCarousel({
       }
     }
 
-    if (slideType === "freeScroll" && type === "next") {
+    // Free scroll logic
+    if (type === "next" && slideType === "freeScroll") {
       const scrollValue =
         carouselTrackRef.current![
           carouselAxis === "x" ? "scrollLeft" : "scrollTop"
@@ -192,7 +182,7 @@ export function useSpringCarousel({
         endReached.current = true;
       }
     }
-    if (slideType === "freeScroll" && type === "prev") {
+    if (type === "prev" && slideType === "freeScroll") {
       const scrollValue =
         carouselTrackRef.current![
           carouselAxis === "x" ? "scrollLeft" : "scrollTop"
@@ -232,6 +222,10 @@ export function useSpringCarousel({
           endReached: endReached.current,
         },
       });
+    }
+
+    if (toIndex !== undefined) {
+      activeItem.current = toIndex;
     }
 
     setSpring.start({
