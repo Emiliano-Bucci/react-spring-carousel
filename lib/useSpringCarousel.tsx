@@ -138,7 +138,7 @@ export function useSpringCarousel({
       toValue = -(activeItem.current * scrollAmountValue);
 
       if (
-        totalAvailable - Math.abs(toValue) < scrollAmountValue / 1.2 &&
+        totalAvailable - Math.abs(toValue) < scrollAmountValue / 1.6 &&
         slideType === "fluid" &&
         !withLoop
       ) {

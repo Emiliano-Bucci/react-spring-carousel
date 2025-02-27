@@ -28,8 +28,8 @@ export function Main() {
   } = useSpringCarousel({
     id: "carousel-test",
     gutter: 16,
-    slideType: "freeScroll",
-    items: Array(8)
+    slideType: "fluid",
+    items: Array(5)
       .fill(0)
       .map((_, i) => ({
         id: `item-${i}`,
@@ -41,7 +41,7 @@ export function Main() {
               justifyContent: "center",
               background: generateRGBA(i),
               padding: "24px",
-              width: "100%",
+              width: "320px",
             }}
           >
             Item {i + 1}
