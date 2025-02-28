@@ -410,12 +410,13 @@ export function useSpringCarousel({
             actionType: "drag",
             type: "prev",
           });
-          console.log("here");
+          state.cancel();
         } else if (nextItemTresholdReached) {
           animateItem({
             actionType: "drag",
             type: "next",
           });
+          state.cancel();
         } else {
           setSpring.start({
             value: totalScrolledAmount.current,
@@ -423,6 +424,7 @@ export function useSpringCarousel({
               velocity,
             },
           });
+          state.cancel();
         }
       }
     },
