@@ -28,7 +28,7 @@ export function Main() {
   } = useSpringCarousel({
     id: "carousel-test",
     gutter: 16,
-    itemsPerSlide: 1,
+    withLoop: true,
     items: Array(5)
       .fill(0)
       .map((_, i) => ({
@@ -42,7 +42,6 @@ export function Main() {
               background: generateRGBA(i),
               padding: "24px",
               width: "100%",
-              width: "120px",
             }}
           >
             Item {i + 1}

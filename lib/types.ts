@@ -40,7 +40,7 @@ type BaseProps = {
 export type Props = BaseProps & LayoutProps;
 
 export type SlideActionType = "drag" | "click" | "resize";
-export type SlideDirection = "prev" | "next";
+export type SlideDirection = "prev" | "next" | "resize";
 
 export type OnDrag = Omit<FullGestureState<"drag">, "event"> & {
   eventName: "onDrag";

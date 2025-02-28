@@ -7,7 +7,7 @@ import { useEventsModule } from "./useEventsModule";
 
 type AnimateItem = {
   shouldAnimate?: boolean;
-  type: "prev" | "next";
+  type: "prev" | "next" | "resize";
   toIndex?: number;
   actionType: SlideActionType;
 };
@@ -199,6 +199,7 @@ export function useSpringCarousel({
     totalScrolledAmount.current = toValue;
 
     if (actionType === "resize") {
+      toValue = -(activeItem.current * scrollAmountValue);
       emitEvent({
         eventName: "onResize",
         sliceActionType: actionType,
@@ -341,7 +342,7 @@ export function useSpringCarousel({
     function handleResize() {
       handleResizeContainer();
       animateItem({
-        type: "next",
+        type: "resize",
         toIndex: activeItem.current,
         shouldAnimate: false,
         actionType: "resize",
@@ -408,6 +409,7 @@ export function useSpringCarousel({
             actionType: "drag",
             type: "prev",
           });
+          console.log("here");
         } else if (nextItemTresholdReached) {
           animateItem({
             actionType: "drag",
