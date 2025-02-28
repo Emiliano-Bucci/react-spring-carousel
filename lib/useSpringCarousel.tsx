@@ -353,6 +353,7 @@ export function useSpringCarousel({
     if (init) {
       carouselIsInitialized.current = true;
       dragThreshold.current = getScrollAmountValue() / 4;
+      console.log(dragThreshold.current);
     }
 
     if (init && slideType === "fixed") {
@@ -416,6 +417,7 @@ export function useSpringCarousel({
             actionType: "drag",
             type: "next",
           });
+          console.log("here2222");
           state.cancel();
         } else {
           setSpring.start({
@@ -463,6 +465,7 @@ export function useSpringCarousel({
       className="ReactSpringCarouselContainer"
       data-part="Container"
       data-part-internal={`${id}-Container`}
+      {...bindDrag()}
     >
       <style
         dangerouslySetInnerHTML={{
@@ -517,7 +520,6 @@ export function useSpringCarousel({
         className="ReactSpringCarouselTrack"
         data-part="Track"
         data-part-internal={`${id}-Track`}
-        {...bindDrag()}
         onScroll={() => {
           startReached.current = false;
           endReached.current = false;

@@ -29,7 +29,7 @@ export function Main() {
     id: "carousel-test",
     gutter: 16,
     withLoop: true,
-    items: Array(5)
+    items: Array(3)
       .fill(0)
       .map((_, i) => ({
         id: `item-${i}`,
