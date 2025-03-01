@@ -1,6 +1,6 @@
 {
   "name": "react-spring-carousel",
-  "version": "3.0.0-beta-2.0.260",
+  "version": "3.0.0-beta-2.0.261",
   "type": "module",
   "license": "MIT",
   "main": "./dist/index.umd.js",

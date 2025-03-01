@@ -30,6 +30,7 @@ export function Main() {
     id: "carousel-test",
     gutter: 16,
     withLoop: true,
+    initialActiveItem: 2,
     items: Array(40)
       .fill(0)
       .map((_, i) => ({

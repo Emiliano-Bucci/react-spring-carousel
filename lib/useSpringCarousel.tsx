@@ -43,7 +43,7 @@ export function useSpringCarousel({
   const endReached = useRef<boolean | undefined>(false);
   const dragThreshold = useRef(0);
 
-  const activeItem = useRef(initialActiveItem);
+  const activeItem = useRef(0);
 
   const [spring, setSpring] = useSpring(
     () => ({
@@ -323,6 +323,7 @@ export function useSpringCarousel({
         type: "next",
         toIndex: initialActiveItem,
         actionType: "resize",
+        shouldAnimate: false,
       });
     }
   }, [init, initialActiveItem]);
