@@ -34,7 +34,9 @@ export function useSpringCarousel({
 
   const carouselContainerRef = useRef<HTMLDivElement | null>(null);
   const carouselTrackRef = useRef<HTMLDivElement | null>(null);
+
   const totalScrolledAmount = useRef(0);
+  const scrollAmountValue = useRef(0);
 
   const startReached = useRef<boolean | undefined>(withLoop ? false : true);
   const endReached = useRef<boolean | undefined>(false);
@@ -100,7 +102,6 @@ export function useSpringCarousel({
     toIndex,
     actionType,
   }: AnimateItem) {
-    const scrollAmountValue = getScrollAmountValue();
     const immediate = !shouldAnimate;
 
     startReached.current = false;
@@ -122,14 +123,14 @@ export function useSpringCarousel({
 
     if (type === "next") {
       const totalAvailable = getTotalScrollAvailableSpace(
-        withLoop ? scrollAmountValue * (items.length * 2) : 0,
+        withLoop ? scrollAmountValue.current * (items.length * 2) : 0,
       );
 
-      toValue = -(activeItem.current * scrollAmountValue);
+      toValue = -(activeItem.current * scrollAmountValue.current);
 
       if (withLoop && activeItem.current === items.length) {
         activeItem.current = 0;
-        fromValue = fromValue + scrollAmountValue * items.length;
+        fromValue = fromValue + scrollAmountValue.current * items.length;
         toValue = 0;
       }
       if (!withLoop && Math.abs(toValue) >= totalAvailable) {
@@ -138,10 +139,10 @@ export function useSpringCarousel({
       }
     }
     if (type === "prev") {
-      toValue = -(activeItem.current * scrollAmountValue);
+      toValue = -(activeItem.current * scrollAmountValue.current);
 
       if (activeItem.current === items.length - 1) {
-        fromValue = fromValue - items.length * scrollAmountValue;
+        fromValue = fromValue - items.length * scrollAmountValue.current;
       }
 
       if (!withLoop && toValue >= 0) {
@@ -153,7 +154,7 @@ export function useSpringCarousel({
     totalScrolledAmount.current = toValue;
 
     if (actionType === "resize") {
-      toValue = -(activeItem.current * scrollAmountValue);
+      toValue = -(activeItem.current * scrollAmountValue.current);
       emitEvent({
         eventName: "onResize",
         sliceActionType: actionType,
@@ -274,11 +275,11 @@ export function useSpringCarousel({
         let offset = 0;
 
         if (withLoop) {
-          offset = getScrollAmountValue() * items.length;
+          offset = scrollAmountValue.current * items.length;
         }
 
         offset -=
-          getScrollAmountValue() *
+          scrollAmountValue.current *
           getIndexModifier(startingPosition, itemsPerSlide);
         offset -= totalStartEndGutterCssVar / 2;
 
@@ -305,7 +306,8 @@ export function useSpringCarousel({
 
     if (init) {
       carouselIsInitialized.current = true;
-      dragThreshold.current = getScrollAmountValue() / 4;
+      scrollAmountValue.current = getScrollAmountValue();
+      dragThreshold.current = scrollAmountValue.current / 4;
 
       handleResizeContainer(onInit);
 
