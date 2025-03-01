@@ -269,6 +269,9 @@ export function useSpringCarousel({
       }
     }
     function handleResizeContainer(_onInit?: () => void) {
+      scrollAmountValue.current = getScrollAmountValue();
+      dragThreshold.current = scrollAmountValue.current / 4;
+
       if (carouselContainerRef.current) {
         const { totalStartEndGutterCssVar } = getCssVars();
 
@@ -307,8 +310,6 @@ export function useSpringCarousel({
 
     if (init) {
       carouselIsInitialized.current = true;
-      scrollAmountValue.current = getScrollAmountValue();
-      dragThreshold.current = scrollAmountValue.current / 4;
 
       handleResizeContainer(onInit);
       window.addEventListener("resize", handleResize);
