@@ -27,6 +27,7 @@ export function useSpringCarousel({
   enableGestures = true,
   slideWhenDragThresholdIsReached = true,
   onInit,
+  initialActiveItem = 0,
 }: Props) {
   const [initialized, setInitialized] = useState(false);
 
@@ -42,7 +43,7 @@ export function useSpringCarousel({
   const endReached = useRef<boolean | undefined>(false);
   const dragThreshold = useRef(0);
 
-  const activeItem = useRef(0);
+  const activeItem = useRef(initialActiveItem);
 
   const [spring, setSpring] = useSpring(
     () => ({
@@ -309,7 +310,6 @@ export function useSpringCarousel({
 
     if (init) {
       carouselIsInitialized.current = true;
-
       handleResizeContainer(onInit);
       window.addEventListener("resize", handleResize);
       return () => {
@@ -317,6 +317,15 @@ export function useSpringCarousel({
       };
     }
   }, [init, withLoop, id, carouselAxis, gutter, startingPosition]);
+  useEffect(() => {
+    if (init && initialActiveItem !== activeItem.current) {
+      animateItem({
+        type: "next",
+        toIndex: initialActiveItem,
+        actionType: "resize",
+      });
+    }
+  }, [init, initialActiveItem]);
 
   const shouldEnableGestures = enableGestures;
 

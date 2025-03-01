@@ -33,6 +33,7 @@ type BaseProps = {
   id: string;
   enableGestures?: boolean;
   slideWhenDragThresholdIsReached?: boolean;
+  initialActiveItem?: number;
   onInit?(): void;
 };
 
