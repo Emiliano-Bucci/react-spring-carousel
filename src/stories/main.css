@@ -17,7 +17,7 @@
 }
 
 .ReactSpringCarouselItem {
-  min-width: 240px !important;
-  flex: unset !important;
+  /* min-width: 240px !important; */
+  /* flex: unset !important; */
   /* flex: 1 0 calc(100% / 3) !important; */
 }

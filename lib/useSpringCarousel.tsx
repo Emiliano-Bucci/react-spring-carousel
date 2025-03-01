@@ -120,6 +120,9 @@ export function useSpringCarousel({
         activeItem.current -= 1;
       }
     }
+    if (toIndex !== undefined) {
+      activeItem.current = toIndex;
+    }
 
     if (type === "next") {
       const totalAvailable = getTotalScrollAvailableSpace(
@@ -178,10 +181,6 @@ export function useSpringCarousel({
           endReached: endReached.current,
         },
       });
-    }
-
-    if (toIndex !== undefined) {
-      activeItem.current = toIndex;
     }
 
     setSpring.start({
