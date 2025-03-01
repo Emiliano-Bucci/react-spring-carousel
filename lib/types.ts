@@ -31,7 +31,6 @@ type BaseProps = {
   withLoop?: boolean;
   items: Item[];
   id: string;
-  slideType?: SlideType;
   enableGestures?: boolean;
   slideWhenDragThresholdIsReached?: boolean;
   onInit?(): void;

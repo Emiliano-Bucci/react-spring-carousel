@@ -23,7 +23,6 @@ export function useSpringCarousel({
   gutter = 0,
   startEndGutter = 0,
   carouselAxis = "x",
-  slideType = "fixed",
   startingPosition = "start",
   enableGestures = true,
   slideWhenDragThresholdIsReached = true,
@@ -47,24 +46,17 @@ export function useSpringCarousel({
     () => ({
       value: 0,
       onChange({ value }) {
-        if (slideType === "fixed") {
-          carouselContainerRef.current!.style.setProperty(
-            `--${id}-offset-position`,
-            `${value.value}px`,
-          );
-        }
-        if (slideType === "freeScroll") {
-          carouselTrackRef.current![
-            carouselAxis === "x" ? "scrollLeft" : "scrollTop"
-          ] = Math.abs(value.value);
-        }
+        carouselContainerRef.current!.style.setProperty(
+          `--${id}-offset-position`,
+          `${value.value}px`,
+        );
       },
     }),
     [carouselAxis],
   );
 
   const groupedItems = (
-    slideType !== "freeScroll" && withLoop
+    withLoop
       ? [
           ...items.map((i) => ({
             ...i,
@@ -117,10 +109,10 @@ export function useSpringCarousel({
     let fromValue = spring.value.get();
     let toValue = 0;
 
-    if (type === "next" && slideType === "fixed") {
+    if (type === "next") {
       activeItem.current += 1;
     }
-    if (type === "prev" && slideType === "fixed") {
+    if (type === "prev") {
       if (activeItem.current === 0) {
         activeItem.current = items.length - 1;
       } else {
@@ -128,7 +120,7 @@ export function useSpringCarousel({
       }
     }
 
-    if (type === "next" && slideType === "fixed") {
+    if (type === "next") {
       const totalAvailable = getTotalScrollAvailableSpace(
         withLoop ? scrollAmountValue * (items.length * 2) : 0,
       );
@@ -145,7 +137,7 @@ export function useSpringCarousel({
         toValue = -totalAvailable;
       }
     }
-    if (type === "prev" && slideType === "fixed") {
+    if (type === "prev") {
       toValue = -(activeItem.current * scrollAmountValue);
 
       if (activeItem.current === items.length - 1) {
@@ -155,45 +147,6 @@ export function useSpringCarousel({
       if (!withLoop && toValue >= 0) {
         startReached.current = true;
         toValue = 0;
-      }
-    }
-
-    // Free scroll logic
-    if (type === "next" && slideType === "freeScroll") {
-      const scrollValue =
-        carouselTrackRef.current![
-          carouselAxis === "x" ? "scrollLeft" : "scrollTop"
-        ];
-
-      const availableScrollSpace =
-        carouselAxis === "x"
-          ? carouselTrackRef.current!.scrollWidth -
-            carouselTrackRef.current!.clientWidth
-          : carouselTrackRef.current!.scrollHeight -
-            carouselTrackRef.current!.clientHeight;
-
-      fromValue = scrollValue;
-      toValue = scrollValue + scrollAmountValue;
-
-      if (
-        toValue > availableScrollSpace ||
-        availableScrollSpace - toValue < 80
-      ) {
-        toValue = availableScrollSpace;
-        endReached.current = true;
-      }
-    }
-    if (type === "prev" && slideType === "freeScroll") {
-      const scrollValue =
-        carouselTrackRef.current![
-          carouselAxis === "x" ? "scrollLeft" : "scrollTop"
-        ];
-      fromValue = scrollValue;
-      toValue = scrollValue - scrollAmountValue;
-
-      if (toValue <= 0) {
-        toValue = 0;
-        startReached.current = true;
       }
     }
 
@@ -239,7 +192,7 @@ export function useSpringCarousel({
         value: toValue,
       },
       onRest({ finished }) {
-        if (finished && slideType === "fixed") {
+        if (finished) {
           emitEvent({
             eventName: "onSlideChangeComplete",
             sliceActionType: actionType,
@@ -353,19 +306,17 @@ export function useSpringCarousel({
     if (init) {
       carouselIsInitialized.current = true;
       dragThreshold.current = getScrollAmountValue() / 4;
-      console.log(dragThreshold.current);
-    }
 
-    if (init && slideType === "fixed") {
       handleResizeContainer(onInit);
+
       window.addEventListener("resize", handleResize);
       return () => {
         window.removeEventListener("resize", handleResize);
       };
     }
-  }, [init, withLoop, id, carouselAxis, gutter, startingPosition, slideType]);
+  }, [init, withLoop, id, carouselAxis, gutter, startingPosition]);
 
-  const shouldEnableGestures = enableGestures && slideType !== "freeScroll";
+  const shouldEnableGestures = enableGestures;
 
   const bindDrag = useDrag(
     (state) => {
@@ -417,7 +368,6 @@ export function useSpringCarousel({
             actionType: "drag",
             type: "next",
           });
-          console.log("here2222");
           state.cancel();
         } else {
           setSpring.start({
@@ -482,9 +432,15 @@ export function useSpringCarousel({
               --${id}-items-per-slide: ${itemsPerSlide};
               --${id}-offset-position: 0px;
               --${id}-offset-modifier: 0px;
-              --${id}-scroll-x-value: ${slideType !== "freeScroll" && carouselAxis === "x" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
-              --${id}-scroll-y-value: ${slideType !== "freeScroll" && carouselAxis === "y" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
-              
+              --${id}-scroll-x-value: ${carouselAxis === "x" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
+              --${id}-scroll-y-value: ${carouselAxis === "y" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
+                touch-action: ${
+                  !shouldEnableGestures
+                    ? "auto"
+                    : carouselAxis === "x"
+                      ? "pan-y"
+                      : "pan-x"
+                };
             }
             [data-part-internal="${id}-Track"] {
               display: flex;
@@ -492,25 +448,17 @@ export function useSpringCarousel({
               --initial-offset-modifier: calc(calc(-100% - var(--${id}-gutter) + calc(var(--${id}-start-end-gutter) / 2 / ${items.length} * ${itemsPerSlide}) + var(--${id}-start-end-gutter)) * ${items.length} / ${itemsPerSlide});
 
 
-              left: ${slideType === "fixed" && withLoop && carouselAxis === "x" && !initialized ? "var(--initial-offset-modifier)" : "0px"};
-              top: ${slideType === "fixed" && withLoop && carouselAxis === "y" && !initialized ? "var(--initial-offset-modifier)" : "0px"};
+              left: ${withLoop && carouselAxis === "x" && !initialized ? "var(--initial-offset-modifier)" : "0px"};
+              top: ${withLoop && carouselAxis === "y" && !initialized ? "var(--initial-offset-modifier)" : "0px"};
               flex-direction: ${carouselAxis === "x" ? "row" : "column"};
               width: 100%;
               height: 100%;
               gap: var(--${id}-gutter);
               transform: translate3d(var(--${id}-scroll-x-value), var(--${id}-scroll-y-value), 0px);
-              overflow-x: ${slideType === "freeScroll" ? "auto" : "visible"};
-              touch-action: ${
-                !shouldEnableGestures
-                  ? "auto"
-                  : carouselAxis === "x"
-                    ? "pan-y"
-                    : "pan-x"
-              };
             }
             [data-part-internal="${id}-Item"] {
               display: flex;
-              flex: ${slideType === "fixed" ? `1 0 calc(100% / var(--${id}-items-per-slide) - calc(var(--${id}-gutter) * (var(--${id}-items-per-slide) - 1)) / var(--${id}-items-per-slide) - calc(var(--${id}-start-end-gutter) / var(--${id}-items-per-slide)))` : "1"};
+              flex: 1 0 calc(100% / var(--${id}-items-per-slide) - calc(var(--${id}-gutter) * (var(--${id}-items-per-slide) - 1)) / var(--${id}-items-per-slide) - calc(var(--${id}-start-end-gutter) / var(--${id}-items-per-slide)))
             }
           `,
         }}
@@ -524,15 +472,6 @@ export function useSpringCarousel({
           startReached.current = false;
           endReached.current = false;
         }}
-        {...(slideType === "freeScroll"
-          ? {
-              onWheel() {
-                startReached.current = false;
-                endReached.current = false;
-                spring.value.stop();
-              },
-            }
-          : {})}
       >
         {groupedItems.map((item, index) => {
           return (
