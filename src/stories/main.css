@@ -7,7 +7,7 @@
   background-color: #ccc;
   justify-content: center;
   align-items: center;
-  max-width: 375px;
+  /* max-width: 375px; */
 }
 
 .carousel-root {

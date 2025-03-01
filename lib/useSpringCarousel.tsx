@@ -295,6 +295,7 @@ export function useSpringCarousel({
       }
     }
     function handleResize() {
+      console.log("resize");
       handleResizeContainer();
       animateItem({
         type: "resize",
@@ -310,7 +311,6 @@ export function useSpringCarousel({
       dragThreshold.current = scrollAmountValue.current / 4;
 
       handleResizeContainer(onInit);
-
       window.addEventListener("resize", handleResize);
       return () => {
         window.removeEventListener("resize", handleResize);
