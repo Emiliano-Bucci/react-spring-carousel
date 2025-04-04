@@ -20,8 +20,7 @@ export function useSpringCarousel({
   withLoop = false,
   id,
   itemsPerSlide = 1,
-  gutter = 0,
-  startEndGutter = 0,
+  responsiveGutter = [{ breakpoint: 0, gutter: 0, startEndGutter: 0 }],
   carouselAxis = "x",
   startingPosition = "start",
   enableGestures = true,
@@ -77,6 +76,11 @@ export function useSpringCarousel({
   ) as ExtendedGroupedItem[];
 
   const { useListenToCustomEvent, emitEvent } = useEventsModule();
+
+  function getGutter() {
+    const { totalGutterCssVar } = getCssVars();
+    return totalGutterCssVar;
+  }
 
   function handleSlideToNextItem(toIndex?: number) {
     if (!carouselIsInitialized.current) return;
@@ -217,7 +221,7 @@ export function useSpringCarousel({
     total =
       firstItem.getBoundingClientRect()[
         carouselAxis === "x" ? "width" : "height"
-      ] + gutter;
+      ] + getGutter();
 
     return total;
   }
@@ -234,18 +238,33 @@ export function useSpringCarousel({
   }
   function getCssVars() {
     let totalStartEndGutterCssVar = 0;
+    let totalGutterCssVar = 0;
 
-    const startEndGutterCssVar = getComputedStyle(
-      document.documentElement,
-    ).getPropertyValue(`--${id}-start-end-gutter`);
-
-    if (startEndGutterCssVar.includes("px")) {
-      totalStartEndGutterCssVar = Number(
-        startEndGutterCssVar.replace("px", ""),
+    if (carouselContainerRef.current) {
+      const computedStyle = window.getComputedStyle(
+        carouselContainerRef.current,
       );
+
+      const startEndGutterCssVar = computedStyle
+        .getPropertyValue(`--${id}-start-end-gutter`)
+        .trim();
+
+      if (startEndGutterCssVar.includes("px")) {
+        totalStartEndGutterCssVar = Number(
+          startEndGutterCssVar.replace("px", ""),
+        );
+      }
+
+      const gutterCssVar = computedStyle
+        .getPropertyValue(`--${id}-gutter`)
+        .trim();
+
+      if (gutterCssVar.includes("px")) {
+        totalGutterCssVar = Number(gutterCssVar.replace("px", ""));
+      }
     }
 
-    return { totalStartEndGutterCssVar };
+    return { totalStartEndGutterCssVar, totalGutterCssVar };
   }
 
   useEffect(() => {
@@ -268,12 +287,14 @@ export function useSpringCarousel({
           return 0;
       }
     }
-    function handleResizeContainer(_onInit?: () => void) {
+    function handleInitCarousel(_onInit?: () => void) {
       scrollAmountValue.current = getScrollAmountValue();
       dragThreshold.current = scrollAmountValue.current / 4;
 
       if (carouselContainerRef.current) {
         const { totalStartEndGutterCssVar } = getCssVars();
+
+        console.log({ totalStartEndGutterCssVar });
 
         let offset = 0;
 
@@ -298,8 +319,7 @@ export function useSpringCarousel({
       }
     }
     function handleResize() {
-      console.log("resize");
-      handleResizeContainer();
+      handleInitCarousel();
       animateItem({
         type: "resize",
         toIndex: activeItem.current,
@@ -310,13 +330,13 @@ export function useSpringCarousel({
 
     if (init) {
       carouselIsInitialized.current = true;
-      handleResizeContainer(onInit);
+      handleInitCarousel(onInit);
       window.addEventListener("resize", handleResize);
       return () => {
         window.removeEventListener("resize", handleResize);
       };
     }
-  }, [init, withLoop, id, carouselAxis, gutter, startingPosition]);
+  }, [init, withLoop, id, carouselAxis, responsiveGutter, startingPosition]);
   useEffect(() => {
     if (init && initialActiveItem !== activeItem.current) {
       animateItem({
@@ -432,10 +452,6 @@ export function useSpringCarousel({
       <style
         dangerouslySetInnerHTML={{
           __html: `
-            :root {
-              --${id}-start-end-gutter: ${startEndGutter * 2}px;
-              --${id}-gutter: ${gutter}px;
-            }
             [data-part-internal="${id}-Container"] {
               display: flex;
               width: 100%;
@@ -446,20 +462,18 @@ export function useSpringCarousel({
               --${id}-offset-modifier: 0px;
               --${id}-scroll-x-value: ${carouselAxis === "x" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
               --${id}-scroll-y-value: ${carouselAxis === "y" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
-                touch-action: ${
-                  !shouldEnableGestures
-                    ? "auto"
-                    : carouselAxis === "x"
-                      ? "pan-y"
-                      : "pan-x"
-                };
+              touch-action: ${
+                !shouldEnableGestures
+                  ? "auto"
+                  : carouselAxis === "x"
+                    ? "pan-y"
+                    : "pan-x"
+              };
             }
             [data-part-internal="${id}-Track"] {
               display: flex;
               position: relative;
               --initial-offset-modifier: calc(calc(-100% - var(--${id}-gutter) + calc(var(--${id}-start-end-gutter) / 2 / ${items.length} * ${itemsPerSlide}) + var(--${id}-start-end-gutter)) * ${items.length} / ${itemsPerSlide});
-
-
               left: ${withLoop && carouselAxis === "x" && !initialized ? "var(--initial-offset-modifier)" : "0px"};
               top: ${withLoop && carouselAxis === "y" && !initialized ? "var(--initial-offset-modifier)" : "0px"};
               flex-direction: ${carouselAxis === "x" ? "row" : "column"};
@@ -471,6 +485,23 @@ export function useSpringCarousel({
             [data-part-internal="${id}-Item"] {
               display: flex;
               flex: 1 0 calc(100% / var(--${id}-items-per-slide) - calc(var(--${id}-gutter) * (var(--${id}-items-per-slide) - 1)) / var(--${id}-items-per-slide) - calc(var(--${id}-start-end-gutter) / var(--${id}-items-per-slide)))
+            }
+            ${
+              responsiveGutter && responsiveGutter.length > 0
+                ? responsiveGutter
+                    .sort((a, b) => a.breakpoint - b.breakpoint)
+                    .map(
+                      (item) => `
+                    @media (min-width: ${item.breakpoint}px) {
+                      [data-part-internal="${id}-Container"] {
+                        --${id}-gutter: ${item.gutter || 0}px;
+                        --${id}-start-end-gutter: ${(item.startEndGutter || 0) * 2}px;
+                      }
+                    }
+                  `,
+                    )
+                    .join("")
+                : ""
             }
           `,
         }}

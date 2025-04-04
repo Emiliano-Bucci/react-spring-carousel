@@ -4,6 +4,13 @@ import { ReactNode } from "react";
 export type SlideType = "fixed" | "freeScroll";
 export type CarouselAxis = "x" | "y";
 
+export type ResponsiveGutterItem = {
+  /** This will create a min-width media query */
+  breakpoint: number;
+  gutter: number;
+  startEndGutter?: number;
+};
+
 export type Item = {
   id: string;
   renderItem:
@@ -22,6 +29,7 @@ type LayoutProps = {
   itemsPerSlide?: number;
   gutter?: number;
   startEndGutter?: number;
+  responsiveGutter?: ResponsiveGutterItem[];
   carouselAxis?: CarouselAxis;
   startingPosition?: "start" | "middle-start" | "center" | "middle-end" | "end";
 };

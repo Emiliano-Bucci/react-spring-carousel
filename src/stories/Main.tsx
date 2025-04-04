@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { useSpringCarousel } from "../../lib/useSpringCarousel";
 import "./main.css";
@@ -20,18 +20,24 @@ export function generateRGBA(index: number) {
 }
 
 export function Main() {
+  const [item, set] = useState(0);
   const {
     carouselFragment,
     slideToNextItem,
     slideToPrevItem,
     useListenToCustomEvent,
-    slideToItem,
   } = useSpringCarousel({
     id: "carousel-test",
-    gutter: 16,
     withLoop: true,
-    initialActiveItem: 2,
-    items: Array(40)
+    itemsPerSlide: 3,
+    responsiveGutter: [
+      {
+        breakpoint: 768,
+        gutter: 24,
+        startEndGutter: 24,
+      },
+    ],
+    items: Array(20)
       .fill(0)
       .map((_, i) => ({
         id: `item-${i}`,
@@ -54,7 +60,7 @@ export function Main() {
 
   useListenToCustomEvent((ev) => {
     if (ev.eventName === "onSlideStartChange") {
-      console.log(ev.nextItem.index);
+      set(ev.nextItem.index);
     }
   });
 
@@ -62,7 +68,13 @@ export function Main() {
     <div className="container">
       <button onClick={slideToPrevItem}>prev</button>
       <div className="carousel-root">{carouselFragment}</div>
-      <button onClick={() => slideToItem(5)}>next</button>
+      <button
+        onClick={() => {
+          slideToNextItem();
+        }}
+      >
+        next
+      </button>
     </div>
   );
 }
