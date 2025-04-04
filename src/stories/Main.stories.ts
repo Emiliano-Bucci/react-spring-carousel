@@ -46,17 +46,19 @@ export const Carousel: Story = {
     enableGestures: true,
     slideWhenDragThresholdIsReached: true,
     initialActiveItem: 0,
-    carouselAxis: "y",
+    carouselAxis: "x",
     startingPosition: "start",
     itemsQuantity: 10,
     itemsPerSlide: [
       {
         itemsPerSlide: 1,
         breakpoint: 0,
+        media: undefined,
       },
       {
         itemsPerSlide: 3,
         breakpoint: 1240,
+        media: undefined,
       },
     ],
     gutter: [

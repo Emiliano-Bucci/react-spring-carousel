@@ -9,12 +9,16 @@ export type ResponsiveGutterItem = {
   breakpoint: number;
   gutter: number;
   startEndGutter?: number;
+  /** Optional custom media query. If undefined, defaults to min-width */
+  media?: string;
 };
 
 export type ResponsiveItemsPerSlideItem = {
   /** This will create a min-width media query */
   breakpoint: number;
   itemsPerSlide: number;
+  /** Optional custom media query. If undefined, defaults to min-width */
+  media?: string;
 };
 
 export type Item = {

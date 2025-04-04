@@ -9,6 +9,7 @@ import {
   SlideActionType,
 } from "./types";
 import { useEventsModule } from "./useEventsModule";
+import { minifyCSS } from "./utils";
 
 type AnimateItem = {
   shouldAnimate?: boolean;
@@ -468,7 +469,7 @@ export function useSpringCarousel({
     >
       <style
         dangerouslySetInnerHTML={{
-          __html: `
+          __html: minifyCSS(`
             [data-part-internal="${id}-Container"] {
               display: flex;
               width: 100%;
@@ -481,13 +482,7 @@ export function useSpringCarousel({
               --${id}-scroll-y-value: ${carouselAxis === "y" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
               --${id}-gutter: 0px;
               --${id}-start-end-gutter: 0px;
-              touch-action: ${
-                !shouldEnableGestures
-                  ? "auto"
-                  : carouselAxis === "x"
-                    ? "pan-y"
-                    : "pan-x"
-              };
+              touch-action: ${!shouldEnableGestures ? "auto" : carouselAxis === "x" ? "pan-y" : "pan-x"};
             }
             [data-part-internal="${id}-Track"] {
               display: flex;
@@ -503,7 +498,7 @@ export function useSpringCarousel({
             }
             [data-part-internal="${id}-Item"] {
               display: flex;
-              flex: 1 0 calc(100% / var(--${id}-items-per-slide) - calc(var(--${id}-gutter) * (var(--${id}-items-per-slide) - 1)) / var(--${id}-items-per-slide) - calc(var(--${id}-start-end-gutter) / var(--${id}-items-per-slide)))
+              flex: 1 0 calc(100% / var(--${id}-items-per-slide) - calc(var(--${id}-gutter) * (var(--${id}-items-per-slide) - 1)) / var(--${id}-items-per-slide) - calc(var(--${id}-start-end-gutter) / var(--${id}-items-per-slide)));
             }
             ${
               gutter && gutter.length > 0
@@ -511,13 +506,13 @@ export function useSpringCarousel({
                     .sort((a, b) => a.breakpoint - b.breakpoint)
                     .map(
                       (item) => `
-                    @media (min-width: ${item.breakpoint}px) {
-                      [data-part-internal="${id}-Container"] {
-                        --${id}-gutter: ${item.gutter || 0}px;
-                        --${id}-start-end-gutter: ${(item.startEndGutter || 0) * 2}px;
-                      }
+                  @media ${item.media || `(min-width: ${item.breakpoint}px)`} {
+                    [data-part-internal="${id}-Container"] {
+                      --${id}-gutter: ${item.gutter || 0}px;
+                      --${id}-start-end-gutter: ${(item.startEndGutter || 0) * 2}px;
                     }
-                  `,
+                  }
+                `,
                     )
                     .join("")
                 : ""
@@ -525,25 +520,20 @@ export function useSpringCarousel({
             ${
               itemsPerSlide && itemsPerSlide.length > 0
                 ? itemsPerSlide
-                    .sort(
-                      (
-                        a: ResponsiveItemsPerSlideItem,
-                        b: ResponsiveItemsPerSlideItem,
-                      ) => a.breakpoint - b.breakpoint,
-                    )
+                    .sort((a, b) => a.breakpoint - b.breakpoint)
                     .map(
                       (item: ResponsiveItemsPerSlideItem) => `
-                    @media (min-width: ${item.breakpoint}px) {
-                      [data-part-internal="${id}-Container"] {
-                        --${id}-items-per-slide: ${item.itemsPerSlide || 1};
-                      }
+                  @media ${item.media || `(min-width: ${item.breakpoint}px)`} {
+                    [data-part-internal="${id}-Container"] {
+                      --${id}-items-per-slide: ${item.itemsPerSlide || 1};
                     }
-                  `,
+                  }
+                `,
                     )
                     .join("")
                 : ""
             }
-          `,
+          `),
         }}
       />
       <div
