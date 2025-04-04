@@ -2,7 +2,12 @@ import { useSpring } from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
 import { useEffect, useRef, useState } from "react";
 
-import { Item, Props, SlideActionType } from "./types";
+import {
+  Item,
+  Props,
+  ResponsiveItemsPerSlideItem,
+  SlideActionType,
+} from "./types";
 import { useEventsModule } from "./useEventsModule";
 
 type AnimateItem = {
@@ -19,8 +24,8 @@ export function useSpringCarousel({
   items,
   withLoop = false,
   id,
-  itemsPerSlide = 1,
-  responsiveGutter = [{ breakpoint: 0, gutter: 0, startEndGutter: 0 }],
+  gutter = [{ breakpoint: 0, gutter: 0, startEndGutter: 0 }],
+  itemsPerSlide = [{ breakpoint: 0, itemsPerSlide: 1 }],
   carouselAxis = "x",
   startingPosition = "start",
   enableGestures = true,
@@ -80,6 +85,20 @@ export function useSpringCarousel({
   function getGutter() {
     const { totalGutterCssVar } = getCssVars();
     return totalGutterCssVar;
+  }
+
+  function getItemsPerSlide() {
+    if (carouselContainerRef.current) {
+      const computedStyle = window.getComputedStyle(
+        carouselContainerRef.current,
+      );
+      const itemsPerSlideCssVar = computedStyle
+        .getPropertyValue(`--${id}-items-per-slide`)
+        .trim();
+
+      return Number(itemsPerSlideCssVar) || 1;
+    }
+    return 1;
   }
 
   function handleSlideToNextItem(toIndex?: number) {
@@ -270,19 +289,20 @@ export function useSpringCarousel({
   useEffect(() => {
     function getIndexModifier(
       choice: "start" | "middle-start" | "center" | "middle-end" | "end",
-      itemsPerSlide: number,
     ): number {
+      const currentItemsPerSlide = getItemsPerSlide();
+
       switch (choice) {
         case "start":
           return 0;
         case "middle-start":
-          return Math.floor((itemsPerSlide - 1) * 0.25);
+          return Math.floor((currentItemsPerSlide - 1) * 0.25);
         case "center":
-          return Math.floor((itemsPerSlide - 1) * 0.5);
+          return Math.floor((currentItemsPerSlide - 1) * 0.5);
         case "middle-end":
-          return Math.floor((itemsPerSlide - 1) * 0.75);
+          return Math.floor((currentItemsPerSlide - 1) * 0.75);
         case "end":
-          return itemsPerSlide - 1;
+          return currentItemsPerSlide - 1;
         default:
           return 0;
       }
@@ -294,8 +314,6 @@ export function useSpringCarousel({
       if (carouselContainerRef.current) {
         const { totalStartEndGutterCssVar } = getCssVars();
 
-        console.log({ totalStartEndGutterCssVar });
-
         let offset = 0;
 
         if (withLoop) {
@@ -303,8 +321,7 @@ export function useSpringCarousel({
         }
 
         offset -=
-          scrollAmountValue.current *
-          getIndexModifier(startingPosition, itemsPerSlide);
+          scrollAmountValue.current * getIndexModifier(startingPosition);
         offset -= totalStartEndGutterCssVar / 2;
 
         carouselContainerRef.current.style.setProperty(
@@ -336,7 +353,7 @@ export function useSpringCarousel({
         window.removeEventListener("resize", handleResize);
       };
     }
-  }, [init, withLoop, id, carouselAxis, responsiveGutter, startingPosition]);
+  }, [init, withLoop, id, carouselAxis, gutter, startingPosition]);
   useEffect(() => {
     if (init && initialActiveItem !== activeItem.current) {
       animateItem({
@@ -457,12 +474,12 @@ export function useSpringCarousel({
               width: 100%;
               height: 100%;
               overflow: hidden;
-              --${id}-items-per-slide: ${itemsPerSlide};
+              --${id}-items-per-slide: 1;
               --${id}-offset-position: 0px;
               --${id}-offset-modifier: 0px;
               --${id}-scroll-x-value: ${carouselAxis === "x" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
               --${id}-scroll-y-value: ${carouselAxis === "y" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
-               --${id}-gutter: 0px;
+              --${id}-gutter: 0px;
               --${id}-start-end-gutter: 0px;
               touch-action: ${
                 !shouldEnableGestures
@@ -475,7 +492,7 @@ export function useSpringCarousel({
             [data-part-internal="${id}-Track"] {
               display: flex;
               position: relative;
-              --initial-offset-modifier: calc(calc(-100% - var(--${id}-gutter) + calc(var(--${id}-start-end-gutter) / 2 / ${items.length} * ${itemsPerSlide}) + var(--${id}-start-end-gutter)) * ${items.length} / ${itemsPerSlide});
+              --initial-offset-modifier: calc(calc(-100% - var(--${id}-gutter) + calc(var(--${id}-start-end-gutter) / 2 / ${items.length} * var(--${id}-items-per-slide)) + var(--${id}-start-end-gutter)) * ${items.length} / var(--${id}-items-per-slide));
               left: ${withLoop && carouselAxis === "x" && !initialized ? "var(--initial-offset-modifier)" : "0px"};
               top: ${withLoop && carouselAxis === "y" && !initialized ? "var(--initial-offset-modifier)" : "0px"};
               flex-direction: ${carouselAxis === "x" ? "row" : "column"};
@@ -489,8 +506,8 @@ export function useSpringCarousel({
               flex: 1 0 calc(100% / var(--${id}-items-per-slide) - calc(var(--${id}-gutter) * (var(--${id}-items-per-slide) - 1)) / var(--${id}-items-per-slide) - calc(var(--${id}-start-end-gutter) / var(--${id}-items-per-slide)))
             }
             ${
-              responsiveGutter && responsiveGutter.length > 0
-                ? responsiveGutter
+              gutter && gutter.length > 0
+                ? gutter
                     .sort((a, b) => a.breakpoint - b.breakpoint)
                     .map(
                       (item) => `
@@ -498,6 +515,27 @@ export function useSpringCarousel({
                       [data-part-internal="${id}-Container"] {
                         --${id}-gutter: ${item.gutter || 0}px;
                         --${id}-start-end-gutter: ${(item.startEndGutter || 0) * 2}px;
+                      }
+                    }
+                  `,
+                    )
+                    .join("")
+                : ""
+            }
+            ${
+              itemsPerSlide && itemsPerSlide.length > 0
+                ? itemsPerSlide
+                    .sort(
+                      (
+                        a: ResponsiveItemsPerSlideItem,
+                        b: ResponsiveItemsPerSlideItem,
+                      ) => a.breakpoint - b.breakpoint,
+                    )
+                    .map(
+                      (item: ResponsiveItemsPerSlideItem) => `
+                    @media (min-width: ${item.breakpoint}px) {
+                      [data-part-internal="${id}-Container"] {
+                        --${id}-items-per-slide: ${item.itemsPerSlide || 1};
                       }
                     }
                   `,
@@ -547,6 +585,8 @@ export function useSpringCarousel({
     useListenToCustomEvent,
     slideToNextItem: () => handleSlideToNextItem(),
     slideToPrevItem: () => handleSlideToPrevItem(),
+    getGutter,
+    getItemsPerSlide,
     slideToItem: (id: string | number) => {
       if (typeof id === "number") {
         const existingItem = items[id];

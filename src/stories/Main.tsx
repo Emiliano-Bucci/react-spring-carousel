@@ -20,17 +20,32 @@ export function generateRGBA(index: number) {
 }
 
 export function Main() {
-  const [item, set] = useState(0);
+  const [activeItem, setActiveItem] = useState(0);
   const {
     carouselFragment,
     slideToNextItem,
     slideToPrevItem,
     useListenToCustomEvent,
+    getItemsPerSlide,
   } = useSpringCarousel({
     id: "carousel-test",
     withLoop: true,
-    itemsPerSlide: 3,
-    responsiveGutter: [
+    startingPosition: "end",
+    itemsPerSlide: [
+      {
+        breakpoint: 0,
+        itemsPerSlide: 1,
+      },
+      {
+        breakpoint: 576,
+        itemsPerSlide: 5,
+      },
+      {
+        breakpoint: 992,
+        itemsPerSlide: 3,
+      },
+    ],
+    gutter: [
       {
         breakpoint: 768,
         gutter: 24,
@@ -60,9 +75,11 @@ export function Main() {
 
   useListenToCustomEvent((ev) => {
     if (ev.eventName === "onSlideStartChange") {
-      set(ev.nextItem.index);
+      setActiveItem(ev.nextItem.index);
     }
   });
+
+  const currentItemsPerSlide = getItemsPerSlide();
 
   return (
     <div className="container">
@@ -75,6 +92,9 @@ export function Main() {
       >
         next
       </button>
+      <div style={{ marginTop: "20px", textAlign: "center" }}>
+        Active Item: {activeItem + 1} | Items Per Slide: {currentItemsPerSlide}
+      </div>
     </div>
   );
 }

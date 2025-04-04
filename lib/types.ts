@@ -11,6 +11,12 @@ export type ResponsiveGutterItem = {
   startEndGutter?: number;
 };
 
+export type ResponsiveItemsPerSlideItem = {
+  /** This will create a min-width media query */
+  breakpoint: number;
+  itemsPerSlide: number;
+};
+
 export type Item = {
   id: string;
   renderItem:
@@ -26,10 +32,8 @@ export type Item = {
 };
 
 type LayoutProps = {
-  itemsPerSlide?: number;
-  gutter?: number;
-  startEndGutter?: number;
-  responsiveGutter?: ResponsiveGutterItem[];
+  gutter?: ResponsiveGutterItem[];
+  itemsPerSlide?: ResponsiveItemsPerSlideItem[];
   carouselAxis?: CarouselAxis;
   startingPosition?: "start" | "middle-start" | "center" | "middle-end" | "end";
 };
