@@ -585,8 +585,6 @@ export function useSpringCarousel({
     useListenToCustomEvent,
     slideToNextItem: () => handleSlideToNextItem(),
     slideToPrevItem: () => handleSlideToPrevItem(),
-    getGutter,
-    getItemsPerSlide,
     slideToItem: (id: string | number) => {
       if (typeof id === "number") {
         const existingItem = items[id];
