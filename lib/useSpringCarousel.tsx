@@ -462,6 +462,8 @@ export function useSpringCarousel({
               --${id}-offset-modifier: 0px;
               --${id}-scroll-x-value: ${carouselAxis === "x" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
               --${id}-scroll-y-value: ${carouselAxis === "y" ? `calc(var(--${id}-offset-position) + var(--${id}-offset-modifier))` : "0px"};
+               --${id}-gutter: 0px;
+              --${id}-start-end-gutter: 0px;
               touch-action: ${
                 !shouldEnableGestures
                   ? "auto"
