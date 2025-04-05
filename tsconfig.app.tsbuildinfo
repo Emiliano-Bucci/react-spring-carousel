@@ -1,1 +1,1 @@
-{"root":["./lib/index.tsx","./lib/types.ts","./lib/useeventsmodule.ts","./lib/usespringcarousel.tsx","./lib/usespringscroll.ts","./lib/vite-env.d.ts"],"version":"5.8.2"}
+{"root":["./lib/index.tsx","./lib/types.ts","./lib/useeventsmodule.ts","./lib/usespringcarousel.tsx","./lib/usespringscroll.ts","./lib/utils.ts","./lib/vite-env.d.ts"],"version":"5.8.2"}

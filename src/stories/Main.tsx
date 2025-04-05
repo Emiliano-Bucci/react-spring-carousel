@@ -4,13 +4,12 @@ import { Props } from "../../lib/types";
 import { useSpringCarousel } from "../../lib/useSpringCarousel";
 import "./main.css";
 
+// Seed the random number generator with the given index
+function seededRandom(seed: number) {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
 function generateRGBA(index: number) {
-  // Seed the random number generator with the given index
-  function seededRandom(seed: number) {
-    const x = Math.sin(seed) * 10000;
-    return x - Math.floor(x);
-  }
-
   // Generate random values for red, green, blue, and alpha channels
   const r = Math.floor(seededRandom(index) * 256);
   const g = Math.floor(seededRandom(index + 1) * 256);
