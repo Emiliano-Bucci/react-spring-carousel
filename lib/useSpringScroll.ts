@@ -67,6 +67,10 @@ export function useSpringScroll({ container, onReach }: Props) {
     if (type === "prev") activeItem.current -= 1;
 
     toValue = activeItem.current * getScrollAmount(container.current!);
+    console.log({
+      toValue,
+      activeItem: activeItem.current,
+    });
 
     if (type === "next") {
       const availableSpace = getScrollAvailableSpace(container.current!);
@@ -95,20 +99,21 @@ export function useSpringScroll({ container, onReach }: Props) {
 
   useEffect(() => {
     function calculateActiveItem() {
+      const scrollAmount = getScrollAmount(container.current!);
       const totalItems = Array(container.current!.childElementCount)
         .fill(0)
         .map((_, i) => {
           return {
-            index: i + 1,
-            start: (getScrollAmount(container.current!) - 50) * (i + 1),
-            end: (getScrollAmount(container.current!) - 50) * (i + 2),
+            index: i,
+            start: scrollAmount * i,
+            end: scrollAmount * (i + 1),
           };
         });
 
       const selectedActiveItem = totalItems.find(
         (i) =>
           container.current!.scrollLeft >= i.start &&
-          container.current!.scrollLeft <= i.end,
+          container.current!.scrollLeft < i.end,
       );
 
       activeItem.current = selectedActiveItem?.index || 0;
