@@ -54,10 +54,11 @@ export function useSpringCarousel({
     () => ({
       value: 0,
       onChange({ value }) {
-        carouselContainerRef.current!.style.setProperty(
-          `--${id}-offset-position`,
-          `${value.value}px`,
-        );
+        carouselTrackRef.current!.style.transform = `translate3d(${value.value}px, 0px, 0px)`;
+        // carouselContainerRef.current!.style.setProperty(
+        //   `--${id}-offset-position`,
+        //   `${value.value}px`,
+        // );
       },
     }),
     [carouselAxis],
@@ -161,7 +162,12 @@ export function useSpringCarousel({
         fromValue = fromValue + scrollAmountValue.current * items.length;
         toValue = 0;
       }
-      if (!withLoop && Math.abs(toValue) >= totalAvailable) {
+
+      if (
+        !withLoop &&
+        (Math.abs(toValue) >= totalAvailable ||
+          activeItem.current === items.length - 1)
+      ) {
         endReached.current = true;
         toValue = -totalAvailable;
       }
