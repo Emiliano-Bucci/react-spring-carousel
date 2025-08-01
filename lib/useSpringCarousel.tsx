@@ -54,7 +54,7 @@ export function useSpringCarousel({
     () => ({
       value: 0,
       onChange({ value }) {
-        carouselTrackRef.current!.style.transform = `translate3d(${value.value}px, 0px, 0px)`;
+        carouselTrackRef.current!.style.transform = `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`;
         // carouselContainerRef.current!.style.setProperty(
         //   `--${id}-offset-position`,
         //   `${value.value}px`,
