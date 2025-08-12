@@ -55,14 +55,12 @@ export function useSpringCarousel({
       value: 0,
       onChange({ value }) {
         carouselTrackRef.current!.style.transform = `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`;
-        // carouselContainerRef.current!.style.setProperty(
-        //   `--${id}-offset-position`,
-        //   `${value.value}px`,
-        // );
       },
     }),
     [carouselAxis],
   );
+
+  useEffect(() => {}, []);
 
   const groupedItems = (
     withLoop
@@ -241,11 +239,11 @@ export function useSpringCarousel({
   }
 
   function getScrollAmountValue() {
-    const firstItem = carouselTrackRef.current!.children[0] as HTMLElement;
+    const container = carouselTrackRef.current!;
     let total = 0;
 
     total =
-      firstItem.getBoundingClientRect()[
+      container.getBoundingClientRect()[
         carouselAxis === "x" ? "width" : "height"
       ] + getGutter();
 
@@ -314,28 +312,29 @@ export function useSpringCarousel({
           return 0;
       }
     }
-    function handleInitCarousel(_onInit?: () => void) {
+    function setValues() {
       scrollAmountValue.current = getScrollAmountValue();
       dragThreshold.current = scrollAmountValue.current / 4;
 
+      const { totalStartEndGutterCssVar } = getCssVars();
+
+      let offset = 0;
+
+      if (withLoop) {
+        offset = scrollAmountValue.current * items.length;
+      }
+
+      offset -= scrollAmountValue.current * getIndexModifier(startingPosition);
+      offset -= totalStartEndGutterCssVar / 2;
+
+      carouselContainerRef.current!.style.setProperty(
+        `--${id}-offset-modifier`,
+        `${-offset}px`,
+      );
+    }
+    function handleInitCarousel(_onInit?: () => void) {
       if (carouselContainerRef.current) {
-        const { totalStartEndGutterCssVar } = getCssVars();
-
-        let offset = 0;
-
-        if (withLoop) {
-          offset = scrollAmountValue.current * items.length;
-        }
-
-        offset -=
-          scrollAmountValue.current * getIndexModifier(startingPosition);
-        offset -= totalStartEndGutterCssVar / 2;
-
-        carouselContainerRef.current.style.setProperty(
-          `--${id}-offset-modifier`,
-          `${-offset}px`,
-        );
-
+        setValues();
         setInitialized(true);
         if (_onInit) {
           _onInit();
@@ -361,6 +360,7 @@ export function useSpringCarousel({
       };
     }
   }, [init, withLoop, id, carouselAxis, gutter, startingPosition]);
+
   useEffect(() => {
     if (init && initialActiveItem !== activeItem.current) {
       animateItem({
