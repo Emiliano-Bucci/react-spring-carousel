@@ -1,4 +1,4 @@
-import { useSpring } from "@react-spring/web";
+import { useSpring, useSpringRef } from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
 import { useEffect, useRef, useState } from "react";
 
@@ -32,6 +32,7 @@ export function useSpringCarousel({
   enableGestures = true,
   slideWhenDragThresholdIsReached = true,
   onInit,
+  slideType = "item",
   initialActiveItem = 0,
 }: Props) {
   const [initialized, setInitialized] = useState(false);
@@ -50,17 +51,14 @@ export function useSpringCarousel({
 
   const activeItem = useRef(0);
 
-  const [spring, setSpring] = useSpring(
-    () => ({
-      value: 0,
-      onChange({ value }) {
-        carouselTrackRef.current!.style.transform = `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`;
-      },
-    }),
-    [carouselAxis],
-  );
-
-  useEffect(() => {}, []);
+  const setSpring = useSpringRef();
+  const spring = useSpring({
+    value: 0,
+    ref: setSpring,
+    onChange({ value }) {
+      carouselTrackRef.current!.style.transform = `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`;
+    },
+  });
 
   const groupedItems = (
     withLoop
@@ -220,6 +218,9 @@ export function useSpringCarousel({
       to: {
         value: toValue,
       },
+      onChange({ value }) {
+        carouselTrackRef.current!.style.transform = `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`;
+      },
       onRest({ finished }) {
         if (finished) {
           emitEvent({
@@ -242,10 +243,17 @@ export function useSpringCarousel({
     const container = carouselTrackRef.current!;
     let total = 0;
 
-    total =
-      container.getBoundingClientRect()[
-        carouselAxis === "x" ? "width" : "height"
-      ] + getGutter();
+    if (slideType === "item") {
+      total =
+        container.children[0].getBoundingClientRect()[
+          carouselAxis === "x" ? "width" : "height"
+        ] + getGutter();
+    } else {
+      total =
+        container.getBoundingClientRect()[
+          carouselAxis === "x" ? "width" : "height"
+        ] + getGutter();
+    }
 
     return total;
   }
@@ -314,6 +322,8 @@ export function useSpringCarousel({
     }
     function setValues() {
       scrollAmountValue.current = getScrollAmountValue();
+
+      console.log("scrollAmountValue", scrollAmountValue.current);
       dragThreshold.current = scrollAmountValue.current / 4;
 
       const { totalStartEndGutterCssVar } = getCssVars();
@@ -325,7 +335,13 @@ export function useSpringCarousel({
       }
 
       offset -= scrollAmountValue.current * getIndexModifier(startingPosition);
+
       offset -= totalStartEndGutterCssVar / 2;
+      console.log({
+        mod1: scrollAmountValue.current * items.length,
+        mod2: scrollAmountValue.current * getIndexModifier(startingPosition),
+        mod3: totalStartEndGutterCssVar / 2,
+      });
 
       carouselContainerRef.current!.style.setProperty(
         `--${id}-offset-modifier`,
@@ -402,6 +418,9 @@ export function useSpringCarousel({
           config: {
             velocity: velocity,
           },
+          onChange({ value }) {
+            carouselTrackRef.current!.style.transform = `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`;
+          },
         });
 
         if (
@@ -430,6 +449,9 @@ export function useSpringCarousel({
             value: totalScrolledAmount.current,
             config: {
               velocity,
+            },
+            onChange({ value }) {
+              carouselTrackRef.current!.style.transform = `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`;
             },
           });
           state.cancel();

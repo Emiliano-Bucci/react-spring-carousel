@@ -50,6 +50,7 @@ type BaseProps = {
   enableGestures?: boolean;
   slideWhenDragThresholdIsReached?: boolean;
   initialActiveItem?: number;
+  slideType?: "item" | "container";
   onInit?(): void;
 };
 

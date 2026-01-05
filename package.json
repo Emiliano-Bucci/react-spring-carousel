@@ -1,6 +1,6 @@
 {
   "name": "react-spring-carousel",
-  "version": "3.0.0-beta-2.0.492",
+  "version": "3.0.0-beta-2.0.96",
   "type": "module",
   "license": "MIT",
   "main": "./dist/index.umd.js",
@@ -29,9 +29,9 @@
     "@use-gesture/react": "^10.3.1"
   },
   "peerDependencies": {
-    "@react-spring/web": "^9.5.4",
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
+    "@react-spring/web": "^9.5.4 || ^10.0.0",
+    "react": "^18.0.0 || ^19",
+    "react-dom": "^18.0.0 || ^19"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^3.2.6",
