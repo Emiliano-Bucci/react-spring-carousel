@@ -65,9 +65,7 @@ export function useSpringCarousel({
     }
     const index = items.findIndex((i) => i.id === value);
     if (index < 0) {
-      console.warn(
-        `initialActiveItem: item with id "${value}" doesn't exist.`,
-      );
+      console.warn(`initialActiveItem: item with id "${value}" doesn't exist.`);
       return 0;
     }
     return index;
@@ -212,6 +210,9 @@ export function useSpringCarousel({
     const logicalIndex = withLoop
       ? activeItem.current % items.length
       : activeItem.current;
+    const realTrackIndex = withLoop
+      ? items.length + (activeItem.current % items.length)
+      : activeItem.current;
 
     if (actionType === "resize") {
       toValue = -(activeItem.current * scrollAmountValue.current);
@@ -222,6 +223,7 @@ export function useSpringCarousel({
         currentItem: {
           index: logicalIndex,
           id: items.at(logicalIndex)?.id ?? "",
+          trackIndex: realTrackIndex,
           startReached: startReached.current,
           endReached: endReached.current,
         },
@@ -234,6 +236,7 @@ export function useSpringCarousel({
         nextItem: {
           index: logicalIndex,
           id: items.at(logicalIndex)?.id ?? "",
+          trackIndex: realTrackIndex,
           startReached: startReached.current,
           endReached: endReached.current,
         },
@@ -260,6 +263,9 @@ export function useSpringCarousel({
           const logicalIndex = withLoop
             ? activeItem.current % items.length
             : activeItem.current;
+          const realTrackIndex = withLoop
+            ? items.length + (activeItem.current % items.length)
+            : activeItem.current;
           emitEvent({
             eventName: "onSlideChangeComplete",
             sliceActionType: actionType,
@@ -267,6 +273,7 @@ export function useSpringCarousel({
             currentItem: {
               index: logicalIndex,
               id: items.at(logicalIndex)?.id ?? "",
+              trackIndex: realTrackIndex,
               startReached: startReached.current,
               endReached: endReached.current,
             },
@@ -360,7 +367,6 @@ export function useSpringCarousel({
     function setValues() {
       scrollAmountValue.current = getScrollAmountValue();
 
-      console.log("scrollAmountValue", scrollAmountValue.current);
       dragThreshold.current = scrollAmountValue.current / 4;
 
       const { totalStartEndGutterCssVar } = getCssVars();
@@ -372,13 +378,7 @@ export function useSpringCarousel({
       }
 
       offset -= scrollAmountValue.current * getIndexModifier(startingPosition);
-
       offset -= totalStartEndGutterCssVar / 2;
-      console.log({
-        mod1: scrollAmountValue.current * items.length,
-        mod2: scrollAmountValue.current * getIndexModifier(startingPosition),
-        mod3: totalStartEndGutterCssVar / 2,
-      });
 
       carouselContainerRef.current!.style.setProperty(
         `--${id}-offset-modifier`,
@@ -527,10 +527,12 @@ export function useSpringCarousel({
   );
 
   function handleIsActiveItem(itemId: string | number) {
+    const realTrackIndex = withLoop
+      ? items.length + (activeItem.current % items.length)
+      : activeItem.current;
     return typeof itemId === "number"
-      ? activeItem.current === itemId
-      : items.find((i) => i.id === itemId)?.id ===
-          items[activeItem.current]?.id;
+      ? realTrackIndex === itemId
+      : itemId === groupedItems[realTrackIndex]?.id;
   }
 
   const carouselFragment = (
@@ -632,7 +634,7 @@ export function useSpringCarousel({
               {typeof item.renderItem === "function"
                 ? item.renderItem({
                     useListenToCustomEvent,
-                    index: withLoop ? index % items.length : index,
+                    index,
                     isClonedItem: Boolean(item.isClonedItem),
                     isActiveItem: handleIsActiveItem,
                   })

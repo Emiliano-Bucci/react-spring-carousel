@@ -70,6 +70,7 @@ type OnSlideStartChange = {
   nextItem: {
     index: number;
     id: string;
+    trackIndex?: number;
     startReached: boolean | undefined;
     endReached: boolean | undefined;
   };
@@ -81,6 +82,7 @@ type OnSlideChangeComplete = {
   currentItem: {
     index: number;
     id: string;
+    trackIndex?: number;
     startReached: boolean | undefined;
     endReached: boolean | undefined;
   };
@@ -92,6 +94,7 @@ type OnResize = {
   currentItem: {
     index: number;
     id: string;
+    trackIndex?: number;
     startReached: boolean | undefined;
     endReached: boolean | undefined;
   };
