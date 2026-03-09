@@ -415,7 +415,7 @@ export function useSpringCarousel({
         window.removeEventListener("resize", handleResize);
       };
     }
-  }, [init, withLoop, id, carouselAxis, gutter, startingPosition]);
+  }, [init, id]);
 
   useEffect(() => {
     const resolvedIndex = resolveInitialIndex(initialActiveItem);
