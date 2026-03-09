@@ -56,7 +56,11 @@ export function useSpringCarousel({
     value: 0,
     ref: setSpring,
     onChange({ value }) {
-      carouselTrackRef.current!.style.transform = `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`;
+      const translate =
+        carouselAxis === "x"
+          ? `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`
+          : `translate3d(0px, calc(${value.value}px + var(--${id}-offset-modifier)), 0px)`;
+      carouselTrackRef.current!.style.transform = translate;
     },
   });
 
@@ -219,7 +223,11 @@ export function useSpringCarousel({
         value: toValue,
       },
       onChange({ value }) {
-        carouselTrackRef.current!.style.transform = `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`;
+        const translate =
+          carouselAxis === "x"
+            ? `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`
+            : `translate3d(0px, calc(${value.value}px + var(--${id}-offset-modifier)), 0px)`;
+        carouselTrackRef.current!.style.transform = translate;
       },
       onRest({ finished }) {
         if (finished) {
@@ -419,7 +427,11 @@ export function useSpringCarousel({
             velocity: velocity,
           },
           onChange({ value }) {
-            carouselTrackRef.current!.style.transform = `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`;
+            const translate =
+              carouselAxis === "x"
+                ? `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`
+                : `translate3d(0px, calc(${value.value}px + var(--${id}-offset-modifier)), 0px)`;
+            carouselTrackRef.current!.style.transform = translate;
           },
         });
 
@@ -451,7 +463,11 @@ export function useSpringCarousel({
               velocity,
             },
             onChange({ value }) {
-              carouselTrackRef.current!.style.transform = `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`;
+              const translate =
+                carouselAxis === "x"
+                  ? `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`
+                  : `translate3d(0px, calc(${value.value}px + var(--${id}-offset-modifier)), 0px)`;
+              carouselTrackRef.current!.style.transform = translate;
             },
           });
           state.cancel();

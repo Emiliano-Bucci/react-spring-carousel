@@ -1,6 +1,6 @@
 {
   "name": "react-spring-carousel",
-  "version": "3.0.0-beta-2.0.96",
+  "version": "3.0.0-beta-2.0.99",
   "type": "module",
   "license": "MIT",
   "main": "./dist/index.umd.js",
@@ -34,6 +34,7 @@
     "react-dom": "^18.0.0 || ^19"
   },
   "devDependencies": {
+    "@react-spring/web": "^10.0.3",
     "@chromatic-com/storybook": "^3.2.6",
     "@eslint/js": "^9.23.0",
     "@storybook/addon-essentials": "^8.6.12",
