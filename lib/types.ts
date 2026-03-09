@@ -26,7 +26,7 @@ export type Item = {
   renderItem:
     | ReactNode
     | ((props: {
-        index: { index: number; clonedIndex: number };
+        index: number;
         isClonedItem: boolean;
         isActiveItem(id: string | number): boolean;
         useListenToCustomEvent(
@@ -49,7 +49,7 @@ type BaseProps = {
   id: string;
   enableGestures?: boolean;
   slideWhenDragThresholdIsReached?: boolean;
-  initialActiveItem?: number;
+  initialActiveItem?: number | string;
   slideType?: "item" | "container";
   onInit?(): void;
 };
@@ -68,7 +68,7 @@ type OnSlideStartChange = {
   slideDirection: SlideDirection;
   sliceActionType: SlideActionType;
   nextItem: {
-    index: { index: number; clonedIndex: number };
+    index: number;
     id: string;
     startReached: boolean | undefined;
     endReached: boolean | undefined;
@@ -79,7 +79,7 @@ type OnSlideChangeComplete = {
   slideDirection: SlideDirection;
   sliceActionType: SlideActionType;
   currentItem: {
-    index: { index: number; clonedIndex: number };
+    index: number;
     id: string;
     startReached: boolean | undefined;
     endReached: boolean | undefined;
@@ -90,7 +90,7 @@ type OnResize = {
   slideDirection: SlideDirection;
   sliceActionType: SlideActionType;
   currentItem: {
-    index: { index: number; clonedIndex: number };
+    index: number;
     id: string;
     startReached: boolean | undefined;
     endReached: boolean | undefined;

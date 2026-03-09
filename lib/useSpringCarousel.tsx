@@ -51,6 +51,28 @@ export function useSpringCarousel({
 
   const activeItem = useRef(0);
 
+  function resolveInitialIndex(value: number | string | undefined): number {
+    if (value === undefined) return 0;
+    if (typeof value === "number") {
+      const existingItem = items[value];
+      if (!existingItem) {
+        console.warn(
+          `initialActiveItem: item at index ${value} doesn't exist.`,
+        );
+        return 0;
+      }
+      return value;
+    }
+    const index = items.findIndex((i) => i.id === value);
+    if (index < 0) {
+      console.warn(
+        `initialActiveItem: item with id "${value}" doesn't exist.`,
+      );
+      return 0;
+    }
+    return index;
+  }
+
   const setSpring = useSpringRef();
   const spring = useSpring({
     value: 0,
@@ -198,7 +220,7 @@ export function useSpringCarousel({
         sliceActionType: actionType,
         slideDirection: type,
         currentItem: {
-          index: { index: logicalIndex, clonedIndex: activeItem.current },
+          index: logicalIndex,
           id: items.at(logicalIndex)?.id ?? "",
           startReached: startReached.current,
           endReached: endReached.current,
@@ -210,7 +232,7 @@ export function useSpringCarousel({
         sliceActionType: actionType,
         slideDirection: type,
         nextItem: {
-          index: { index: logicalIndex, clonedIndex: activeItem.current },
+          index: logicalIndex,
           id: items.at(logicalIndex)?.id ?? "",
           startReached: startReached.current,
           endReached: endReached.current,
@@ -243,7 +265,7 @@ export function useSpringCarousel({
             sliceActionType: actionType,
             slideDirection: type,
             currentItem: {
-              index: { index: logicalIndex, clonedIndex: activeItem.current },
+              index: logicalIndex,
               id: items.at(logicalIndex)?.id ?? "",
               startReached: startReached.current,
               endReached: endReached.current,
@@ -393,10 +415,11 @@ export function useSpringCarousel({
   }, [init, withLoop, id, carouselAxis, gutter, startingPosition]);
 
   useEffect(() => {
-    if (init && initialActiveItem !== activeItem.current) {
+    const resolvedIndex = resolveInitialIndex(initialActiveItem);
+    if (init && resolvedIndex !== activeItem.current) {
       animateItem({
         type: "next",
-        toIndex: initialActiveItem,
+        toIndex: resolvedIndex,
         actionType: "resize",
         shouldAnimate: false,
       });
@@ -609,7 +632,7 @@ export function useSpringCarousel({
               {typeof item.renderItem === "function"
                 ? item.renderItem({
                     useListenToCustomEvent,
-                    index: { index, clonedIndex: index % items.length },
+                    index: withLoop ? index % items.length : index,
                     isClonedItem: Boolean(item.isClonedItem),
                     isActiveItem: handleIsActiveItem,
                   })
