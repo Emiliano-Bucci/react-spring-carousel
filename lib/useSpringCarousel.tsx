@@ -626,6 +626,33 @@ export function useSpringCarousel({
         }}
       >
         {groupedItems.map((item, index) => {
+          const itemLogicalIndex = withLoop ? index % items.length : index;
+
+          function isNextItem() {
+            const logicalActive = withLoop
+              ? activeItem.current % items.length
+              : activeItem.current;
+            if (withLoop) {
+              return itemLogicalIndex === (logicalActive + 1) % items.length;
+            }
+            if (logicalActive + 1 >= items.length) return false;
+            return itemLogicalIndex === logicalActive + 1;
+          }
+
+          function isPrevItem() {
+            const logicalActive = withLoop
+              ? activeItem.current % items.length
+              : activeItem.current;
+            if (withLoop) {
+              return (
+                itemLogicalIndex ===
+                (logicalActive - 1 + items.length) % items.length
+              );
+            }
+            if (logicalActive - 1 < 0) return false;
+            return itemLogicalIndex === logicalActive - 1;
+          }
+
           return (
             <div
               className="ReactSpringCarouselItem"
@@ -640,6 +667,8 @@ export function useSpringCarousel({
                     index,
                     isClonedItem: Boolean(item.isClonedItem),
                     isActiveItem: handleIsActiveItem,
+                    isNextItem,
+                    isPrevItem,
                   })
                 : item.renderItem}
             </div>

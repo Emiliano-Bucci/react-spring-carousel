@@ -29,6 +29,8 @@ export type Item = {
         index: number;
         isClonedItem: boolean;
         isActiveItem(id: string | number): boolean;
+        isNextItem(): boolean;
+        isPrevItem(): boolean;
         useListenToCustomEvent(
           eventHandler: SpringCarouselEventsEventHandler,
         ): void;
