@@ -31,7 +31,6 @@ export function useSpringCarousel({
   startingPosition = "start",
   enableGestures = true,
   slideWhenDragThresholdIsReached = true,
-  onInit,
   slideType = "item",
   initialActiveItem = 0,
 }: Props) {
@@ -221,8 +220,8 @@ export function useSpringCarousel({
         sliceActionType: actionType,
         slideDirection: type,
         currentItem: {
-          index: logicalIndex,
           id: items.at(logicalIndex)?.id ?? "",
+          index: logicalIndex,
           trackIndex: realTrackIndex,
           startReached: startReached.current,
           endReached: endReached.current,
@@ -385,12 +384,16 @@ export function useSpringCarousel({
         `${-offset}px`,
       );
     }
-    function handleInitCarousel(_onInit?: () => void) {
+    function handleInitCarousel(shouldEmitInit?: boolean) {
       if (carouselContainerRef.current) {
         setValues();
         setInitialized(true);
-        if (_onInit) {
-          _onInit();
+        if (shouldEmitInit) {
+          const index = resolveInitialIndex(initialActiveItem);
+          const trackIndex = withLoop
+            ? items.length + (index % items.length)
+            : index;
+          emitEvent({ eventName: "onInit", index, trackIndex });
         }
       }
     }
@@ -406,7 +409,7 @@ export function useSpringCarousel({
 
     if (init) {
       carouselIsInitialized.current = true;
-      handleInitCarousel(onInit);
+      handleInitCarousel(true);
       window.addEventListener("resize", handleResize);
       return () => {
         window.removeEventListener("resize", handleResize);

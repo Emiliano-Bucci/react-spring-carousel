@@ -51,7 +51,6 @@ type BaseProps = {
   slideWhenDragThresholdIsReached?: boolean;
   initialActiveItem?: number | string;
   slideType?: "item" | "container";
-  onInit?(): void;
 };
 
 export type Props = BaseProps & LayoutProps;
@@ -99,12 +98,18 @@ type OnResize = {
     endReached: boolean | undefined;
   };
 };
+type OnInit = {
+  eventName: "onInit";
+  index: number;
+  trackIndex: number;
+};
 
 export type SpringCarouselEvents =
   | OnSlideStartChange
   | OnSlideChangeComplete
   | OnResize
-  | OnDrag;
+  | OnDrag
+  | OnInit;
 
 export type SpringCarouselEventsEventHandler = (
   props: SpringCarouselEvents,
