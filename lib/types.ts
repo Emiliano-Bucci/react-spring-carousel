@@ -68,7 +68,7 @@ type OnSlideStartChange = {
   slideDirection: SlideDirection;
   sliceActionType: SlideActionType;
   nextItem: {
-    index: number;
+    index: { index: number; clonedIndex: number };
     id: string;
     startReached: boolean | undefined;
     endReached: boolean | undefined;
@@ -79,7 +79,7 @@ type OnSlideChangeComplete = {
   slideDirection: SlideDirection;
   sliceActionType: SlideActionType;
   currentItem: {
-    index: number;
+    index: { index: number; clonedIndex: number };
     id: string;
     startReached: boolean | undefined;
     endReached: boolean | undefined;
@@ -90,7 +90,7 @@ type OnResize = {
   slideDirection: SlideDirection;
   sliceActionType: SlideActionType;
   currentItem: {
-    index: number;
+    index: { index: number; clonedIndex: number };
     id: string;
     startReached: boolean | undefined;
     endReached: boolean | undefined;

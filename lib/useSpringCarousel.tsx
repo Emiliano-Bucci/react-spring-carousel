@@ -187,6 +187,10 @@ export function useSpringCarousel({
 
     totalScrolledAmount.current = toValue;
 
+    const logicalIndex = withLoop
+      ? activeItem.current % items.length
+      : activeItem.current;
+
     if (actionType === "resize") {
       toValue = -(activeItem.current * scrollAmountValue.current);
       emitEvent({
@@ -194,8 +198,8 @@ export function useSpringCarousel({
         sliceActionType: actionType,
         slideDirection: type,
         currentItem: {
-          index: activeItem.current,
-          id: items.at(activeItem.current)?.id ?? "",
+          index: { index: logicalIndex, clonedIndex: activeItem.current },
+          id: items.at(logicalIndex)?.id ?? "",
           startReached: startReached.current,
           endReached: endReached.current,
         },
@@ -206,8 +210,8 @@ export function useSpringCarousel({
         sliceActionType: actionType,
         slideDirection: type,
         nextItem: {
-          index: activeItem.current,
-          id: items.at(activeItem.current)?.id ?? "",
+          index: { index: logicalIndex, clonedIndex: activeItem.current },
+          id: items.at(logicalIndex)?.id ?? "",
           startReached: startReached.current,
           endReached: endReached.current,
         },
@@ -231,13 +235,16 @@ export function useSpringCarousel({
       },
       onRest({ finished }) {
         if (finished) {
+          const logicalIndex = withLoop
+            ? activeItem.current % items.length
+            : activeItem.current;
           emitEvent({
             eventName: "onSlideChangeComplete",
             sliceActionType: actionType,
             slideDirection: type,
             currentItem: {
-              index: activeItem.current,
-              id: items.at(activeItem.current)?.id ?? "",
+              index: { index: logicalIndex, clonedIndex: activeItem.current },
+              id: items.at(logicalIndex)?.id ?? "",
               startReached: startReached.current,
               endReached: endReached.current,
             },
