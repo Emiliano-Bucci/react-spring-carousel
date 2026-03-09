@@ -26,7 +26,7 @@ export type Item = {
   renderItem:
     | ReactNode
     | ((props: {
-        index: number;
+        index: { index: number; clonedIndex: number };
         isClonedItem: boolean;
         isActiveItem(id: string | number): boolean;
         useListenToCustomEvent(

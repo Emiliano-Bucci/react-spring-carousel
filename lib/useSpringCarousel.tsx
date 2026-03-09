@@ -602,7 +602,7 @@ export function useSpringCarousel({
               {typeof item.renderItem === "function"
                 ? item.renderItem({
                     useListenToCustomEvent,
-                    index,
+                    index: { index, clonedIndex: index % items.length },
                     isClonedItem: Boolean(item.isClonedItem),
                     isActiveItem: handleIsActiveItem,
                   })
