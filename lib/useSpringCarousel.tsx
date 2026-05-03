@@ -49,6 +49,8 @@ export function useSpringCarousel({
   const withLoopRef = useRef(withLoop);
   withLoopRef.current = withLoop;
 
+  const hasEmittedInit = useRef(false);
+
   function resolveInitialIndex(value: number | string | undefined): number {
     if (value === undefined) return 0;
     if (typeof value === "number") {
@@ -392,7 +394,14 @@ export function useSpringCarousel({
 
     if (init) {
       carouselIsInitialized.current = true;
-      handleInitCarousel(true);
+
+      if (!hasEmittedInit.current) {
+        handleInitCarousel(true);
+        hasEmittedInit.current = true;
+      } else {
+        handleResize();
+      }
+
       window.addEventListener("resize", handleResize);
       return () => {
         window.removeEventListener("resize", handleResize);
