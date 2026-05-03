@@ -41,11 +41,11 @@ type Story = StoryObj<typeof meta>;
 
 export const Carousel: Story = {
   args: {
-    init: true,
+    init: false,
     withLoop: false,
     enableGestures: true,
     slideWhenDragThresholdIsReached: true,
-    initialActiveItem: 0,
+    initialActiveItem: 1,
     carouselAxis: "x",
     startingPosition: "start",
     itemsQuantity: 10,

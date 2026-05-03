@@ -7,45 +7,50 @@ import {
 
 const eventLabel = "RSC::Event";
 
-export function useEventsModule() {
-  const targetEvent = useRef<HTMLDivElement | null>(null);
-
-  function useListenToCustomEvent(
+type EventsModule = {
+  useListenToCustomEvent: (
     eventHandler: SpringCarouselEventsEventHandler,
-  ) {
-    useEffect(() => {
-      if (!targetEvent.current) {
-        targetEvent.current = document.createElement("div");
-      }
+  ) => void;
+  emitEvent: (event: SpringCarouselEvents) => void;
+};
 
-      function handleEvent(_event: Event) {
-        const event = _event as CustomEvent<SpringCarouselEvents>;
-        eventHandler(event.detail);
-      }
+export function useEventsModule(): EventsModule {
+  const targetEvent = useRef<HTMLDivElement | null>(null);
+  const moduleRef = useRef<EventsModule | null>(null);
 
-      if (targetEvent.current) {
-        targetEvent.current.addEventListener(eventLabel, handleEvent, false);
-        return () => {
-          targetEvent.current?.removeEventListener(
-            eventLabel,
-            handleEvent,
-            false,
-          );
-        };
-      }
-    }, [eventHandler]);
+  if (moduleRef.current === null) {
+    moduleRef.current = {
+      useListenToCustomEvent(eventHandler) {
+        useEffect(() => {
+          if (!targetEvent.current) {
+            targetEvent.current = document.createElement("div");
+          }
+
+          function handleEvent(_event: Event) {
+            const event = _event as CustomEvent<SpringCarouselEvents>;
+            eventHandler(event.detail);
+          }
+
+          targetEvent.current.addEventListener(eventLabel, handleEvent, false);
+          return () => {
+            targetEvent.current?.removeEventListener(
+              eventLabel,
+              handleEvent,
+              false,
+            );
+          };
+        }, [eventHandler]);
+      },
+      emitEvent(event) {
+        if (targetEvent.current) {
+          const newEvent = new CustomEvent(eventLabel, {
+            detail: event,
+          });
+          targetEvent.current.dispatchEvent(newEvent);
+        }
+      },
+    };
   }
-  function emitEvent(event: SpringCarouselEvents) {
-    if (targetEvent.current) {
-      const newEvent = new CustomEvent(eventLabel, {
-        detail: event,
-      });
-      targetEvent.current.dispatchEvent(newEvent);
-    }
-  }
 
-  return {
-    useListenToCustomEvent,
-    emitEvent,
-  };
+  return moduleRef.current;
 }

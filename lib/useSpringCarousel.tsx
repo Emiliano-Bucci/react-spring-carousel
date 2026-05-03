@@ -1,13 +1,8 @@
 import { useSpring, useSpringRef } from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  Item,
-  Props,
-  ResponsiveItemsPerSlideItem,
-  SlideActionType,
-} from "./types";
+import { Props, ResponsiveItemsPerSlideItem, SlideActionType } from "./types";
 import { useEventsModule } from "./useEventsModule";
 import { minifyCSS } from "./utils";
 
@@ -17,8 +12,6 @@ type AnimateItem = {
   toIndex?: number;
   actionType: SlideActionType;
 };
-
-type ExtendedGroupedItem = Item & { isClonedItem: boolean };
 
 export function useSpringCarousel({
   init = true,
@@ -49,6 +42,12 @@ export function useSpringCarousel({
   const dragThreshold = useRef(0);
 
   const activeItem = useRef(0);
+
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+
+  const withLoopRef = useRef(withLoop);
+  withLoopRef.current = withLoop;
 
   function resolveInitialIndex(value: number | string | undefined): number {
     if (value === undefined) return 0;
@@ -83,23 +82,7 @@ export function useSpringCarousel({
     },
   });
 
-  const groupedItems = (
-    withLoop
-      ? [
-          ...items.map((i) => ({
-            ...i,
-            id: `prev-repeated-item-${i.id}`,
-            isClonedItem: true,
-          })),
-          ...items,
-          ...items.map((i) => ({
-            ...i,
-            id: `next-repeated-item-${i.id}`,
-            isClonedItem: true,
-          })),
-        ]
-      : items
-  ) as ExtendedGroupedItem[];
+  const trackLength = withLoop ? items.length * 3 : items.length;
 
   const { useListenToCustomEvent, emitEvent } = useEventsModule();
 
@@ -415,7 +398,7 @@ export function useSpringCarousel({
         window.removeEventListener("resize", handleResize);
       };
     }
-  }, [init, id]);
+  }, [init, id, carouselAxis]);
 
   useEffect(() => {
     const resolvedIndex = resolveInitialIndex(initialActiveItem);
@@ -529,26 +512,50 @@ export function useSpringCarousel({
     },
   );
 
-  function handleIsActiveItem(itemId: string | number) {
+  const handleIsActiveItem = useCallback((itemId: string | number) => {
+    const items = itemsRef.current;
+    const withLoop = withLoopRef.current;
     const realTrackIndex = withLoop
       ? items.length + (activeItem.current % items.length)
       : activeItem.current;
-    return typeof itemId === "number"
-      ? realTrackIndex === itemId
-      : itemId === groupedItems[realTrackIndex]?.id;
-  }
+    if (typeof itemId === "number") return realTrackIndex === itemId;
+    const logicalIndex = activeItem.current % items.length;
+    return itemId === items[logicalIndex]?.id;
+  }, []);
 
-  const carouselFragment = (
-    <div
-      ref={carouselContainerRef}
-      className="ReactSpringCarouselContainer"
-      data-part="Container"
-      data-part-internal={`${id}-Container`}
-      {...bindDrag()}
-    >
-      <style
-        dangerouslySetInnerHTML={{
-          __html: minifyCSS(`
+  const isNextItemFns = useMemo(
+    () =>
+      Array.from({ length: items.length }, (_, i) => () => {
+        const logicalActive = withLoop
+          ? activeItem.current % items.length
+          : activeItem.current;
+        if (withLoop) {
+          return i === (logicalActive + 1) % items.length;
+        }
+        if (logicalActive + 1 >= items.length) return false;
+        return i === logicalActive + 1;
+      }),
+    [items.length, withLoop],
+  );
+
+  const isPrevItemFns = useMemo(
+    () =>
+      Array.from({ length: items.length }, (_, i) => () => {
+        const logicalActive = withLoop
+          ? activeItem.current % items.length
+          : activeItem.current;
+        if (withLoop) {
+          return i === (logicalActive - 1 + items.length) % items.length;
+        }
+        if (logicalActive - 1 < 0) return false;
+        return i === logicalActive - 1;
+      }),
+    [items.length, withLoop],
+  );
+
+  const css = useMemo(
+    () =>
+      minifyCSS(`
             [data-part-internal="${id}-Container"] {
               display: flex;
               width: 100%;
@@ -582,6 +589,7 @@ export function useSpringCarousel({
             ${
               gutter && gutter.length > 0
                 ? gutter
+                    .slice()
                     .sort((a, b) => a.breakpoint - b.breakpoint)
                     .map(
                       (item) => `
@@ -599,6 +607,7 @@ export function useSpringCarousel({
             ${
               itemsPerSlide && itemsPerSlide.length > 0
                 ? itemsPerSlide
+                    .slice()
                     .sort((a, b) => a.breakpoint - b.breakpoint)
                     .map(
                       (item: ResponsiveItemsPerSlideItem) => `
@@ -613,8 +622,27 @@ export function useSpringCarousel({
                 : ""
             }
           `),
-        }}
-      />
+    [
+      id,
+      carouselAxis,
+      shouldEnableGestures,
+      items.length,
+      withLoop,
+      initialized,
+      gutter,
+      itemsPerSlide,
+    ],
+  );
+
+  const carouselFragment = (
+    <div
+      ref={carouselContainerRef}
+      className="ReactSpringCarouselContainer"
+      data-part="Container"
+      data-part-internal={`${id}-Container`}
+      {...bindDrag()}
+    >
+      <style dangerouslySetInnerHTML={{ __html: css }} />
       <div
         ref={carouselTrackRef}
         className="ReactSpringCarouselTrack"
@@ -625,33 +653,13 @@ export function useSpringCarousel({
           endReached.current = false;
         }}
       >
-        {groupedItems.map((item, index) => {
+        {Array.from({ length: trackLength }, (_, index) => {
           const itemLogicalIndex = withLoop ? index % items.length : index;
-
-          function isNextItem() {
-            const logicalActive = withLoop
-              ? activeItem.current % items.length
-              : activeItem.current;
-            if (withLoop) {
-              return itemLogicalIndex === (logicalActive + 1) % items.length;
-            }
-            if (logicalActive + 1 >= items.length) return false;
-            return itemLogicalIndex === logicalActive + 1;
-          }
-
-          function isPrevItem() {
-            const logicalActive = withLoop
-              ? activeItem.current % items.length
-              : activeItem.current;
-            if (withLoop) {
-              return (
-                itemLogicalIndex ===
-                (logicalActive - 1 + items.length) % items.length
-              );
-            }
-            if (logicalActive - 1 < 0) return false;
-            return itemLogicalIndex === logicalActive - 1;
-          }
+          const item = items[itemLogicalIndex];
+          const isClonedItem =
+            withLoop && (index < items.length || index >= items.length * 2);
+          const isNextItem = isNextItemFns[itemLogicalIndex];
+          const isPrevItem = isPrevItemFns[itemLogicalIndex];
 
           return (
             <div
@@ -665,7 +673,7 @@ export function useSpringCarousel({
                 ? item.renderItem({
                     useListenToCustomEvent,
                     index,
-                    isClonedItem: Boolean(item.isClonedItem),
+                    isClonedItem,
                     isActiveItem: handleIsActiveItem,
                     isNextItem,
                     isPrevItem,
