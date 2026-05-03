@@ -10,7 +10,6 @@ import {
   SpringCarouselEvents,
 } from "./types";
 import { useEventsModule } from "./useEventsModule";
-import { minifyCSS } from "./utils";
 
 type AnimateItem = {
   shouldAnimate?: boolean;
@@ -33,6 +32,7 @@ export function useSpringCarousel({
   slideType = "item",
   initialActiveItem = 0,
   renderWindow,
+  renderPlaceholder,
 }: Props) {
   const [initialized, setInitialized] = useState(false);
   const [, setRenderTick] = useState(0);
@@ -557,7 +557,7 @@ export function useSpringCarousel({
 
   const css = useMemo(
     () =>
-      minifyCSS(`
+      `
             [data-part-internal="${id}-Container"] {
               display: flex;
               width: 100%;
@@ -623,7 +623,7 @@ export function useSpringCarousel({
                     .join("")
                 : ""
             }
-          `),
+          `,
     [
       id,
       carouselAxis,
@@ -675,7 +675,9 @@ export function useSpringCarousel({
                   data-part-internal={`${id}-Item`}
                   data-id={item.id}
                   aria-hidden="true"
-                />
+                >
+                  {renderPlaceholder?.({ item, index, isClonedItem })}
+                </div>
               );
             }
           }

@@ -60,6 +60,18 @@ type BaseProps = {
    * Recommended minimum: 1 (active + immediate neighbors).
    */
   renderWindow?: number;
+  /**
+   * Optional render function called for items OUTSIDE the `renderWindow`.
+   * Receives the original `item`, its track `index`, and `isClonedItem`.
+   * Use it to render lightweight content (skeletons, posters) in place of
+   * the heavy `renderItem` for off-window slots. Has no effect when
+   * `renderWindow` is undefined.
+   */
+  renderPlaceholder?: (props: {
+    item: Item;
+    index: number;
+    isClonedItem: boolean;
+  }) => ReactNode;
 };
 
 export type Props = BaseProps & LayoutProps;
