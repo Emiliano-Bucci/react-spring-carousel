@@ -63,6 +63,7 @@ export function useSpringCarousel({
   const dragRafId = useRef<number | null>(null);
 
   const resizeTimerId = useRef<number | null>(null);
+  const resizeRafId = useRef<number | null>(null);
   const lastContainerSize = useRef({ width: 0, height: 0 });
 
   function resolveInitialIndex(value: number | string | undefined): number {
@@ -352,28 +353,43 @@ export function useSpringCarousel({
       });
     }
 
+    function cancelPendingResize() {
+      if (resizeTimerId.current !== null) {
+        clearTimeout(resizeTimerId.current);
+        resizeTimerId.current = null;
+      }
+      if (resizeRafId.current !== null) {
+        cancelAnimationFrame(resizeRafId.current);
+        resizeRafId.current = null;
+      }
+    }
+
     function scheduleResize() {
       // Trailing-edge debounce: collapse a "resize storm" (Chrome DevTools
       // device change, browser zoom, transitional viewport animations) into
-      // a single measurement once dimensions have stabilized. Avoids
+      // a single recompute once dimensions have stabilized. Avoids
       // intermediate measurements that knock the spring around.
-      if (resizeTimerId.current !== null) {
-        clearTimeout(resizeTimerId.current);
-      }
+      // After the debounce window, rAF aligns the measurement with the next
+      // frame boundary so getBoundingClientRect reads a stable, committed
+      // layout instead of forcing a sync layout mid event loop.
+      cancelPendingResize();
       resizeTimerId.current = window.setTimeout(() => {
         resizeTimerId.current = null;
-        const container = carouselContainerRef.current;
-        if (!container) return;
-        const rect = container.getBoundingClientRect();
-        const sizeChanged =
-          rect.width !== lastContainerSize.current.width ||
-          rect.height !== lastContainerSize.current.height;
-        if (!sizeChanged) return;
-        lastContainerSize.current = {
-          width: rect.width,
-          height: rect.height,
-        };
-        handleResize();
+        resizeRafId.current = requestAnimationFrame(() => {
+          resizeRafId.current = null;
+          const container = carouselContainerRef.current;
+          if (!container) return;
+          const rect = container.getBoundingClientRect();
+          const sizeChanged =
+            rect.width !== lastContainerSize.current.width ||
+            rect.height !== lastContainerSize.current.height;
+          if (!sizeChanged) return;
+          lastContainerSize.current = {
+            width: rect.width,
+            height: rect.height,
+          };
+          handleResize();
+        });
       }, 100);
     }
 
@@ -420,10 +436,7 @@ export function useSpringCarousel({
           "orientationchange",
           handleOrientationChange,
         );
-        if (resizeTimerId.current !== null) {
-          clearTimeout(resizeTimerId.current);
-          resizeTimerId.current = null;
-        }
+        cancelPendingResize();
       };
     }
   }, [init, id, carouselAxis, withLoop]);
