@@ -157,6 +157,51 @@ describe("computeAnimationTarget", () => {
       expect(out.newActive).toBe(3);
       expect(out.toValue).toBe(-300);
     });
+
+    it("resize at active=0 without loop sets startReached", () => {
+      const out = computeAnimationTarget({
+        ...baseInput,
+        type: "resize",
+        actionType: "resize",
+        toIndex: 0,
+        currentActive: 0,
+        itemsLength: 6,
+        withLoop: false,
+      });
+      expect(out.startReached).toBe(true);
+      expect(out.endReached).toBe(false);
+      expect(Math.abs(out.toValue)).toBe(0);
+    });
+
+    it("resize at last item without loop sets endReached and clamps toValue", () => {
+      const out = computeAnimationTarget({
+        ...baseInput,
+        type: "resize",
+        actionType: "resize",
+        toIndex: 5,
+        currentActive: 5,
+        itemsLength: 6,
+        withLoop: false,
+        scrollAmount: 100,
+        totalAvailable: 400,
+      });
+      expect(out.endReached).toBe(true);
+      expect(out.toValue).toBe(-400);
+    });
+
+    it("resize with loop never sets startReached/endReached", () => {
+      const out = computeAnimationTarget({
+        ...baseInput,
+        type: "resize",
+        actionType: "resize",
+        toIndex: 5,
+        currentActive: 5,
+        itemsLength: 6,
+        withLoop: true,
+      });
+      expect(out.startReached).toBe(false);
+      expect(out.endReached).toBe(false);
+    });
   });
 
   describe("logicalIndex / realTrackIndex", () => {

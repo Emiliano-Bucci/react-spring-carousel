@@ -86,6 +86,20 @@ export function computeAnimationTarget(
 
   if (actionType === "resize") {
     toValue = -(active * scrollAmount);
+    if (!withLoop) {
+      if (active === 0) {
+        startReached = true;
+      }
+      if (
+        active === itemsLength - 1 ||
+        Math.abs(toValue) >= totalAvailable
+      ) {
+        endReached = true;
+        if (Math.abs(toValue) >= totalAvailable && totalAvailable > 0) {
+          toValue = -totalAvailable;
+        }
+      }
+    }
   }
 
   const logicalIndex = withLoop ? active % itemsLength : active;

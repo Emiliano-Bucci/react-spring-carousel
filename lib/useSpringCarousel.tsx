@@ -62,6 +62,9 @@ export function useSpringCarousel({
   const pendingDragPayload = useRef<SpringCarouselEvents | null>(null);
   const dragRafId = useRef<number | null>(null);
 
+  const resizeRafId = useRef<number | null>(null);
+  const lastContainerSize = useRef({ width: 0, height: 0 });
+
   function resolveInitialIndex(value: number | string | undefined): number {
     if (value === undefined) return 0;
     if (typeof value === "number") {
@@ -166,7 +169,7 @@ export function useSpringCarousel({
       withLoop,
       scrollAmount: scrollAmountValue.current,
       totalAvailable:
-        type === "next"
+        type === "next" || actionType === "resize"
           ? getTotalScrollAvailableSpace(
               withLoop ? scrollAmountValue.current * (items.length * 2) : 0,
             )
@@ -349,19 +352,72 @@ export function useSpringCarousel({
       });
     }
 
+    function scheduleResize() {
+      if (resizeRafId.current !== null) return;
+      resizeRafId.current = requestAnimationFrame(() => {
+        resizeRafId.current = null;
+        const container = carouselContainerRef.current;
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+        const sizeChanged =
+          rect.width !== lastContainerSize.current.width ||
+          rect.height !== lastContainerSize.current.height;
+        if (!sizeChanged) return;
+        lastContainerSize.current = {
+          width: rect.width,
+          height: rect.height,
+        };
+        handleResize();
+      });
+    }
+
+    function handleOrientationChange() {
+      // After orientationchange iOS Safari reports stale dimensions for a few
+      // frames. Defer the recompute and force-invalidate the size cache so
+      // the next scheduled run actually re-measures even if the post-rotation
+      // viewport ended up matching the pre-rotation one (which can happen
+      // mid-transition).
+      setTimeout(() => {
+        lastContainerSize.current = { width: 0, height: 0 };
+        scheduleResize();
+      }, 250);
+    }
+
     if (init) {
       carouselIsInitialized.current = true;
 
       if (!hasEmittedInit.current) {
         handleInitCarousel(true);
         hasEmittedInit.current = true;
+        if (carouselContainerRef.current) {
+          const rect = carouselContainerRef.current.getBoundingClientRect();
+          lastContainerSize.current = {
+            width: rect.width,
+            height: rect.height,
+          };
+        }
       } else {
         handleResize();
       }
 
-      window.addEventListener("resize", handleResize);
+      // visualViewport gives stable readings on iOS (excludes URL bar
+      // show/hide oscillations). Fall back to window.resize on browsers
+      // without it.
+      const viewportTarget: Window | VisualViewport =
+        window.visualViewport ?? window;
+      viewportTarget.addEventListener("resize", scheduleResize);
+      window.addEventListener("orientationchange", handleOrientationChange);
+
       return () => {
-        window.removeEventListener("resize", handleResize);
+        viewportTarget.removeEventListener("resize", scheduleResize);
+        window.removeEventListener(
+          "orientationchange",
+          handleOrientationChange,
+        );
+        if (resizeRafId.current !== null) {
+          cancelAnimationFrame(resizeRafId.current);
+          resizeRafId.current = null;
+        }
       };
     }
   }, [init, id, carouselAxis, withLoop]);
