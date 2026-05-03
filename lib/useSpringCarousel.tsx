@@ -62,7 +62,7 @@ export function useSpringCarousel({
   const pendingDragPayload = useRef<SpringCarouselEvents | null>(null);
   const dragRafId = useRef<number | null>(null);
 
-  const resizeRafId = useRef<number | null>(null);
+  const resizeTimerId = useRef<number | null>(null);
   const lastContainerSize = useRef({ width: 0, height: 0 });
 
   function resolveInitialIndex(value: number | string | undefined): number {
@@ -353,9 +353,15 @@ export function useSpringCarousel({
     }
 
     function scheduleResize() {
-      if (resizeRafId.current !== null) return;
-      resizeRafId.current = requestAnimationFrame(() => {
-        resizeRafId.current = null;
+      // Trailing-edge debounce: collapse a "resize storm" (Chrome DevTools
+      // device change, browser zoom, transitional viewport animations) into
+      // a single measurement once dimensions have stabilized. Avoids
+      // intermediate measurements that knock the spring around.
+      if (resizeTimerId.current !== null) {
+        clearTimeout(resizeTimerId.current);
+      }
+      resizeTimerId.current = window.setTimeout(() => {
+        resizeTimerId.current = null;
         const container = carouselContainerRef.current;
         if (!container) return;
         const rect = container.getBoundingClientRect();
@@ -368,7 +374,7 @@ export function useSpringCarousel({
           height: rect.height,
         };
         handleResize();
-      });
+      }, 100);
     }
 
     function handleOrientationChange() {
@@ -414,9 +420,9 @@ export function useSpringCarousel({
           "orientationchange",
           handleOrientationChange,
         );
-        if (resizeRafId.current !== null) {
-          cancelAnimationFrame(resizeRafId.current);
-          resizeRafId.current = null;
+        if (resizeTimerId.current !== null) {
+          clearTimeout(resizeTimerId.current);
+          resizeTimerId.current = null;
         }
       };
     }
