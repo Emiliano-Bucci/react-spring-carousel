@@ -21,5 +21,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["lib"]
+  "include": ["lib"],
+  "exclude": ["lib/**/*.test.ts", "lib/**/*.test.tsx", "lib/__tests__"]
 }

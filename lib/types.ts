@@ -53,6 +53,13 @@ type BaseProps = {
   slideWhenDragThresholdIsReached?: boolean;
   initialActiveItem?: number | string;
   slideType?: "item" | "container";
+  /**
+   * If set, only renders items within `renderWindow` slots from the active
+   * one. Other slots become empty placeholders sized identically. Use to
+   * reduce mount cost with many heavy items (e.g. video players).
+   * Recommended minimum: 1 (active + immediate neighbors).
+   */
+  renderWindow?: number;
 };
 
 export type Props = BaseProps & LayoutProps;

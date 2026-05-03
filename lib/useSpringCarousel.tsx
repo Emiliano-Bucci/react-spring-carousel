@@ -2,7 +2,13 @@ import { useSpring, useSpringRef } from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { Props, ResponsiveItemsPerSlideItem, SlideActionType } from "./types";
+import { computeAnimationTarget, getTrackTransform } from "./animation";
+import {
+  Props,
+  ResponsiveItemsPerSlideItem,
+  SlideActionType,
+  SpringCarouselEvents,
+} from "./types";
 import { useEventsModule } from "./useEventsModule";
 import { minifyCSS } from "./utils";
 
@@ -26,8 +32,10 @@ export function useSpringCarousel({
   slideWhenDragThresholdIsReached = true,
   slideType = "item",
   initialActiveItem = 0,
+  renderWindow,
 }: Props) {
   const [initialized, setInitialized] = useState(false);
+  const [, setRenderTick] = useState(0);
 
   const carouselIsInitialized = useRef(init);
 
@@ -50,6 +58,9 @@ export function useSpringCarousel({
   withLoopRef.current = withLoop;
 
   const hasEmittedInit = useRef(false);
+
+  const pendingDragPayload = useRef<SpringCarouselEvents | null>(null);
+  const dragRafId = useRef<number | null>(null);
 
   function resolveInitialIndex(value: number | string | undefined): number {
     if (value === undefined) return 0;
@@ -76,11 +87,11 @@ export function useSpringCarousel({
     value: 0,
     ref: setSpring,
     onChange({ value }) {
-      const translate =
-        carouselAxis === "x"
-          ? `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`
-          : `translate3d(0px, calc(${value.value}px + var(--${id}-offset-modifier)), 0px)`;
-      carouselTrackRef.current!.style.transform = translate;
+      carouselTrackRef.current!.style.transform = getTrackTransform(
+        value.value,
+        carouselAxis,
+        id,
+      );
     },
   });
 
@@ -88,23 +99,32 @@ export function useSpringCarousel({
 
   const { useListenToCustomEvent, emitEvent } = useEventsModule();
 
+  function resolveActiveResponsive<
+    T extends { breakpoint: number; media?: string },
+  >(arr: T[] | undefined): T | null {
+    if (!arr || arr.length === 0) return null;
+    let best: T | null = null;
+    let bestBreakpoint = -Infinity;
+    for (const entry of arr) {
+      const matches = entry.media
+        ? window.matchMedia(entry.media).matches
+        : window.innerWidth >= entry.breakpoint;
+      if (matches && entry.breakpoint >= bestBreakpoint) {
+        best = entry;
+        bestBreakpoint = entry.breakpoint;
+      }
+    }
+    return best;
+  }
+
   function getGutter() {
     const { totalGutterCssVar } = getCssVars();
     return totalGutterCssVar;
   }
 
   function getItemsPerSlide() {
-    if (carouselContainerRef.current) {
-      const computedStyle = window.getComputedStyle(
-        carouselContainerRef.current,
-      );
-      const itemsPerSlideCssVar = computedStyle
-        .getPropertyValue(`--${id}-items-per-slide`)
-        .trim();
-
-      return Number(itemsPerSlideCssVar) || 1;
-    }
-    return 1;
+    const matched = resolveActiveResponsive(itemsPerSlide);
+    return matched?.itemsPerSlide || 1;
   }
 
   function handleSlideToNextItem(toIndex?: number) {
@@ -137,77 +157,41 @@ export function useSpringCarousel({
     startReached.current = false;
     endReached.current = false;
 
-    let fromValue = spring.value.get();
-    let toValue = 0;
+    const target = computeAnimationTarget({
+      type,
+      actionType,
+      toIndex,
+      currentActive: activeItem.current,
+      itemsLength: items.length,
+      withLoop,
+      scrollAmount: scrollAmountValue.current,
+      totalAvailable:
+        type === "next"
+          ? getTotalScrollAvailableSpace(
+              withLoop ? scrollAmountValue.current * (items.length * 2) : 0,
+            )
+          : 0,
+      fromValueRaw: spring.value.get(),
+    });
 
-    if (type === "next") {
-      activeItem.current += 1;
+    activeItem.current = target.newActive;
+    startReached.current = target.startReached;
+    endReached.current = target.endReached;
+    totalScrolledAmount.current = target.toValue;
+
+    if (renderWindow !== undefined) {
+      setRenderTick((t) => t + 1);
     }
-    if (type === "prev") {
-      if (activeItem.current === 0) {
-        activeItem.current = items.length - 1;
-      } else {
-        activeItem.current -= 1;
-      }
-    }
-    if (toIndex !== undefined) {
-      activeItem.current = toIndex;
-    }
-
-    if (type === "next") {
-      const totalAvailable = getTotalScrollAvailableSpace(
-        withLoop ? scrollAmountValue.current * (items.length * 2) : 0,
-      );
-
-      toValue = -(activeItem.current * scrollAmountValue.current);
-
-      if (withLoop && activeItem.current === items.length) {
-        activeItem.current = 0;
-        fromValue = fromValue + scrollAmountValue.current * items.length;
-        toValue = 0;
-      }
-
-      if (
-        !withLoop &&
-        (Math.abs(toValue) >= totalAvailable ||
-          activeItem.current === items.length - 1)
-      ) {
-        endReached.current = true;
-        toValue = -totalAvailable;
-      }
-    }
-    if (type === "prev") {
-      toValue = -(activeItem.current * scrollAmountValue.current);
-
-      if (activeItem.current === items.length - 1) {
-        fromValue = fromValue - items.length * scrollAmountValue.current;
-      }
-
-      if (!withLoop && toValue >= 0) {
-        startReached.current = true;
-        toValue = 0;
-      }
-    }
-
-    totalScrolledAmount.current = toValue;
-
-    const logicalIndex = withLoop
-      ? activeItem.current % items.length
-      : activeItem.current;
-    const realTrackIndex = withLoop
-      ? items.length + (activeItem.current % items.length)
-      : activeItem.current;
 
     if (actionType === "resize") {
-      toValue = -(activeItem.current * scrollAmountValue.current);
       emitEvent({
         eventName: "onResize",
         sliceActionType: actionType,
         slideDirection: type,
         currentItem: {
-          id: items.at(logicalIndex)?.id ?? "",
-          index: logicalIndex,
-          trackIndex: realTrackIndex,
+          id: items.at(target.logicalIndex)?.id ?? "",
+          index: target.logicalIndex,
+          trackIndex: target.realTrackIndex,
           startReached: startReached.current,
           endReached: endReached.current,
         },
@@ -218,9 +202,9 @@ export function useSpringCarousel({
         sliceActionType: actionType,
         slideDirection: type,
         nextItem: {
-          index: logicalIndex,
-          id: items.at(logicalIndex)?.id ?? "",
-          trackIndex: realTrackIndex,
+          index: target.logicalIndex,
+          id: items.at(target.logicalIndex)?.id ?? "",
+          trackIndex: target.realTrackIndex,
           startReached: startReached.current,
           endReached: endReached.current,
         },
@@ -229,18 +213,14 @@ export function useSpringCarousel({
 
     setSpring.start({
       immediate,
-      from: {
-        value: fromValue,
-      },
-      to: {
-        value: toValue,
-      },
+      from: { value: target.fromValue },
+      to: { value: target.toValue },
       onChange({ value }) {
-        const translate =
-          carouselAxis === "x"
-            ? `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`
-            : `translate3d(0px, calc(${value.value}px + var(--${id}-offset-modifier)), 0px)`;
-        carouselTrackRef.current!.style.transform = translate;
+        carouselTrackRef.current!.style.transform = getTrackTransform(
+          value.value,
+          carouselAxis,
+          id,
+        );
       },
       onRest({ finished }) {
         if (finished) {
@@ -297,34 +277,11 @@ export function useSpringCarousel({
     return total;
   }
   function getCssVars() {
-    let totalStartEndGutterCssVar = 0;
-    let totalGutterCssVar = 0;
-
-    if (carouselContainerRef.current) {
-      const computedStyle = window.getComputedStyle(
-        carouselContainerRef.current,
-      );
-
-      const startEndGutterCssVar = computedStyle
-        .getPropertyValue(`--${id}-start-end-gutter`)
-        .trim();
-
-      if (startEndGutterCssVar.includes("px")) {
-        totalStartEndGutterCssVar = Number(
-          startEndGutterCssVar.replace("px", ""),
-        );
-      }
-
-      const gutterCssVar = computedStyle
-        .getPropertyValue(`--${id}-gutter`)
-        .trim();
-
-      if (gutterCssVar.includes("px")) {
-        totalGutterCssVar = Number(gutterCssVar.replace("px", ""));
-      }
-    }
-
-    return { totalStartEndGutterCssVar, totalGutterCssVar };
+    const matched = resolveActiveResponsive(gutter);
+    return {
+      totalGutterCssVar: matched?.gutter || 0,
+      totalStartEndGutterCssVar: (matched?.startEndGutter || 0) * 2,
+    };
   }
 
   useEffect(() => {
@@ -407,7 +364,7 @@ export function useSpringCarousel({
         window.removeEventListener("resize", handleResize);
       };
     }
-  }, [init, id, carouselAxis]);
+  }, [init, id, carouselAxis, withLoop]);
 
   useEffect(() => {
     const resolvedIndex = resolveInitialIndex(initialActiveItem);
@@ -422,6 +379,41 @@ export function useSpringCarousel({
   }, [init, initialActiveItem]);
 
   const shouldEnableGestures = enableGestures;
+
+  function flushPendingDrag() {
+    if (dragRafId.current !== null) {
+      cancelAnimationFrame(dragRafId.current);
+      dragRafId.current = null;
+    }
+    if (pendingDragPayload.current) {
+      const payload = pendingDragPayload.current;
+      pendingDragPayload.current = null;
+      emitEvent(payload);
+    }
+  }
+
+  function scheduleDragEmit(payload: SpringCarouselEvents) {
+    pendingDragPayload.current = payload;
+    if (dragRafId.current === null) {
+      dragRafId.current = requestAnimationFrame(() => {
+        dragRafId.current = null;
+        const p = pendingDragPayload.current;
+        pendingDragPayload.current = null;
+        if (p) emitEvent(p);
+      });
+    }
+  }
+
+  useEffect(
+    () => () => {
+      if (dragRafId.current !== null) {
+        cancelAnimationFrame(dragRafId.current);
+        dragRafId.current = null;
+      }
+      pendingDragPayload.current = null;
+    },
+    [],
+  );
 
   const bindDrag = useDrag(
     (state) => {
@@ -439,7 +431,7 @@ export function useSpringCarousel({
       const velocity = state.velocity;
 
       if (isDragging) {
-        emitEvent({
+        scheduleDragEmit({
           ...state,
           eventName: "onDrag",
           slideActionType: "drag",
@@ -452,11 +444,11 @@ export function useSpringCarousel({
             velocity: velocity,
           },
           onChange({ value }) {
-            const translate =
-              carouselAxis === "x"
-                ? `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`
-                : `translate3d(0px, calc(${value.value}px + var(--${id}-offset-modifier)), 0px)`;
-            carouselTrackRef.current!.style.transform = translate;
+            carouselTrackRef.current!.style.transform = getTrackTransform(
+              value.value,
+              carouselAxis,
+              id,
+            );
           },
         });
 
@@ -469,6 +461,7 @@ export function useSpringCarousel({
       }
 
       if (state.last) {
+        flushPendingDrag();
         if (prevItemTresholdReached) {
           animateItem({
             actionType: "drag",
@@ -488,11 +481,11 @@ export function useSpringCarousel({
               velocity,
             },
             onChange({ value }) {
-              const translate =
-                carouselAxis === "x"
-                  ? `translate3d(calc(${value.value}px + var(--${id}-offset-modifier)), 0px, 0px)`
-                  : `translate3d(0px, calc(${value.value}px + var(--${id}-offset-modifier)), 0px)`;
-              carouselTrackRef.current!.style.transform = translate;
+              carouselTrackRef.current!.style.transform = getTrackTransform(
+                value.value,
+                carouselAxis,
+                id,
+              );
             },
           });
           state.cancel();
@@ -667,6 +660,26 @@ export function useSpringCarousel({
           const item = items[itemLogicalIndex];
           const isClonedItem =
             withLoop && (index < items.length || index >= items.length * 2);
+
+          if (renderWindow !== undefined) {
+            const trackCenter = withLoop
+              ? items.length + (activeItem.current % items.length)
+              : activeItem.current;
+            const distance = Math.abs(index - trackCenter);
+            if (distance > renderWindow) {
+              return (
+                <div
+                  className="ReactSpringCarouselItem"
+                  data-part="Item"
+                  key={`${item.id}-${index}`}
+                  data-part-internal={`${id}-Item`}
+                  data-id={item.id}
+                  aria-hidden="true"
+                />
+              );
+            }
+          }
+
           const isNextItem = isNextItemFns[itemLogicalIndex];
           const isPrevItem = isPrevItemFns[itemLogicalIndex];
 

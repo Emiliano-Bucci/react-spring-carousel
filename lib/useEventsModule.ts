@@ -5,8 +5,6 @@ import {
   SpringCarouselEventsEventHandler,
 } from "./types";
 
-const eventLabel = "RSC::Event";
-
 type EventsModule = {
   useListenToCustomEvent: (
     eventHandler: SpringCarouselEventsEventHandler,
@@ -15,39 +13,29 @@ type EventsModule = {
 };
 
 export function useEventsModule(): EventsModule {
-  const targetEvent = useRef<HTMLDivElement | null>(null);
-  const moduleRef = useRef<EventsModule | null>(null);
+  const listenersRef = useRef<Set<SpringCarouselEventsEventHandler> | null>(
+    null,
+  );
+  if (listenersRef.current === null) {
+    listenersRef.current = new Set();
+  }
 
+  const moduleRef = useRef<EventsModule | null>(null);
   if (moduleRef.current === null) {
     moduleRef.current = {
       useListenToCustomEvent(eventHandler) {
         useEffect(() => {
-          if (!targetEvent.current) {
-            targetEvent.current = document.createElement("div");
-          }
-
-          function handleEvent(_event: Event) {
-            const event = _event as CustomEvent<SpringCarouselEvents>;
-            eventHandler(event.detail);
-          }
-
-          targetEvent.current.addEventListener(eventLabel, handleEvent, false);
+          const listeners = listenersRef.current!;
+          listeners.add(eventHandler);
           return () => {
-            targetEvent.current?.removeEventListener(
-              eventLabel,
-              handleEvent,
-              false,
-            );
+            listeners.delete(eventHandler);
           };
         }, [eventHandler]);
       },
       emitEvent(event) {
-        if (targetEvent.current) {
-          const newEvent = new CustomEvent(eventLabel, {
-            detail: event,
-          });
-          targetEvent.current.dispatchEvent(newEvent);
-        }
+        const listeners = listenersRef.current;
+        if (!listeners || listeners.size === 0) return;
+        listeners.forEach((handler) => handler(event));
       },
     };
   }
