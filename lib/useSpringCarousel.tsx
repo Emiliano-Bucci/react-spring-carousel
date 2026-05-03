@@ -178,12 +178,13 @@ export function useSpringCarousel({
       fromValueRaw: spring.value.get(),
     });
 
+    const previousActive = activeItem.current;
     activeItem.current = target.newActive;
     startReached.current = target.startReached;
     endReached.current = target.endReached;
     totalScrolledAmount.current = target.toValue;
 
-    if (renderWindow !== undefined) {
+    if (renderWindow !== undefined && previousActive !== target.newActive) {
       setRenderTick((t) => t + 1);
     }
 
@@ -213,6 +214,18 @@ export function useSpringCarousel({
           endReached: endReached.current,
         },
       });
+    }
+
+    if (immediate && carouselTrackRef.current) {
+      // Synchronously paint the new transform in the same frame as the
+      // layout/CSS-var change. Avoids a transient frame where the inline
+      // transform combines the previous spring value with the just-updated
+      // --offset-modifier, which can show a different item briefly.
+      carouselTrackRef.current.style.transform = getTrackTransform(
+        target.toValue,
+        carouselAxis,
+        id,
+      );
     }
 
     setSpring.start({
@@ -364,33 +377,43 @@ export function useSpringCarousel({
       }
     }
 
-    function scheduleResize() {
-      // Trailing-edge debounce: collapse a "resize storm" (Chrome DevTools
-      // device change, browser zoom, transitional viewport animations) into
-      // a single recompute once dimensions have stabilized. Avoids
-      // intermediate measurements that knock the spring around.
-      // After the debounce window, rAF aligns the measurement with the next
-      // frame boundary so getBoundingClientRect reads a stable, committed
-      // layout instead of forcing a sync layout mid event loop.
-      cancelPendingResize();
-      resizeTimerId.current = window.setTimeout(() => {
-        resizeTimerId.current = null;
-        resizeRafId.current = requestAnimationFrame(() => {
-          resizeRafId.current = null;
-          const container = carouselContainerRef.current;
-          if (!container) return;
-          const rect = container.getBoundingClientRect();
-          const sizeChanged =
-            rect.width !== lastContainerSize.current.width ||
-            rect.height !== lastContainerSize.current.height;
-          if (!sizeChanged) return;
+    function runResizeCheck(scheduleVerifyPass: boolean) {
+      if (resizeRafId.current !== null) return;
+      resizeRafId.current = requestAnimationFrame(() => {
+        resizeRafId.current = null;
+        const container = carouselContainerRef.current;
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+        const sizeChanged =
+          rect.width !== lastContainerSize.current.width ||
+          rect.height !== lastContainerSize.current.height;
+        if (sizeChanged) {
           lastContainerSize.current = {
             width: rect.width,
             height: rect.height,
           };
           handleResize();
-        });
-      }, 100);
+        }
+        if (scheduleVerifyPass) {
+          // Soft-keyboard open/close on iOS animates over ~300ms; the first
+          // measurement may catch dimensions mid-transition. Schedule one
+          // more pass after the animation should have settled.
+          resizeTimerId.current = window.setTimeout(() => {
+            resizeTimerId.current = null;
+            runResizeCheck(false);
+          }, 400);
+        }
+      });
+    }
+
+    function scheduleResize() {
+      // rAF aligns the measurement with the next frame boundary so
+      // getBoundingClientRect reads a stable, committed layout. After the
+      // first check, schedule a verify pass to catch slow transitions
+      // (mobile keyboard slide, address bar slide, ongoing CSS transitions
+      // on the page).
+      cancelPendingResize();
+      runResizeCheck(true);
     }
 
     function handleOrientationChange() {
@@ -399,10 +422,23 @@ export function useSpringCarousel({
       // the next scheduled run actually re-measures even if the post-rotation
       // viewport ended up matching the pre-rotation one (which can happen
       // mid-transition).
-      setTimeout(() => {
+      cancelPendingResize();
+      resizeTimerId.current = window.setTimeout(() => {
+        resizeTimerId.current = null;
         lastContainerSize.current = { width: 0, height: 0 };
-        scheduleResize();
+        runResizeCheck(true);
       }, 250);
+    }
+
+    function handleVisibilityChange() {
+      // When tab/app becomes visible again, force a re-measure: dimensions
+      // could have changed while we were hidden (rotation, window resize,
+      // browser chrome state) without firing any event we listened to.
+      if (document.visibilityState === "visible") {
+        cancelPendingResize();
+        lastContainerSize.current = { width: 0, height: 0 };
+        runResizeCheck(true);
+      }
     }
 
     if (init) {
@@ -429,12 +465,17 @@ export function useSpringCarousel({
         window.visualViewport ?? window;
       viewportTarget.addEventListener("resize", scheduleResize);
       window.addEventListener("orientationchange", handleOrientationChange);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
 
       return () => {
         viewportTarget.removeEventListener("resize", scheduleResize);
         window.removeEventListener(
           "orientationchange",
           handleOrientationChange,
+        );
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange,
         );
         cancelPendingResize();
       };
