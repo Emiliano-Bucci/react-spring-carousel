@@ -54,7 +54,7 @@ export const Carousel: Story = {
     withLoop: true,
     enableGestures: true,
     slideWhenDragThresholdIsReached: true,
-    initialActiveItem: 0,
+    initialActiveItem: 2,
     carouselAxis: "y",
     startingPosition: "start",
     itemsQuantity: 8,
@@ -85,7 +85,7 @@ export const Carousel: Story = {
       },
     ],
 
-    renderWindow: 3,
+    renderWindow: 2,
     slideType: "item",
   },
 };

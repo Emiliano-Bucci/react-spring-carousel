@@ -34,7 +34,7 @@ export function Main({
   } = useSpringCarousel({
     ...props,
     id: "carousel-test",
-    initialActiveItem: activeItem,
+    initialActiveItem: `item-${activeItem + 1}`,
     items: Array(itemsQuantity)
       .fill(0)
       .map((_, i) => ({

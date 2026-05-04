@@ -50,6 +50,14 @@ export function useSpringCarousel({
   const dragThreshold = useRef(0);
 
   const activeItem = useRef(0);
+  // Tracks the last logical index emitted via onSlideChangeComplete.
+  // Consumers commonly mirror this index back to `initialActiveItem`
+  // (URL sync, controlled state). When that echo arrives in the
+  // initialActiveItem effect we want to skip the redundant animateItem,
+  // otherwise rapid user actions taken between the emit and the echo's
+  // re-render get snapped back. External navigation (back button, deep
+  // link) still works because resolvedIndex won't match this ref.
+  const lastEmittedActiveRef = useRef(0);
 
   const itemsRef = useRef(items);
   itemsRef.current = items;
@@ -247,6 +255,7 @@ export function useSpringCarousel({
           const realTrackIndex = withLoop
             ? items.length + (activeItem.current % items.length)
             : activeItem.current;
+          lastEmittedActiveRef.current = logicalIndex;
           emitEvent({
             eventName: "onSlideChangeComplete",
             sliceActionType: actionType,
@@ -484,7 +493,17 @@ export function useSpringCarousel({
 
   useEffect(() => {
     const resolvedIndex = resolveInitialIndex(initialActiveItem);
-    if (init && resolvedIndex !== activeItem.current) {
+    // If resolvedIndex matches the last index we just emitted via
+    // onSlideChangeComplete, this re-run is the consumer echoing our
+    // own event back as `initialActiveItem`. Skip — animating would
+    // revert any user action taken between emit and this re-render.
+    const isRoundTripEcho =
+      resolvedIndex === lastEmittedActiveRef.current;
+    if (
+      init &&
+      resolvedIndex !== activeItem.current &&
+      !isRoundTripEcho
+    ) {
       animateItem({
         type: "next",
         toIndex: resolvedIndex,
