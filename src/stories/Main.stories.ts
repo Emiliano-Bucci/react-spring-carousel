@@ -86,5 +86,6 @@ export const Carousel: Story = {
     ],
 
     renderWindow: 3,
+    slideType: "item",
   },
 };

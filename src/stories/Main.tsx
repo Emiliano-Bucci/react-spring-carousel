@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { Props } from "../../lib/types";
 import { useSpringCarousel } from "../../lib/useSpringCarousel";
@@ -25,30 +25,45 @@ export function Main({
 }: Omit<Props, "items" | "id"> & {
   itemsQuantity: number;
 }) {
-  const { carouselFragment, slideToNextItem, slideToPrevItem } =
-    useSpringCarousel({
-      ...props,
-      id: "carousel-test",
-      items: Array(itemsQuantity)
-        .fill(0)
-        .map((_, i) => ({
-          id: `item-${i}`,
-          renderItem: (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: generateRGBA(i),
-                padding: "24px",
-                width: "100%",
-              }}
-            >
-              Item {i + 1}
-            </div>
-          ),
-        })),
-    });
+  const [activeItem, setActiveItem] = useState(props.initialActiveItem || 0);
+  const {
+    carouselFragment,
+    slideToNextItem,
+    slideToPrevItem,
+    useListenToCustomEvent,
+  } = useSpringCarousel({
+    ...props,
+    id: "carousel-test",
+    initialActiveItem: activeItem,
+    items: Array(itemsQuantity)
+      .fill(0)
+      .map((_, i) => ({
+        id: `item-${i + 1}`,
+        renderItem: (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: generateRGBA(i),
+              padding: "24px",
+              width: "100%",
+            }}
+          >
+            Item {i + 1}
+          </div>
+        ),
+      })),
+  });
+
+  useListenToCustomEvent((ev) => {
+    if (ev.eventName === "onSlideChangeComplete") {
+      console.log(ev);
+      setActiveItem(ev.currentItem.index);
+    }
+  });
+
+  console.log({ activeItem });
 
   return (
     <div className="container">
