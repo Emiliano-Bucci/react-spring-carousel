@@ -386,16 +386,25 @@ export function useSpringCarousel({
       }
     }
 
-    function runResizeCheck(scheduleVerifyPass: boolean) {
+    function runResizeCheck(scheduleVerifyPass: boolean, axisOnly = false) {
       if (resizeRafId.current !== null) return;
       resizeRafId.current = requestAnimationFrame(() => {
         resizeRafId.current = null;
         const container = carouselContainerRef.current;
         if (!container) return;
         const rect = container.getBoundingClientRect();
-        const sizeChanged =
-          rect.width !== lastContainerSize.current.width ||
-          rect.height !== lastContainerSize.current.height;
+        // A hidden container (display: none, e.g. a closed drawer) reports
+        // 0x0: keep the last real size so it re-measures once visible again.
+        if (rect.width === 0 && rect.height === 0) return;
+        const widthChanged = rect.width !== lastContainerSize.current.width;
+        const heightChanged = rect.height !== lastContainerSize.current.height;
+        // Container-driven checks only care about the scroll axis, so e.g.
+        // images loading inside a horizontal carousel don't reposition it.
+        const sizeChanged = axisOnly
+          ? carouselAxis === "x"
+            ? widthChanged
+            : heightChanged
+          : widthChanged || heightChanged;
         if (sizeChanged) {
           lastContainerSize.current = {
             width: rect.width,
@@ -476,7 +485,18 @@ export function useSpringCarousel({
       window.addEventListener("orientationchange", handleOrientationChange);
       document.addEventListener("visibilitychange", handleVisibilityChange);
 
+      // The container can change size while the viewport doesn't: the page
+      // scrollbar disappearing when a dialog locks scroll, late content
+      // widening the layout, a sidebar opening. Re-measure on those too.
+      const containerObserver = new ResizeObserver(() => {
+        runResizeCheck(false, true);
+      });
+      if (carouselContainerRef.current) {
+        containerObserver.observe(carouselContainerRef.current);
+      }
+
       return () => {
+        containerObserver.disconnect();
         viewportTarget.removeEventListener("resize", scheduleResize);
         window.removeEventListener(
           "orientationchange",
