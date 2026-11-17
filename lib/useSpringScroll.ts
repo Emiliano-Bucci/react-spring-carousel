@@ -1,5 +1,12 @@
 import { useSpring } from "@react-spring/web";
-import { RefObject, useEffect, useRef } from "react";
+import { RefObject, useEffect, useLayoutEffect, useRef } from "react";
+
+import { getScrollTarget, ScrollReach } from "./scroll";
+
+// Scroll positions this close to the end count as the end: fractional widths
+// can leave the container a few pixels short of its maximum scroll.
+const END_TOLERANCE_PX = 10;
+const SCROLL_END_DELAY_MS = 200;
 
 function getGap(container: HTMLElement) {
   let totalGap = 0;
@@ -16,27 +23,49 @@ function getScrollAvailableSpace(_container: HTMLElement) {
   return _container.scrollWidth - _container.clientWidth;
 }
 
-function getScrollAmount(_container: HTMLElement) {
-  const element = _container.children[0] as HTMLElement;
+function getScrollAmount(_container: HTMLElement, scrollAmountValue?: number) {
+  if (typeof scrollAmountValue === "number") {
+    return scrollAmountValue;
+  }
+  const element = _container.children[0];
   const gap = getGap(_container);
   return element.getBoundingClientRect().width + gap;
 }
 
-type Reach = "start" | "end" | "idle";
-
 type Props = {
   container: RefObject<HTMLDivElement | null>;
-  onReach?(type: Reach): void;
+  onReach?(type: ScrollReach): void;
+  /** Fixed step of the arrows, instead of the first item width plus the gap. */
+  scrollAmountValue?: number;
+  /** Scroll position applied before the first paint, without animation. */
+  initialScrollPosition?: number;
 };
 
-export function useSpringScroll({ container, onReach }: Props) {
-  const reachRef = useRef<Reach>("start");
+export function useSpringScroll({
+  container,
+  onReach,
+  scrollAmountValue,
+  initialScrollPosition,
+}: Props) {
+  const reachRef = useRef<ScrollReach>("start");
   const activeItem = useRef(0);
+  // The listeners are attached once: they read the latest options from here,
+  // so an inline `onReach` does not re-subscribe them on every render.
+  const optionsRef = useRef({ onReach, scrollAmountValue });
   const [, setSpring] = useSpring(() => ({
     x: 0,
   }));
 
-  function animateTo(to: number) {
+  useLayoutEffect(() => {
+    optionsRef.current = { onReach, scrollAmountValue };
+  });
+
+  function emitReach(reach: ScrollReach) {
+    reachRef.current = reach;
+    optionsRef.current.onReach?.(reach);
+  }
+
+  function animateTo(to: number, immediate = false) {
     setSpring.start({
       from: {
         x: container.current!.scrollLeft,
@@ -44,6 +73,7 @@ export function useSpringScroll({ container, onReach }: Props) {
       to: {
         x: to,
       },
+      immediate,
       onChange({ value }) {
         if (container.current) {
           container.current.scrollLeft = value.x;
@@ -52,54 +82,47 @@ export function useSpringScroll({ container, onReach }: Props) {
     });
   }
 
-  function handleScroll(type: "prev" | "next") {
+  function handleScroll(direction: "prev" | "next") {
     if (
       !container.current ||
-      (type === "next" && reachRef.current === "end") ||
-      (type === "prev" && reachRef.current === "start")
+      (direction === "next" && reachRef.current === "end") ||
+      (direction === "prev" && reachRef.current === "start")
     ) {
       return;
     }
 
-    let toValue = 0;
+    const target = getScrollTarget({
+      direction,
+      activeItem: activeItem.current,
+      scrollAmount: getScrollAmount(
+        container.current,
+        optionsRef.current.scrollAmountValue,
+      ),
+      availableSpace: getScrollAvailableSpace(container.current),
+    });
 
-    if (type === "next") activeItem.current += 1;
-    if (type === "prev") activeItem.current -= 1;
-
-    toValue = activeItem.current * getScrollAmount(container.current!);
-
-    if (type === "next") {
-      const availableSpace = getScrollAvailableSpace(container.current!);
-
-      if (toValue > availableSpace) {
-        reachRef.current = "end";
-        toValue = availableSpace;
-
-        if (onReach) {
-          onReach("end");
-        }
-      }
-    }
-    if (type === "prev" && toValue <= 0) {
-      reachRef.current = "start";
-      activeItem.current = 0;
-      toValue = 0;
-
-      if (onReach) {
-        onReach("start");
-      }
+    activeItem.current = target.activeItem;
+    if (target.reach) {
+      emitReach(target.reach);
     }
 
-    animateTo(toValue);
+    animateTo(target.toValue);
   }
 
   useEffect(() => {
-    function calculateActiveItem() {
-      const scrollAmount = getScrollAmount(container.current!);
+    const element = container.current;
+    if (!element) {
+      return;
+    }
+
+    function calculateActiveItem(_element: HTMLElement) {
+      const scrollAmount = getScrollAmount(
+        _element,
+        optionsRef.current.scrollAmountValue,
+      );
       const itemWidth =
-        [...container.current!.children].at(0)?.getBoundingClientRect().width ||
-        0;
-      const totalItems = Array(container.current!.childElementCount)
+        [..._element.children].at(0)?.getBoundingClientRect().width || 0;
+      const totalItems = Array(_element.childElementCount)
         .fill(0)
         .map((_, i) => {
           return {
@@ -109,7 +132,7 @@ export function useSpringScroll({ container, onReach }: Props) {
           };
         });
 
-      const scrollToEvaluate = container.current!.scrollLeft + itemWidth;
+      const scrollToEvaluate = _element.scrollLeft + itemWidth;
 
       const selectedActiveItem = totalItems.find(
         (i) => scrollToEvaluate >= i.start && scrollToEvaluate < i.end,
@@ -120,74 +143,81 @@ export function useSpringScroll({ container, onReach }: Props) {
     function stopSpringOnWheel() {
       setSpring.stop();
     }
-    function handleScroll(ev: Event) {
+    function handleScrollReach(ev: Event) {
       const el = ev.target as HTMLElement;
 
       if (el.scrollLeft === 0) {
         activeItem.current = 0;
-        reachRef.current = "start";
-        if (onReach) {
-          onReach("start");
-        }
-      } else if (el.scrollLeft >= getScrollAvailableSpace(el)) {
-        reachRef.current = "end";
-        if (onReach) {
-          onReach("end");
-        }
+        emitReach("start");
+      } else if (
+        el.scrollLeft >=
+        getScrollAvailableSpace(el) - END_TOLERANCE_PX
+      ) {
+        emitReach("end");
       } else if (reachRef.current !== "idle") {
-        reachRef.current = "idle";
-        if (onReach) {
-          onReach("idle");
-        }
+        emitReach("idle");
       }
     }
-    let scrollTimeout: NodeJS.Timeout;
+    let scrollTimeout: ReturnType<typeof setTimeout>;
     let lastScrollPos = 0;
 
-    function handleScrollEnd() {
-      const currentPos = container.current!.scrollLeft;
-
-      // Update position
-      lastScrollPos = currentPos;
-
-      // Clear previous timeout
+    // Native scrolling (swipe, trackpad) moves the container without the
+    // arrows: once it settles, the active item is read back from the position.
+    function handleScrollEnd(ev: Event) {
+      const el = ev.target as HTMLElement;
+      lastScrollPos = el.scrollLeft;
       clearTimeout(scrollTimeout);
 
-      // Set a timeout to check if scrolling has ended
       scrollTimeout = setTimeout(function () {
-        // After timeout, check if position has changed since timeout was set
-        if (container.current!.scrollLeft === lastScrollPos) {
-          calculateActiveItem();
+        if (el.scrollLeft === lastScrollPos) {
+          calculateActiveItem(el);
         }
-      }, 200);
+      }, SCROLL_END_DELAY_MS);
     }
 
-    if (container.current) {
-      container.current.addEventListener("wheel", stopSpringOnWheel, {
-        passive: true,
-      });
-      container.current.addEventListener("scroll", handleScroll);
-      container.current.addEventListener("scroll", handleScrollEnd);
-      return () => {
-        if (container.current) {
-          container.current.removeEventListener("scroll", handleScrollEnd);
-          container.current.removeEventListener("scroll", handleScroll);
-          container.current.removeEventListener("wheel", stopSpringOnWheel);
-        }
-      };
+    element.addEventListener("wheel", stopSpringOnWheel, {
+      passive: true,
+    });
+    element.addEventListener("scroll", handleScrollReach);
+    element.addEventListener("scroll", handleScrollEnd);
+    return () => {
+      clearTimeout(scrollTimeout);
+      element.removeEventListener("scroll", handleScrollEnd);
+      element.removeEventListener("scroll", handleScrollReach);
+      element.removeEventListener("wheel", stopSpringOnWheel);
+    };
+  }, [container, setSpring]);
+
+  useLayoutEffect(() => {
+    if (typeof initialScrollPosition === "number" && container.current) {
+      animateTo(initialScrollPosition, true);
     }
-  }, [container, onReach]);
+  }, [container, initialScrollPosition]);
+
   useEffect(() => {
-    if (container.current) {
-      const rObserver = new ResizeObserver(() => {
-        animateTo(activeItem.current * getScrollAmount(container.current!));
-      });
-      rObserver.observe(container.current);
-      return () => {
-        rObserver.disconnect();
-      };
+    const element = container.current;
+    if (!element) {
+      return;
     }
-  }, []);
+
+    // The observer reports the initial size right away: skipping it keeps
+    // `initialScrollPosition`, which is not an item boundary.
+    let isFirstObservation = true;
+    const rObserver = new ResizeObserver(() => {
+      if (isFirstObservation) {
+        isFirstObservation = false;
+        return;
+      }
+      animateTo(
+        activeItem.current *
+          getScrollAmount(element, optionsRef.current.scrollAmountValue),
+      );
+    });
+    rObserver.observe(element);
+    return () => {
+      rObserver.disconnect();
+    };
+  }, [container]);
 
   return {
     scrollToNext() {
