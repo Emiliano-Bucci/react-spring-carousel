@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { computeAnimationTarget, getTrackTransform } from "../animation";
+import {
+  computeAnimationTarget,
+  getTotalAvailableSpace,
+  getTrackTransform,
+} from "../animation";
 
 const baseInput = {
   scrollAmount: 100,
@@ -242,5 +246,58 @@ describe("getTrackTransform", () => {
     expect(getTrackTransform(-200, "y", "reel")).toBe(
       "translate3d(0px, calc(-200px + var(--reel-offset-modifier)), 0px)",
     );
+  });
+});
+
+describe("getTotalAvailableSpace", () => {
+  it("is the scroll size minus the viewport without a start/end gutter", () => {
+    expect(
+      getTotalAvailableSpace({
+        scrollSize: 1000,
+        viewportSize: 400,
+        startEndGutterTotal: 0,
+        modifier: 0,
+      }),
+    ).toBe(600);
+  });
+
+  it("grows by the whole start/end gutter", () => {
+    expect(
+      getTotalAvailableSpace({
+        scrollSize: 1000,
+        viewportSize: 400,
+        startEndGutterTotal: 32,
+        modifier: 0,
+      }),
+    ).toBe(632);
+  });
+
+  it("subtracts the modifier", () => {
+    expect(
+      getTotalAvailableSpace({
+        scrollSize: 1000,
+        viewportSize: 400,
+        startEndGutterTotal: 32,
+        modifier: 100,
+      }),
+    ).toBe(532);
+  });
+
+  it("lets the last of two full-width slides reach the start edge", () => {
+    // Viewport 1297, gutter 16, startEndGutter 16 (32 in total): each slide
+    // is 1297 - 32 = 1265 wide and one step is 1265 + 16 = 1281.
+    const viewportSize = 1297;
+    const slideSize = 1265;
+    const gutter = 16;
+    const step = slideSize + gutter;
+
+    expect(
+      getTotalAvailableSpace({
+        scrollSize: slideSize * 2 + gutter,
+        viewportSize,
+        startEndGutterTotal: 32,
+        modifier: 0,
+      }),
+    ).toBe(step);
   });
 });

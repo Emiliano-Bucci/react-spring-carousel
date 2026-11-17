@@ -118,6 +118,25 @@ export function computeAnimationTarget(
   };
 }
 
+export type GetTotalAvailableSpaceInput = {
+  scrollSize: number;
+  viewportSize: number;
+  startEndGutterTotal: number;
+  modifier: number;
+};
+
+// The start/end gutter shifts the track with a transform, which the scroll
+// size does not include: without it the end of the track falls short by the
+// whole gutter.
+export function getTotalAvailableSpace({
+  scrollSize,
+  viewportSize,
+  startEndGutterTotal,
+  modifier,
+}: GetTotalAvailableSpaceInput): number {
+  return scrollSize - viewportSize + startEndGutterTotal - modifier;
+}
+
 export function getTrackTransform(
   value: number,
   axis: CarouselAxis,

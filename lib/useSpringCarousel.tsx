@@ -2,7 +2,11 @@ import { useSpring, useSpringRef } from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { computeAnimationTarget, getTrackTransform } from "./animation";
+import {
+  computeAnimationTarget,
+  getTotalAvailableSpace,
+  getTrackTransform,
+} from "./animation";
 import {
   Props,
   ResponsiveItemsPerSlideItem,
@@ -293,14 +297,21 @@ export function useSpringCarousel({
   }
   function getTotalScrollAvailableSpace(modifier: number) {
     const container = carouselTrackRef.current!;
-    const total =
-      container[carouselAxis === "x" ? "scrollWidth" : "scrollHeight"] -
-      container.getBoundingClientRect()[
-        carouselAxis === "x" ? "width" : "height"
-      ] -
-      modifier;
+    // With a loop the end is never clamped, so the gutter changes nothing there.
+    const startEndGutterTotal = withLoop
+      ? 0
+      : getCssVars().totalStartEndGutterCssVar;
 
-    return total;
+    return getTotalAvailableSpace({
+      scrollSize:
+        container[carouselAxis === "x" ? "scrollWidth" : "scrollHeight"],
+      viewportSize:
+        container.getBoundingClientRect()[
+          carouselAxis === "x" ? "width" : "height"
+        ],
+      startEndGutterTotal,
+      modifier,
+    });
   }
   function getCssVars() {
     const matched = resolveActiveResponsive(gutter);
