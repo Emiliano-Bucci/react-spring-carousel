@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   computeAnimationTarget,
+  getScrollSize,
   getTotalAvailableSpace,
   getTrackTransform,
 } from "./animation";
@@ -302,13 +303,24 @@ export function useSpringCarousel({
       ? 0
       : getCssVars().totalStartEndGutterCssVar;
 
+    const isX = carouselAxis === "x";
+    const trackRect = container.getBoundingClientRect();
+    const viewportSize = isX ? trackRect.width : trackRect.height;
+    const lastItem = container.lastElementChild;
+    let scrollSize = container[isX ? "scrollWidth" : "scrollHeight"];
+
+    if (lastItem) {
+      const lastItemRect = lastItem.getBoundingClientRect();
+      scrollSize = getScrollSize({
+        trackStart: isX ? trackRect.left : trackRect.top,
+        lastItemEnd: isX ? lastItemRect.right : lastItemRect.bottom,
+        viewportSize,
+      });
+    }
+
     return getTotalAvailableSpace({
-      scrollSize:
-        container[carouselAxis === "x" ? "scrollWidth" : "scrollHeight"],
-      viewportSize:
-        container.getBoundingClientRect()[
-          carouselAxis === "x" ? "width" : "height"
-        ],
+      scrollSize,
+      viewportSize,
       startEndGutterTotal,
       modifier,
     });

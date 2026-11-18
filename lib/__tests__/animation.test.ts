@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   computeAnimationTarget,
+  getScrollSize,
   getTotalAvailableSpace,
   getTrackTransform,
 } from "../animation";
@@ -246,6 +247,63 @@ describe("getTrackTransform", () => {
     expect(getTrackTransform(-200, "y", "reel")).toBe(
       "translate3d(0px, calc(-200px + var(--reel-offset-modifier)), 0px)",
     );
+  });
+});
+
+describe("getScrollSize", () => {
+  it("keeps the fraction of a fractional layout", () => {
+    // Viewport 1080 / 2.8 = 385.703: two slides of 353.703 and a 16 gap.
+    expect(
+      getScrollSize({
+        trackStart: -353.297,
+        lastItemEnd: 370.109,
+        viewportSize: 385.703,
+      }),
+    ).toBeCloseTo(723.406, 3);
+  });
+
+  it("is measured from the track start, wherever the track is translated", () => {
+    expect(
+      getScrollSize({
+        trackStart: 0,
+        lastItemEnd: 723.406,
+        viewportSize: 385.703,
+      }),
+    ).toBeCloseTo(
+      getScrollSize({
+        trackStart: -353.297,
+        lastItemEnd: 370.109,
+        viewportSize: 385.703,
+      }),
+      6,
+    );
+  });
+
+  it("is never smaller than the viewport", () => {
+    expect(
+      getScrollSize({ trackStart: 0, lastItemEnd: 200, viewportSize: 385.703 }),
+    ).toBe(385.703);
+  });
+
+  it("lets the last of two slides reach the edge on a fractional viewport", () => {
+    // Same layout: the end of the track is one step (353.703 + 16) away, and
+    // the rounded scrollWidth (723) stopped 0.406px short of it.
+    const viewportSize = 385.703;
+    const step = 353.703 + 16;
+    const scrollSize = getScrollSize({
+      trackStart: 0,
+      lastItemEnd: 353.703 * 2 + 16,
+      viewportSize,
+    });
+
+    expect(
+      getTotalAvailableSpace({
+        scrollSize,
+        viewportSize,
+        startEndGutterTotal: 32,
+        modifier: 0,
+      }),
+    ).toBeCloseTo(step, 6);
   });
 });
 

@@ -118,6 +118,25 @@ export function computeAnimationTarget(
   };
 }
 
+export type GetScrollSizeInput = {
+  trackStart: number;
+  lastItemEnd: number;
+  viewportSize: number;
+};
+
+// The scroll size read from the layout boxes, which keep their fractions:
+// `scrollWidth` is rounded to a whole pixel while the viewport size is not,
+// so on a fractional viewport width (common on Android) the last item
+// stopped up to half a pixel short and the previous one showed at the edge.
+// Like `scrollWidth`, it is never smaller than the viewport.
+export function getScrollSize({
+  trackStart,
+  lastItemEnd,
+  viewportSize,
+}: GetScrollSizeInput): number {
+  return Math.max(lastItemEnd - trackStart, viewportSize);
+}
+
 export type GetTotalAvailableSpaceInput = {
   scrollSize: number;
   viewportSize: number;
